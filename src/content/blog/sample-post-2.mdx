@@ -10,4 +10,25 @@ cluster: foundation
 draft: false
 ---
 
+import InlineAssistant from "../../components/InlineAssistant.astro";
+import StudyTool from "../../components/StudyTool.astro";
+
 This is another sample post used for related content checks.
+
+<StudyTool
+  type="mistakes"
+  title="Common Mistakes"
+  mistakes={[
+    "Posting debit and credit in reverse order.",
+    "Ignoring balancing checks before final answer.",
+    "Confusing adjustment entries with regular entries."
+  ]}
+/>
+
+<StudyTool
+  type="check-understanding"
+  title="Concept Check"
+  insight="If two accounts mismatch, explain the likely source, then state how you would verify it in one pass."
+/>
+
+<InlineAssistant type="example" context="article" />

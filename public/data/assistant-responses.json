@@ -1,0 +1,17 @@
+{
+  "simplify": [
+    "Think of this as a rule: identify the core term, apply the method step-by-step, and verify with one quick check.",
+    "Break it into three parts: concept, formula, and application. If any part is unclear, revise that before solving more questions.",
+    "Start with the definition in plain words, then connect it to one solved example from your notes."
+  ],
+  "exam-summary": [
+    "Exam focus: know the definition, one standard method, and one common trap. Practice one timed question immediately.",
+    "For scoring marks, write the method cleanly, include assumptions, and end with a final check statement.",
+    "Revise keywords first, then attempt 2 past-paper questions where this concept is directly tested."
+  ],
+  "example": [
+    "Example approach: pick one textbook problem, solve without notes in 3-5 steps, and compare only after finishing.",
+    "Use a mini example: define variables, apply the rule, compute, then mention why the result is valid.",
+    "Try this pattern: concept statement -> formula setup -> substitution -> final interpretation."
+  ]
+}

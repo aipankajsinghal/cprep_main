@@ -1,0 +1,235 @@
+---
+interface Props {
+  type?: "simplify" | "exam-summary" | "example";
+  context?: "section" | "article";
+  endpoint?: string;
+}
+
+const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = Astro.props as Props;
+---
+<aside
+  class="inline-assistant"
+  data-inline-assistant
+  data-default-action={type}
+  data-context={context}
+  data-endpoint={endpoint}
+  aria-label="Inline study assistant"
+>
+  <p class="inline-assistant__label">AI Study Assist</p>
+  <div class="inline-assistant__actions">
+    <button type="button" data-assistant-action="simplify" aria-expanded="false">Simplify explanation</button>
+    <button type="button" data-assistant-action="exam-summary" aria-expanded="false">Exam-focused summary</button>
+    <button type="button" data-assistant-action="example" aria-expanded="false">Show example</button>
+  </div>
+  <div class="inline-assistant__output" data-assistant-output hidden></div>
+</aside>
+
+<script>
+  const blocks = Array.from(document.querySelectorAll("[data-inline-assistant]"));
+  const normalizeTopic = (value) =>
+    value.replace(/[✓#]/g, " ").replace(/\s+/g, " ").trim();
+
+  const extractContext = (root, mode) => {
+    if (mode === "article") {
+      const body = document.querySelector(".post-body");
+      const articleText = body?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+      return {
+        topic: "Article",
+        contextText: articleText
+      };
+    }
+
+    const section = root.closest("[data-learning-section]");
+    if (section instanceof HTMLElement) {
+      const heading = section.querySelector("h2,h3");
+      const shadow = section.cloneNode(true);
+      if (shadow instanceof HTMLElement) {
+        for (const assistant of shadow.querySelectorAll("[data-inline-assistant]")) {
+          assistant.remove();
+        }
+      }
+      return {
+        topic: normalizeTopic(heading?.textContent ?? "") || "Section",
+        contextText:
+          (shadow instanceof HTMLElement ? shadow.innerText : section.innerText)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 1200)
+      };
+    }
+
+    // Fallback path when section wrappers are absent.
+    const fallbackHeading =
+      (root.previousElementSibling instanceof HTMLHeadingElement ? root.previousElementSibling.textContent : "") || "";
+    const fallbackText =
+      root.parentElement?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+    return {
+      topic: normalizeTopic(fallbackHeading) || "Section",
+      contextText: fallbackText
+    };
+  };
+
+  for (const block of blocks) {
+    const buttons = Array.from(block.querySelectorAll("[data-assistant-action]"));
+    const output = block.querySelector("[data-assistant-output]");
+    if (!(output instanceof HTMLElement) || !buttons.length) continue;
+
+    let activeAction = block.getAttribute("data-default-action") ?? "";
+    let loaded = null;
+    let activeRequestId = 0;
+
+    const closeAll = () => {
+      for (const button of buttons) {
+        if (button instanceof HTMLButtonElement) {
+          button.setAttribute("aria-expanded", "false");
+        }
+      }
+      output.hidden = true;
+      output.textContent = "";
+      activeAction = "";
+    };
+
+    block.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-assistant-action]");
+      if (!(button instanceof HTMLButtonElement)) return;
+
+      const action = button.getAttribute("data-assistant-action");
+      if (!action) return;
+
+      if (activeAction === action && !output.hidden) {
+        closeAll();
+        return;
+      }
+
+      for (const item of buttons) {
+        if (item instanceof HTMLButtonElement) {
+          item.setAttribute("aria-expanded", item === button ? "true" : "false");
+        }
+      }
+
+      output.hidden = false;
+      output.textContent = "Loading focused help...";
+
+      try {
+        if (!loaded) {
+          loaded = import("../utils/inlineAssistantClient");
+        }
+        const module = await loaded;
+        const context = block.getAttribute("data-context") ?? "section";
+        const endpoint = block.getAttribute("data-endpoint") ?? "";
+        const { topic, contextText } = extractContext(block, context);
+        const postSlug = window.__cpGaContext?.post_slug ?? "";
+        const cacheKey = `${postSlug}::${topic}::${action}`;
+        const requestId = ++activeRequestId;
+
+        // 1) Runtime cache first.
+        const cached = module.getCachedRuntimeResponse(cacheKey);
+        if (cached) {
+          output.textContent = cached;
+          activeAction = action;
+          return;
+        }
+
+        // 2) Static response next (instant first paint for the hint).
+        const staticText = await module.getStaticResponse(action, cacheKey);
+        if (requestId !== activeRequestId) return;
+        output.textContent = staticText;
+        activeAction = action;
+
+        // 3) Runtime enhancement last (optional progressive upgrade).
+        module
+          .requestRuntimeHint({
+            endpoint: endpoint || undefined,
+            action,
+            topic,
+            contextText,
+            cacheKey
+          })
+          .then((runtimeText) => {
+            if (requestId !== activeRequestId) return;
+            if (activeAction !== action) return;
+            if (!runtimeText || runtimeText === output.textContent) return;
+            output.classList.add("inline-assistant__output--refresh");
+            output.textContent = runtimeText;
+            requestAnimationFrame(() => {
+              output.classList.remove("inline-assistant__output--refresh");
+            });
+          })
+          .catch(() => {});
+      } catch {
+        output.textContent = "Unable to fetch assistance right now. Try again in a moment.";
+      }
+    });
+  }
+</script>
+
+<style>
+  .inline-assistant {
+    margin: 1.2rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.85rem;
+    background: var(--color-bg-muted);
+  }
+
+  .inline-assistant__label {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .inline-assistant__label::before {
+    content: "";
+    width: 0.48rem;
+    height: 0.48rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+  }
+
+  .inline-assistant__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .inline-assistant__actions button {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    padding: 0.38rem 0.68rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .inline-assistant__actions button:hover {
+    border-color: var(--color-lavender-500);
+    transform: scale(1.02);
+  }
+
+  .inline-assistant__actions button[aria-expanded="true"] {
+    border-color: var(--color-lavender-500);
+    background: var(--color-lavender-soft);
+  }
+
+  .inline-assistant__output {
+    margin-top: 0.7rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.65rem;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+  }
+
+  .inline-assistant__output--refresh {
+    opacity: 0.86;
+    transition: opacity 180ms ease-out;
+  }
+</style>

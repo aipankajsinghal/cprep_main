@@ -41,6 +41,7 @@ const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#6d5cf5" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -68,6 +69,8 @@ const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
       })();
     </script>
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
     <link
       rel="preload"
       href="/fonts/inter-latin-400-normal.woff2"
@@ -129,6 +132,14 @@ const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
             localStorage.setItem(key, isDark ? "dark" : "light");
           } catch {}
           syncLabel();
+        });
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js", { scope: "/blog/" }).catch(() => {});
         });
       })();
     </script>

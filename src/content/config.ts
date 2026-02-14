@@ -13,7 +13,14 @@ const blog = defineCollection({
     draft: z.boolean().optional(),
     minutesRead: z.number().optional(),
     ogImage: z.string().optional(),
-    faq: z.boolean().default(false)
+    faqItems: z
+      .array(
+        z.object({
+          q: z.string(),
+          a: z.string()
+        })
+      )
+      .optional()
   })
 });
 

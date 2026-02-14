@@ -2,6 +2,11 @@
   max-width: var(--reading-width);
   margin-inline: auto;
   color: var(--color-text-primary);
+  scroll-snap-type: y mandatory;
+}
+
+.editorial section {
+  scroll-snap-align: start;
 }
 
 .editorial > :first-child {

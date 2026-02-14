@@ -9,8 +9,23 @@ cluster: foundation
 draft: false
 ---
 
+import InlineAssistant from "../../components/InlineAssistant.astro";
+import StudyTool from "../../components/StudyTool.astro";
+
 This is a **sample MDX** article.
 
 ## Why this exists
 
 It verifies that the blog index and dynamic blog route render collection content.
+
+<InlineAssistant type="simplify" context="section" />
+
+<StudyTool
+  type="revision"
+  title="Rapid Revision"
+  points={[
+    "Define trial balance in one sentence.",
+    "List what it checks and what it cannot detect.",
+    "Solve one short error-spotting question."
+  ]}
+/>

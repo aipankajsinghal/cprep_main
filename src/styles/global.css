@@ -40,6 +40,10 @@ body {
   font-size: 17px;
 }
 
+main {
+  animation: fadeUp 300ms ease-out;
+}
+
 .page-shell {
   width: min(100% - 2rem, calc(var(--reading-width) + 2rem));
   margin-inline: auto;
@@ -80,6 +84,18 @@ a {
 
 a:hover {
   text-decoration-color: var(--color-lavender-600);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -18,6 +18,7 @@
     "@fontsource/inter": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.1.18",
+    "@vite-pwa/astro": "^1.2.0",
     "astro": "^5.17.2",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",

@@ -1,0 +1,145 @@
+---
+interface Props {
+  href?: string;
+  cluster?: string;
+  postSlug?: string;
+  midLabel?: string;
+  endLabel?: string;
+}
+
+const {
+  href = "https://www.championsprep.in/",
+  cluster = "",
+  postSlug = "",
+  midLabel = "Need guided strategy for this topic?",
+  endLabel = "Ready for structured prep? Explore full study resources."
+} = Astro.props as Props;
+---
+<section class="smart-cta smart-cta--mid" data-smart-cta-mid hidden aria-label="Mid article call to action">
+  <p>{midLabel}</p>
+  <a href={href} data-smart-cta-link data-position="mid">Get prep plan</a>
+</section>
+
+<section class="smart-cta smart-cta--end" aria-label="End of article call to action">
+  <p>{endLabel}</p>
+  <a href={href} data-smart-cta-link data-position="end">Explore ChampionsPrep</a>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const mid = document.querySelector("[data-smart-cta-mid]");
+  const postBody = document.querySelector(".post-body");
+
+  if (mid instanceof HTMLElement && postBody instanceof HTMLElement) {
+    if (getComputedStyle(postBody).position === "static") {
+      postBody.style.position = "relative";
+    }
+
+    const marker = document.createElement("span");
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.position = "absolute";
+    marker.style.top = "40%";
+    marker.style.left = "0";
+    marker.style.width = "1px";
+    marker.style.height = "1px";
+    postBody.append(marker);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          mid.hidden = false;
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -15% 0px", threshold: 0 }
+    );
+
+    observer.observe(marker);
+  }
+
+  const ctaLinks = Array.from(document.querySelectorAll("[data-smart-cta-link]"));
+  for (const link of ctaLinks) {
+    if (!(link instanceof HTMLAnchorElement)) continue;
+    link.addEventListener("click", () => {
+      const position = link.getAttribute("data-position");
+      if (!position) return;
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("cta_click", {
+          post_slug: postSlug,
+          cluster,
+          position
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .smart-cta {
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+  }
+
+  .smart-cta p {
+    margin: 0;
+  }
+
+  .smart-cta a {
+    margin-top: 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.55rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--color-lavender-600);
+    border-radius: 999px;
+    background: var(--color-lavender-600);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+  }
+
+  .smart-cta a:hover {
+    background: var(--color-lavender-500);
+    border-color: var(--color-lavender-500);
+    transform: scale(1.02);
+  }
+
+  .smart-cta--mid {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    max-width: min(26rem, calc(100vw - 2rem));
+    padding: 0.85rem;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--color-lavender-500), transparent 84%);
+  }
+
+  .smart-cta--mid::before,
+  .smart-cta--end::before {
+    content: "";
+    display: inline-block;
+    width: 0.48rem;
+    height: 0.48rem;
+    margin-right: 0.45rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+    vertical-align: middle;
+  }
+
+  .smart-cta--end {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-left: 4px solid var(--color-lavender-500);
+  }
+
+  @media (max-width: 768px) {
+    .smart-cta--mid {
+      left: 1rem;
+      right: 1rem;
+      bottom: 0.75rem;
+    }
+  }
+</style>

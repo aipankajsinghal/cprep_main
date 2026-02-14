@@ -1,7 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
 import BlogLayout from '../../layouts/BlogLayout.astro';
-import SignupCTA from "../../components/SignupCTA.astro";
 import ExamTip from "../../components/ExamTip.astro";
 import RelatedPosts from "../../components/RelatedPosts.astro";
 import AuthorCard from "../../components/AuthorCard.astro";
@@ -11,7 +10,8 @@ import PrevNextNav from "../../components/PrevNextNav.astro";
 import ReadingProgress from "../../components/ReadingProgress.astro";
 import ShareButtons from "../../components/ShareButtons.astro";
 import MicroFeedback from "../../components/MicroFeedback.astro";
-import { calculateMinutesRead, extractFaqItemsFromBody, slugifyTag } from "../../utils/content";
+import SmartCTA from "../../components/SmartCTA.astro";
+import { calculateMinutesRead } from "../../utils/content";
 
 export function getStaticPaths() {
   return getCollection("blog", ({ data }) => !data.draft).then((posts) =>
@@ -29,16 +29,16 @@ const canonical = new URL(`/blog/${entry.slug}/`, Astro.site ?? Astro.url).toStr
 const ogImagePath = entry.data.ogImage ?? `/blog/og/${entry.slug}.png`;
 const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
 const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
-const clusterLabel = entry.data.cluster
-  .split("-")
-  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-  .join(" ");
 const pageTitle = entry.data.title;
 const pageDescription = entry.data.description;
 const allPosts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);
+const clusterPostsAscending = [...clusterPosts].sort((a, b) => {
+  const byDate = a.data.date.getTime() - b.data.date.getTime();
+  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
+});
 const currentIndex = clusterPosts.findIndex((post) => post.slug === entry.slug);
 const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
 const nextPost =
@@ -60,6 +60,28 @@ const blogPostingJsonLd = {
   mainEntityOfPage: canonical,
   url: canonical
 };
+const learningResourceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  learningResourceType: "Lesson",
+  educationalLevel: "Class 11-12",
+  teaches: entry.data.cluster,
+  name: entry.data.title,
+  description: entry.data.description,
+  url: canonical
+};
+const learningPathJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: `${entry.data.cluster} Learning Path`,
+  itemListOrder: "https://schema.org/ItemListOrderAscending",
+  itemListElement: clusterPostsAscending.map((post, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: post.data.title,
+    url: new URL(`/blog/${post.slug}/`, Astro.site ?? Astro.url).toString()
+  }))
+};
 
 const breadcrumbJsonLd = {
   "@context": "https://schema.org",
@@ -74,36 +96,31 @@ const breadcrumbJsonLd = {
     {
       "@type": "ListItem",
       position: 2,
-      name: clusterLabel,
-      item: new URL(`/blog/tag/${slugifyTag(entry.data.cluster)}/`, Astro.site ?? Astro.url).toString()
-    },
-    {
-      "@type": "ListItem",
-      position: 3,
       name: entry.data.title,
       item: canonical
     }
   ]
 };
 
-const faqItems = entry.data.faq ? extractFaqItemsFromBody(entry.body) : [];
+const faqItems = entry.data.faqItems ?? [];
 const faqJsonLd =
-  entry.data.faq && faqItems.length > 0
+  faqItems.length > 0
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         mainEntity: faqItems.map((item) => ({
           "@type": "Question",
-          name: item.question,
+          name: item.q,
           acceptedAnswer: {
             "@type": "Answer",
-            text: item.answer
+            text: item.a
           }
         }))
       }
     : undefined;
 
-const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [blogPostingJsonLd, breadcrumbJsonLd];
+const baseJsonLd = [blogPostingJsonLd, learningResourceJsonLd, breadcrumbJsonLd, learningPathJsonLd];
+const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 ---
 <BlogLayout
   title={pageTitle}
@@ -115,18 +132,21 @@ const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [b
   gaContext={{ post_slug: entry.slug, cluster: entry.data.cluster }}
 >
   <ReadingProgress />
-  <Breadcrumbs cluster={entry.data.cluster} title={entry.data.title} />
+  <Breadcrumbs title={entry.data.title} />
   <div class="post-shell">
     <div class="post-toc">
       <TableOfContents headings={tocHeadings} />
     </div>
     <div class="post-main">
-      <h1>{entry.data.title}</h1>
-      <p>{entry.data.description}</p>
-      <p>{minutesRead} min read</p>
-      <ExamTip title="Quick Revision Tip">
-        <p>Summarize each section in one sentence before moving to the next chapter.</p>
-      </ExamTip>
+      <div class="post-head">
+        <h1>{entry.data.title}</h1>
+        <p>{entry.data.description}</p>
+        <p>{minutesRead} min read</p>
+        <ExamTip title="Quick Revision Tip">
+          <p>Summarize each section in one sentence before moving to the next chapter.</p>
+        </ExamTip>
+      </div>
+      <div id="reading-trigger" aria-hidden="true"></div>
       <div class="post-body">
         <Content />
       </div>
@@ -143,7 +163,7 @@ const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [b
       />
       <MicroFeedback postSlug={entry.slug} cluster={entry.data.cluster} />
       <RelatedPosts currentSlug={entry.slug} cluster={entry.data.cluster} tags={entry.data.tags} />
-      <SignupCTA postSlug={entry.slug} cluster={entry.data.cluster} />
+      <SmartCTA postSlug={entry.slug} cluster={entry.data.cluster} />
       <AuthorCard name={entry.data.author} />
     </div>
   </div>
@@ -162,6 +182,84 @@ const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [b
     anchor.textContent = "#";
     heading.append(anchor);
   }
+
+  const readingTrigger = document.getElementById("reading-trigger");
+  if (readingTrigger) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry) return;
+        document.body.classList.toggle("reading-mode", !entry.isIntersecting);
+      },
+      {
+        threshold: 0
+      }
+    );
+    observer.observe(readingTrigger);
+  }
+
+  const postBody = document.querySelector(".post-body");
+  if (postBody instanceof HTMLElement) {
+    const sectionHeadings = Array.from(postBody.querySelectorAll("h2[id]"));
+    const breakpoints = sectionHeadings.length
+      ? sectionHeadings
+      : Array.from(postBody.querySelectorAll("h3[id]"));
+    const completionMarkers = [];
+
+    for (let index = 0; index < breakpoints.length; index++) {
+      const start = breakpoints[index];
+      const stop = breakpoints[index + 1] ?? null;
+      const section = document.createElement("section");
+      section.className = "reading-section";
+      section.setAttribute("data-learning-section", "");
+      section.setAttribute("data-complete", "false");
+
+      const cue = document.createElement("span");
+      cue.className = "section-completion-cue";
+      cue.setAttribute("aria-hidden", "true");
+      cue.textContent = "✓";
+      start.append(cue);
+
+      start.before(section);
+      let cursor = start;
+      while (cursor && cursor !== stop) {
+        const next = cursor.nextSibling;
+        section.append(cursor);
+        cursor = next;
+      }
+
+      const marker = document.createElement("span");
+      marker.className = "section-complete-marker";
+      marker.setAttribute("aria-hidden", "true");
+      section.append(marker);
+      completionMarkers.push(marker);
+    }
+
+    if (completionMarkers.length) {
+      const completionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const marker = entry.target;
+            const section = marker.closest(".reading-section");
+            if (!(section instanceof HTMLElement)) continue;
+            if (entry.isIntersecting) {
+              section.setAttribute("data-complete", "true");
+            } else if (entry.boundingClientRect.top > window.innerHeight) {
+              section.setAttribute("data-complete", "false");
+            }
+          }
+        },
+        {
+          threshold: 0,
+          rootMargin: "0px 0px -72% 0px"
+        }
+      );
+
+      for (const marker of completionMarkers) {
+        completionObserver.observe(marker);
+      }
+    }
+  }
 </script>
 
 <style>
@@ -177,6 +275,92 @@ const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [b
 
   .post-main {
     order: 2;
+  }
+
+  .post-body {
+    border: 1px solid transparent;
+    border-radius: var(--shape-radius);
+    padding: 0.2rem;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 1rem;
+  }
+
+  .post-body :global(section.reading-section) {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    padding-bottom: 0.35rem;
+  }
+
+  .post-body :global(.section-complete-marker) {
+    display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .post-body :global(.section-completion-cue) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.35rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-lavender-600);
+    font-size: 0.7rem;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 200ms ease-out, transform 200ms ease-out, border-color 200ms ease-out;
+  }
+
+  .post-body :global(section.reading-section[data-complete="true"] .section-completion-cue) {
+    opacity: 0.92;
+    transform: scale(1);
+    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 42%);
+  }
+
+  .post-head,
+  .post-main :global(.breadcrumbs),
+  .post-toc,
+  .post-body,
+  :global(.theme-toggle) {
+    transition: opacity 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out,
+      border-color 200ms ease-out;
+  }
+
+  #reading-trigger {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(body.reading-mode) .post-head {
+    transform: scale(0.985);
+    transform-origin: top center;
+  }
+
+  :global(body.reading-mode) .post-main :global(.breadcrumbs),
+  :global(body.reading-mode) :global(.theme-toggle) {
+    opacity: 0.7;
+  }
+
+  :global(body.reading-mode) .post-toc {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+
+  :global(body.reading-mode) .post-toc:hover {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  :global(body.reading-mode) .post-body {
+    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 65%);
+    box-shadow: 0 6px 22px color-mix(in srgb, var(--color-lavender-500), transparent 92%);
   }
 
   @media (min-width: 1024px) {

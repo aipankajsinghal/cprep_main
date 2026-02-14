@@ -1,0 +1,103 @@
+---
+interface Props {
+  type: "revision" | "mistakes" | "check-understanding";
+  title?: string;
+  points?: string[];
+  mistakes?: string[];
+  insight?: string;
+}
+
+const {
+  type,
+  title = "Study Tool",
+  points = [],
+  mistakes = [],
+  insight = "Summarize the idea in your own words, then test it with one past-paper question."
+} = Astro.props as Props;
+---
+<aside class="study-tool" data-study-tool={type} aria-label={title}>
+  <h3>{title}</h3>
+
+  {type === "revision" && (
+    <ul>
+      {(points.length ? points : [
+        "Identify the core definition in one line.",
+        "Write 2 formula/keywords from memory.",
+        "Solve one quick question without notes."
+      ]).map((point) => (
+        <li>{point}</li>
+      ))}
+    </ul>
+  )}
+
+  {type === "mistakes" && (
+    <details>
+      <summary>Common mistakes to avoid</summary>
+      <ul>
+        {(mistakes.length ? mistakes : [
+          "Skipping units or assumptions while writing steps.",
+          "Memorizing final answers without checking method.",
+          "Ignoring exception cases mentioned in the chapter."
+        ]).map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </details>
+  )}
+
+  {type === "check-understanding" && (
+    <details>
+      <summary>Check understanding</summary>
+      <p>{insight}</p>
+    </details>
+  )}
+</aside>
+
+<style>
+  .study-tool {
+    margin: 1.4rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.85rem 1rem;
+    background: var(--color-bg-muted);
+  }
+
+  .study-tool h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+  }
+
+  .study-tool h3::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+  }
+
+  .study-tool ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .study-tool li {
+    margin: 0.3rem 0;
+  }
+
+  .study-tool details summary {
+    cursor: pointer;
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .study-tool details[open] summary {
+    color: var(--color-lavender-600);
+  }
+
+  .study-tool details p {
+    margin: 0.65rem 0 0;
+  }
+</style>
