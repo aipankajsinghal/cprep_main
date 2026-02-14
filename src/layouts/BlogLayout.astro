@@ -13,6 +13,7 @@ interface Props {
   ogImage?: string;
   ogType?: string;
   noindex?: boolean;
+  pagefindStyles?: boolean;
   jsonLd?: JsonLdValue | JsonLdValue[];
   gaContext?: Record<string, string>;
 }
@@ -24,12 +25,20 @@ const {
   ogImage,
   ogType = "website",
   noindex = false,
+  pagefindStyles = false,
   jsonLd = [],
   gaContext = {}
 } = Astro.props as Props;
 
 const pageTitle = title.includes("ChampionsPrep") ? title : `${title} | ChampionsPrep Blog`;
-const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const normalizeCanonical = (value: string): string => {
+  const parsed = new URL(value);
+  if (!/\.[a-z0-9]+$/i.test(parsed.pathname) && !parsed.pathname.endsWith("/")) {
+    parsed.pathname = `${parsed.pathname}/`;
+  }
+  return parsed.toString();
+};
+const canonicalUrl = normalizeCanonical(canonical ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString());
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
 const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
@@ -70,7 +79,7 @@ const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
     </script>
     <link rel="canonical" href={canonicalUrl} />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+    {pagefindStyles && <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />}
     <link
       rel="preload"
       href="/fonts/inter-latin-400-normal.woff2"

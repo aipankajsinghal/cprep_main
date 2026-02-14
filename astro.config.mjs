@@ -8,6 +8,7 @@ import rehypeSlug from "rehype-slug";
 export default defineConfig({
   site: "https://www.championsprep.in/blog",
   output: "static",
+  trailingSlash: "always",
   integrations: [
     mdx({
       rehypePlugins: [rehypeSlug]

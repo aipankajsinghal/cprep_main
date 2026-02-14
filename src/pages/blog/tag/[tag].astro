@@ -32,7 +32,7 @@ const posts = allPosts
 
 const pageTitle = `Tag: ${tagLabel}`;
 const pageDescription = `Posts tagged with ${tagLabel}.`;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toString();
 ---
 <BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
   <h1>{pageTitle}</h1>

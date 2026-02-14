@@ -21,9 +21,21 @@
       bar.style.transform = `scaleX(${ratio})`;
     };
 
+    let ticking = false;
+    const scheduleUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        updateProgress();
+      });
+    };
+
+    const cleanupController = new AbortController();
     updateProgress();
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    window.addEventListener("resize", updateProgress);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true, signal: cleanupController.signal });
+    window.addEventListener("resize", scheduleUpdate, { signal: cleanupController.signal });
+    window.addEventListener("pagehide", () => cleanupController.abort(), { once: true });
   }
 </script>
 

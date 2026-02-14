@@ -15,9 +15,10 @@ interface FallbackPayload {
 }
 
 const FALLBACK_ENDPOINT = "/data/assistant-responses.json";
-let endpointAvailable = true;
+let endpointUnavailableUntil = 0;
 const runtimeCache = new Map<string, string>();
 let staticPayloadPromise: Promise<FallbackPayload> | null = null;
+const RUNTIME_RETRY_COOLDOWN_MS = 60_000;
 
 function concise(text: string): string {
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -63,7 +64,7 @@ export async function getStaticResponse(action: AssistantAction, seed = ""): Pro
 export async function requestRuntimeHint(input: RequestInput): Promise<string> {
   const { endpoint, action, topic, contextText, cacheKey } = input;
 
-  if (endpoint && endpointAvailable) {
+  if (endpoint && Date.now() >= endpointUnavailableUntil) {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -89,8 +90,8 @@ export async function requestRuntimeHint(input: RequestInput): Promise<string> {
       if (cacheKey) runtimeCache.set(cacheKey, value);
       return value;
     } catch {
-      // Keep static-first behavior when runtime API is unavailable on static hosting.
-      endpointAvailable = false;
+      // Keep static-first behavior while still allowing periodic runtime retry.
+      endpointUnavailableUntil = Date.now() + RUNTIME_RETRY_COOLDOWN_MS;
       throw new Error("assistant_request_failed");
     }
   }

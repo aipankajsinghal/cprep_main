@@ -1,0 +1,3779 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: **/*.log, md, tmp/
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+AGENTS.md
+api/inline-ai.ts
+astro.config.mjs
+CPrep_Blog_Prd.md
+package.json
+public/blog/og/sample-post-2.png
+public/blog/og/sample-post.png
+public/data/assistant-responses.json
+public/fonts/inter-latin-400-normal.woff2
+public/icons/icon-192.svg
+public/icons/icon-512.svg
+public/manifest.webmanifest
+public/sw.js
+scripts/generate-og.mjs
+src/components/AuthorCard.astro
+src/components/Breadcrumbs.astro
+src/components/ExamTip.astro
+src/components/InlineAssistant.astro
+src/components/MicroFeedback.astro
+src/components/PrevNextNav.astro
+src/components/ReadingProgress.astro
+src/components/RelatedPosts.astro
+src/components/SearchWidget.astro
+src/components/ShareButtons.astro
+src/components/SignupCTA.astro
+src/components/SmartCTA.astro
+src/components/StudyTool.astro
+src/components/TableOfContents.astro
+src/content/blog/_template.mdx
+src/content/blog/sample-post-2.mdx
+src/content/blog/sample-post.mdx
+src/content/config.ts
+src/layouts/BlogLayout.astro
+src/pages/blog/[...slug].astro
+src/pages/blog/index.astro
+src/pages/blog/tag/[tag].astro
+src/pages/rss.xml.ts
+src/styles/global.css
+src/styles/print.css
+src/styles/tokens.css
+src/styles/typography.css
+src/utils/content.ts
+src/utils/inlineAssistantClient.ts
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="api/inline-ai.ts">
+export const config = {
+  runtime: "edge"
+};
+
+const SYSTEM_PROMPT =
+  "You are a CBSE commerce tutor. Provide concise educational explanations suitable for class 11-12 students.";
+
+function badRequest(message: string): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
+export default async function handler(request: Request): Promise<Response> {
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: "Missing OPENAI_API_KEY" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  let body: { topic?: string; context?: string; type?: string } = {};
+  try {
+    body = await request.json();
+  } catch {
+    return badRequest("Invalid JSON body");
+  }
+
+  const topic = String(body.topic ?? "").trim().slice(0, 160);
+  const context = String(body.context ?? "").trim().slice(0, 1200);
+  const type = String(body.type ?? "").trim();
+
+  if (!topic || !context || !["simplify", "exam-summary", "example"].includes(type)) {
+    return badRequest("Invalid payload");
+  }
+
+  const userPrompt = `Topic: ${topic}\nAction: ${type}\nContext:\n${context}`;
+
+  const upstream = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4.1-mini",
+      temperature: 0.3,
+      max_output_tokens: 150,
+      input: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt }
+      ]
+    })
+  });
+
+  if (!upstream.ok) {
+    return new Response(JSON.stringify({ error: "Upstream AI request failed" }), {
+      status: 502,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  const data = (await upstream.json()) as {
+    output_text?: string;
+    output?: Array<{
+      content?: Array<{ type?: string; text?: string }>;
+    }>;
+  };
+
+  let output = data.output_text ?? "";
+  if (!output && Array.isArray(data.output)) {
+    for (const part of data.output) {
+      if (!Array.isArray(part.content)) continue;
+      for (const block of part.content) {
+        if (block?.type === "output_text" && typeof block.text === "string") {
+          output += block.text;
+        }
+      }
+    }
+  }
+
+  const cleaned = output.replace(/\s+/g, " ").trim().slice(0, 320);
+  return new Response(JSON.stringify({ output: cleaned }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+</file>
+
+<file path="public/data/assistant-responses.json">
+{
+  "simplify": [
+    "Think of this as a rule: identify the core term, apply the method step-by-step, and verify with one quick check.",
+    "Break it into three parts: concept, formula, and application. If any part is unclear, revise that before solving more questions.",
+    "Start with the definition in plain words, then connect it to one solved example from your notes."
+  ],
+  "exam-summary": [
+    "Exam focus: know the definition, one standard method, and one common trap. Practice one timed question immediately.",
+    "For scoring marks, write the method cleanly, include assumptions, and end with a final check statement.",
+    "Revise keywords first, then attempt 2 past-paper questions where this concept is directly tested."
+  ],
+  "example": [
+    "Example approach: pick one textbook problem, solve without notes in 3-5 steps, and compare only after finishing.",
+    "Use a mini example: define variables, apply the rule, compute, then mention why the result is valid.",
+    "Try this pattern: concept statement -> formula setup -> substitution -> final interpretation."
+  ]
+}
+</file>
+
+<file path="public/icons/icon-192.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="ChampionsPrep Blog icon">
+  <rect width="192" height="192" rx="36" fill="#f3f1ff"/>
+  <rect x="40" y="40" width="112" height="112" transform="rotate(45 96 96)" fill="#6d5cf5"/>
+  <circle cx="96" cy="96" r="26" fill="#ffffff"/>
+</svg>
+</file>
+
+<file path="public/icons/icon-512.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="ChampionsPrep Blog icon">
+  <rect width="512" height="512" rx="96" fill="#f3f1ff"/>
+  <rect x="112" y="112" width="288" height="288" transform="rotate(45 256 256)" fill="#6d5cf5"/>
+  <circle cx="256" cy="256" r="70" fill="#ffffff"/>
+</svg>
+</file>
+
+<file path="public/manifest.webmanifest">
+{
+  "name": "ChampionsPrep Blog",
+  "short_name": "CPrep Blog",
+  "description": "Editorial exam-prep content from ChampionsPrep.",
+  "start_url": "/blog/",
+  "scope": "/blog/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6d5cf5",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
+</file>
+
+<file path="public/sw.js">
+const CACHE_VERSION = "cp-blog-v1";
+const APP_SHELL = ["/blog/", "/manifest.webmanifest"];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)).catch(() => {})
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_VERSION)
+          .map((key) => caches.delete(key))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  if (!url.pathname.startsWith("/blog/") && !url.pathname.startsWith("/icons/")) return;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          return cached || caches.match("/blog/");
+        })
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => cached);
+    })
+  );
+});
+</file>
+
+<file path="src/components/InlineAssistant.astro">
+---
+interface Props {
+  type?: "simplify" | "exam-summary" | "example";
+  context?: "section" | "article";
+  endpoint?: string;
+}
+
+const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = Astro.props as Props;
+---
+<aside
+  class="inline-assistant"
+  data-inline-assistant
+  data-default-action={type}
+  data-context={context}
+  data-endpoint={endpoint}
+  aria-label="Inline study assistant"
+>
+  <p class="inline-assistant__label">AI Study Assist</p>
+  <div class="inline-assistant__actions">
+    <button type="button" data-assistant-action="simplify" aria-expanded="false">Simplify explanation</button>
+    <button type="button" data-assistant-action="exam-summary" aria-expanded="false">Exam-focused summary</button>
+    <button type="button" data-assistant-action="example" aria-expanded="false">Show example</button>
+  </div>
+  <div class="inline-assistant__output" data-assistant-output hidden></div>
+</aside>
+
+<script>
+  const blocks = Array.from(document.querySelectorAll("[data-inline-assistant]"));
+  const normalizeTopic = (value) =>
+    value.replace(/[✓#]/g, " ").replace(/\s+/g, " ").trim();
+
+  const extractContext = (root, mode) => {
+    if (mode === "article") {
+      const body = document.querySelector(".post-body");
+      const articleText = body?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+      return {
+        topic: "Article",
+        contextText: articleText
+      };
+    }
+
+    const section = root.closest("[data-learning-section]");
+    if (section instanceof HTMLElement) {
+      const heading = section.querySelector("h2,h3");
+      const shadow = section.cloneNode(true);
+      if (shadow instanceof HTMLElement) {
+        for (const assistant of shadow.querySelectorAll("[data-inline-assistant]")) {
+          assistant.remove();
+        }
+      }
+      return {
+        topic: normalizeTopic(heading?.textContent ?? "") || "Section",
+        contextText:
+          (shadow instanceof HTMLElement ? shadow.innerText : section.innerText)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 1200)
+      };
+    }
+
+    // Fallback path when section wrappers are absent.
+    const fallbackHeading =
+      (root.previousElementSibling instanceof HTMLHeadingElement ? root.previousElementSibling.textContent : "") || "";
+    const fallbackText =
+      root.parentElement?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+    return {
+      topic: normalizeTopic(fallbackHeading) || "Section",
+      contextText: fallbackText
+    };
+  };
+
+  for (const block of blocks) {
+    const buttons = Array.from(block.querySelectorAll("[data-assistant-action]"));
+    const output = block.querySelector("[data-assistant-output]");
+    if (!(output instanceof HTMLElement) || !buttons.length) continue;
+
+    let activeAction = block.getAttribute("data-default-action") ?? "";
+    let loaded = null;
+    let activeRequestId = 0;
+
+    const closeAll = () => {
+      for (const button of buttons) {
+        if (button instanceof HTMLButtonElement) {
+          button.setAttribute("aria-expanded", "false");
+        }
+      }
+      output.hidden = true;
+      output.textContent = "";
+      activeAction = "";
+    };
+
+    block.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-assistant-action]");
+      if (!(button instanceof HTMLButtonElement)) return;
+
+      const action = button.getAttribute("data-assistant-action");
+      if (!action) return;
+
+      if (activeAction === action && !output.hidden) {
+        closeAll();
+        return;
+      }
+
+      for (const item of buttons) {
+        if (item instanceof HTMLButtonElement) {
+          item.setAttribute("aria-expanded", item === button ? "true" : "false");
+        }
+      }
+
+      output.hidden = false;
+      output.textContent = "Loading focused help...";
+
+      try {
+        if (!loaded) {
+          loaded = import("../utils/inlineAssistantClient");
+        }
+        const module = await loaded;
+        const context = block.getAttribute("data-context") ?? "section";
+        const endpoint = block.getAttribute("data-endpoint") ?? "";
+        const { topic, contextText } = extractContext(block, context);
+        const postSlug = window.__cpGaContext?.post_slug ?? "";
+        const cacheKey = `${postSlug}::${topic}::${action}`;
+        const requestId = ++activeRequestId;
+
+        // 1) Runtime cache first.
+        const cached = module.getCachedRuntimeResponse(cacheKey);
+        if (cached) {
+          output.textContent = cached;
+          activeAction = action;
+          return;
+        }
+
+        // 2) Static response next (instant first paint for the hint).
+        const staticText = await module.getStaticResponse(action, cacheKey);
+        if (requestId !== activeRequestId) return;
+        output.textContent = staticText;
+        activeAction = action;
+
+        // 3) Runtime enhancement last (optional progressive upgrade).
+        module
+          .requestRuntimeHint({
+            endpoint: endpoint || undefined,
+            action,
+            topic,
+            contextText,
+            cacheKey
+          })
+          .then((runtimeText) => {
+            if (requestId !== activeRequestId) return;
+            if (activeAction !== action) return;
+            if (!runtimeText || runtimeText === output.textContent) return;
+            output.classList.add("inline-assistant__output--refresh");
+            output.textContent = runtimeText;
+            requestAnimationFrame(() => {
+              output.classList.remove("inline-assistant__output--refresh");
+            });
+          })
+          .catch(() => {});
+      } catch {
+        output.textContent = "Unable to fetch assistance right now. Try again in a moment.";
+      }
+    });
+  }
+</script>
+
+<style>
+  .inline-assistant {
+    margin: 1.2rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.85rem;
+    background: var(--color-bg-muted);
+  }
+
+  .inline-assistant__label {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .inline-assistant__label::before {
+    content: "";
+    width: 0.48rem;
+    height: 0.48rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+  }
+
+  .inline-assistant__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .inline-assistant__actions button {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    padding: 0.38rem 0.68rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .inline-assistant__actions button:hover {
+    border-color: var(--color-lavender-500);
+    transform: scale(1.02);
+  }
+
+  .inline-assistant__actions button[aria-expanded="true"] {
+    border-color: var(--color-lavender-500);
+    background: var(--color-lavender-soft);
+  }
+
+  .inline-assistant__output {
+    margin-top: 0.7rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.65rem;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+  }
+
+  .inline-assistant__output--refresh {
+    opacity: 0.86;
+    transition: opacity 180ms ease-out;
+  }
+</style>
+</file>
+
+<file path="src/components/SmartCTA.astro">
+---
+interface Props {
+  href?: string;
+  cluster?: string;
+  postSlug?: string;
+  midLabel?: string;
+  endLabel?: string;
+}
+
+const {
+  href = "https://www.championsprep.in/",
+  cluster = "",
+  postSlug = "",
+  midLabel = "Need guided strategy for this topic?",
+  endLabel = "Ready for structured prep? Explore full study resources."
+} = Astro.props as Props;
+---
+<section class="smart-cta smart-cta--mid" data-smart-cta-mid hidden aria-label="Mid article call to action">
+  <p>{midLabel}</p>
+  <a href={href} data-smart-cta-link data-position="mid">Get prep plan</a>
+</section>
+
+<section class="smart-cta smart-cta--end" aria-label="End of article call to action">
+  <p>{endLabel}</p>
+  <a href={href} data-smart-cta-link data-position="end">Explore ChampionsPrep</a>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const mid = document.querySelector("[data-smart-cta-mid]");
+  const postBody = document.querySelector(".post-body");
+
+  if (mid instanceof HTMLElement && postBody instanceof HTMLElement) {
+    if (getComputedStyle(postBody).position === "static") {
+      postBody.style.position = "relative";
+    }
+
+    const marker = document.createElement("span");
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.position = "absolute";
+    marker.style.top = "40%";
+    marker.style.left = "0";
+    marker.style.width = "1px";
+    marker.style.height = "1px";
+    postBody.append(marker);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          mid.hidden = false;
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -15% 0px", threshold: 0 }
+    );
+
+    observer.observe(marker);
+  }
+
+  const ctaLinks = Array.from(document.querySelectorAll("[data-smart-cta-link]"));
+  for (const link of ctaLinks) {
+    if (!(link instanceof HTMLAnchorElement)) continue;
+    link.addEventListener("click", () => {
+      const position = link.getAttribute("data-position");
+      if (!position) return;
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("cta_click", {
+          post_slug: postSlug,
+          cluster,
+          position
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .smart-cta {
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+  }
+
+  .smart-cta p {
+    margin: 0;
+  }
+
+  .smart-cta a {
+    margin-top: 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.55rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--color-lavender-600);
+    border-radius: 999px;
+    background: var(--color-lavender-600);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+  }
+
+  .smart-cta a:hover {
+    background: var(--color-lavender-500);
+    border-color: var(--color-lavender-500);
+    transform: scale(1.02);
+  }
+
+  .smart-cta--mid {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    max-width: min(26rem, calc(100vw - 2rem));
+    padding: 0.85rem;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--color-lavender-500), transparent 84%);
+  }
+
+  .smart-cta--mid::before,
+  .smart-cta--end::before {
+    content: "";
+    display: inline-block;
+    width: 0.48rem;
+    height: 0.48rem;
+    margin-right: 0.45rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+    vertical-align: middle;
+  }
+
+  .smart-cta--end {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-left: 4px solid var(--color-lavender-500);
+  }
+
+  @media (max-width: 768px) {
+    .smart-cta--mid {
+      left: 1rem;
+      right: 1rem;
+      bottom: 0.75rem;
+    }
+  }
+</style>
+</file>
+
+<file path="src/components/StudyTool.astro">
+---
+interface Props {
+  type: "revision" | "mistakes" | "check-understanding";
+  title?: string;
+  points?: string[];
+  mistakes?: string[];
+  insight?: string;
+}
+
+const {
+  type,
+  title = "Study Tool",
+  points = [],
+  mistakes = [],
+  insight = "Summarize the idea in your own words, then test it with one past-paper question."
+} = Astro.props as Props;
+---
+<aside class="study-tool" data-study-tool={type} aria-label={title}>
+  <h3>{title}</h3>
+
+  {type === "revision" && (
+    <ul>
+      {(points.length ? points : [
+        "Identify the core definition in one line.",
+        "Write 2 formula/keywords from memory.",
+        "Solve one quick question without notes."
+      ]).map((point) => (
+        <li>{point}</li>
+      ))}
+    </ul>
+  )}
+
+  {type === "mistakes" && (
+    <details>
+      <summary>Common mistakes to avoid</summary>
+      <ul>
+        {(mistakes.length ? mistakes : [
+          "Skipping units or assumptions while writing steps.",
+          "Memorizing final answers without checking method.",
+          "Ignoring exception cases mentioned in the chapter."
+        ]).map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </details>
+  )}
+
+  {type === "check-understanding" && (
+    <details>
+      <summary>Check understanding</summary>
+      <p>{insight}</p>
+    </details>
+  )}
+</aside>
+
+<style>
+  .study-tool {
+    margin: 1.4rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.85rem 1rem;
+    background: var(--color-bg-muted);
+  }
+
+  .study-tool h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+  }
+
+  .study-tool h3::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+  }
+
+  .study-tool ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .study-tool li {
+    margin: 0.3rem 0;
+  }
+
+  .study-tool details summary {
+    cursor: pointer;
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .study-tool details[open] summary {
+    color: var(--color-lavender-600);
+  }
+
+  .study-tool details p {
+    margin: 0.65rem 0 0;
+  }
+</style>
+</file>
+
+<file path="src/utils/inlineAssistantClient.ts">
+export type AssistantAction = "simplify" | "exam-summary" | "example";
+
+interface RequestInput {
+  endpoint?: string;
+  action: AssistantAction;
+  topic: string;
+  contextText: string;
+  cacheKey?: string;
+}
+
+interface FallbackPayload {
+  simplify?: string[];
+  "exam-summary"?: string[];
+  example?: string[];
+}
+
+const FALLBACK_ENDPOINT = "/data/assistant-responses.json";
+let endpointAvailable = true;
+const runtimeCache = new Map<string, string>();
+let staticPayloadPromise: Promise<FallbackPayload> | null = null;
+
+function concise(text: string): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= 260) return normalized;
+  return `${normalized.slice(0, 257).trimEnd()}...`;
+}
+
+function hashKey(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function pickFallback(payload: FallbackPayload, action: AssistantAction, seed = ""): string {
+  const options = payload[action] ?? [];
+  if (!options.length) return "Focus on the core concept, then solve one question before moving forward.";
+  const index = hashKey(`${action}:${seed}`) % options.length;
+  return options[index];
+}
+
+async function getStaticPayload(): Promise<FallbackPayload> {
+  if (!staticPayloadPromise) {
+    staticPayloadPromise = fetch(`${FALLBACK_ENDPOINT}?t=${Date.now()}`, { cache: "no-store" }).then((response) => {
+      if (!response.ok) throw new Error("assistant_fallback_failed");
+      return response.json() as Promise<FallbackPayload>;
+    });
+  }
+  return staticPayloadPromise;
+}
+
+export function getCachedRuntimeResponse(cacheKey?: string): string | undefined {
+  if (!cacheKey) return undefined;
+  return runtimeCache.get(cacheKey);
+}
+
+export async function getStaticResponse(action: AssistantAction, seed = ""): Promise<string> {
+  const payload = await getStaticPayload();
+  return concise(pickFallback(payload, action, seed));
+}
+
+export async function requestRuntimeHint(input: RequestInput): Promise<string> {
+  const { endpoint, action, topic, contextText, cacheKey } = input;
+
+  if (endpoint && endpointAvailable) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          topic: topic.slice(0, 160),
+          context: contextText.slice(0, 1200),
+          type: action
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("assistant_request_failed");
+      }
+
+      const data = await response.json();
+      if (!data || typeof data.output !== "string") {
+        throw new Error("assistant_invalid_payload");
+      }
+      const value = concise(data.output);
+      if (cacheKey) runtimeCache.set(cacheKey, value);
+      return value;
+    } catch {
+      // Keep static-first behavior when runtime API is unavailable on static hosting.
+      endpointAvailable = false;
+      throw new Error("assistant_request_failed");
+    }
+  }
+
+  throw new Error("assistant_endpoint_unavailable");
+}
+</file>
+
+<file path=".gitignore">
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+</file>
+
+<file path="AGENTS.md">
+Ambiguous behavior must never be guessed. If unclear, request clarification instead of implementing assumptions.
+Environment rule: This project runs on Windows with PowerShell terminal. All local commands MUST use valid PowerShell syntax to avoid command failures.
+
+# AGENTS.md
+
+This file defines mandatory rules and operating constraints for any AI agent
+(Codex, GPT, automation tools) contributing to this repository.
+
+The architecture of this project is FINAL and must not be altered.
+
+---
+
+# 1. PROJECT PHILOSOPHY
+
+This project is:
+
+- Static-first
+- Content-driven
+- Editorial-focused
+- Performance-first
+- Backend-free
+
+Core principle:
+
+Content is code.
+
+All blog posts are MDX files stored in the repository.
+
+---
+
+# 2. ABSOLUTE CONSTRAINTS (DO NOT VIOLATE)
+
+AI agents MUST NOT introduce:
+
+- Backend APIs
+- Databases
+- Server runtime logic
+- Authentication systems
+- CMS dashboards
+- Admin panels
+- External content APIs
+- SSR frameworks or server rendering
+- Full-stack frameworks
+
+If a feature appears to require backend logic:
+
+-> propose a STATIC alternative.
+
+---
+
+# 3. TECHNOLOGY STACK (LOCKED)
+
+Framework:
+
+- Astro (static output)
+
+Styling:
+
+- Tailwind CSS v4
+- CSS design tokens
+
+Content:
+
+- Astro Content Collections
+- MDX files
+
+Search:
+
+- Pagefind (static index)
+
+SEO:
+
+- JSON-LD schema generated at build time
+
+Deployment target:
+
+- Static hosting via CDN (Vercel)
+
+---
+
+# 4. STATIC-FIRST RULE
+
+All dynamic behavior must be:
+
+- precomputed at build time OR
+- client-side enhancement only when strictly necessary.
+
+Examples:
+
+GOOD:
+
+- reading time computed during build
+- related posts computed during build
+- OG images generated during build
+
+BAD:
+
+- server API for content
+- runtime database queries
+- dynamic content fetching
+
+---
+
+# 5. DESIGN SYSTEM RULES
+
+Brand identity:
+
+- Lavender accent color
+- Editorial typography
+- Geometric diamond motif
+
+Visual style:
+
+- Editorial
+- Academic
+- Minimal motion
+
+DO NOT introduce:
+
+- flashy gradients
+- heavy animation frameworks
+- UI libraries without approval.
+
+---
+
+# 6. PERFORMANCE PRIORITY
+
+Agents must:
+
+- minimize JavaScript
+- avoid unnecessary hydration
+- prefer CSS over JS
+- avoid large dependencies.
+
+---
+
+# 7. COMPONENT DESIGN GUIDELINES
+
+Components must:
+
+- be small and composable
+- follow editorial layout system
+- avoid state-heavy patterns.
+
+Examples:
+
+Allowed:
+
+- TableOfContents
+- ReadingProgress
+- ShareButtons
+
+Not allowed:
+
+- interactive dashboards
+- user accounts
+- real-time features.
+
+---
+
+# 8. SEO AUTOMATION
+
+SEO must be implemented via:
+
+- static metadata generation
+- structured data (JSON-LD)
+- sitemap + RSS
+- internal linking logic.
+
+Agents should never introduce SEO plugins requiring backend.
+
+---
+
+# 9. DARK MODE
+
+Dark mode must:
+
+- use CSS variables
+- avoid heavy JS frameworks.
+
+---
+
+# 10. FILE STRUCTURE
+
+Agents must respect existing folder structure.
+
+Do not reorganize directories without explicit instruction.
+
+---
+
+# 11. WHEN UNSURE
+
+If implementation options include:
+
+A) static solution
+B) dynamic/backend solution
+
+Always choose:
+
+-> static solution.
+
+---
+
+# 12. NON-GOALS
+
+This project is NOT:
+
+- a blogging platform
+- a CMS
+- a SaaS application
+- a user-facing web app
+
+It is:
+
+-> a high-performance editorial website.
+
+---
+
+# FINAL RULE
+
+Architecture is final.
+
+Agents must extend within constraints, not redesign them.
+</file>
+
+<file path="astro.config.mjs">
+// @ts-check
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
+import rehypeSlug from "rehype-slug";
+
+export default defineConfig({
+  site: "https://www.championsprep.in/blog",
+  output: "static",
+  integrations: [
+    mdx({
+      rehypePlugins: [rehypeSlug]
+    }),
+    sitemap()
+  ],
+  vite: {
+    plugins: [tailwindcss()]
+  }
+});
+</file>
+
+<file path="CPrep_Blog_Prd.md">
+# ChampionsPrep Blog — Master Product + Design Spec (v2)
+
+> \*\*⚠️ Architecture is final. Do not redesign or introduce additional frameworks.\*\*
+
+---
+
+## Static Validation
+
+Nothing in this PRD requires a backend. All features are static or client-side-minimal:
+
+|Feature|Implementation|Backend?|
+|-|-|-|
+|Pagefind search|Static index built at deploy|❌ No|
+|OG images|Build-time generation via satori|❌ No|
+|Micro feedback|GA4 custom events only|❌ No|
+|Share buttons|Static URL templates|❌ No|
+|Reading time|Word count at build|❌ No|
+|Dark mode|CSS + localStorage|❌ No|
+|Related posts|Build-time scoring|❌ No|
+|Tag pages|Static generation per tag|❌ No|
+|Table of Contents|Build-time heading extraction|❌ No|
+
+---
+
+# 1\. Product Overview
+
+Build a high-performance editorial blog using:
+
+* Astro (latest)
+* Tailwind CSS v4 (CSS-first configuration)
+* MDX content
+* Static-first architecture
+
+This blog:
+
+* lives at `/blog` on main domain
+* is a separate repo/project
+* contains ZERO backend logic
+* is optimized for SEO + reading experience.
+
+---
+
+# 2\. Architecture Rules (STRICT)
+
+DO NOT implement:
+
+* backend APIs
+* databases
+* CMS dashboards
+* authentication
+* runtime rendering
+* SSR unless explicitly needed.
+
+Publishing workflow:
+
+1. Duplicate MDX template
+2. Write content
+3. Commit
+4. Deploy
+
+---
+
+# 3\. Tech Stack
+
+Framework:
+
+* Astro
+
+Integrations:
+
+* @astrojs/mdx
+* @astrojs/sitemap
+* @astrojs/rss
+
+Styling:
+
+* Tailwind CSS v4
+* CSS-first design tokens
+
+Search:
+
+* Pagefind (static search index, built at deploy time, zero backend)
+
+OG Image Generation:
+
+* satori (build-time generation from post title + brand template)
+
+---
+
+# 4\. Project Structure
+
+```
+src/
+  components/
+    SignupCTA.astro
+    ExamTip.astro
+    RelatedPosts.astro
+    AuthorCard.astro
+    ShareButtons.astro
+    TableOfContents.astro
+    ReadingProgress.astro
+    SearchWidget.astro
+    PrevNextNav.astro
+    Breadcrumbs.astro
+    MicroFeedback.astro
+
+  content/
+    config.ts
+    blog/
+      \_template.mdx
+
+  layouts/
+    BlogLayout.astro
+
+  pages/
+    blog/
+      index.astro
+      \[...slug].astro
+      tag/
+        \[tag].astro
+
+  styles/
+    tokens.css
+    global.css
+    typography.css
+    print.css
+```
+
+---
+
+# 5\. Content Model (Astro Content Collections)
+
+Frontmatter schema:
+
+```
+title: string
+description: string
+date: date
+updatedDate?: date
+author: string (default: "ChampionsPrep")
+tags: string\[]
+cluster: string
+draft?: boolean
+minutesRead?: number (auto-calculated at build time)
+ogImage?: string (auto-generated if not provided)
+```
+
+Reading time is auto-calculated from word count (~200 wpm) during build.
+
+---
+
+# 6\. Brand Design System
+
+## Primary Brand Color
+
+Lavender-driven identity.
+
+Primary:
+
+```
+--color-lavender-500: #8B7CF6
+--color-lavender-600: #6D5CF5
+--color-lavender-soft: #F3F1FF
+```
+
+Neutrals:
+
+```
+--color-text-primary: #111827
+--color-text-secondary: #4B5563
+--color-border: #E5E7EB
+--color-bg: #FFFFFF
+```
+
+Dark mode overrides:
+
+```
+--color-text-primary: #F3F4F6
+--color-text-secondary: #9CA3AF
+--color-border: #374151
+--color-bg: #111827
+```
+
+Lavender is accent color — NOT full background.
+
+---
+
+# 7\. Tailwind v4 Design Tokens
+
+Define in CSS:
+
+```css
+:root {
+  --color-lavender-500: #8B7CF6;
+  --color-lavender-600: #6D5CF5;
+  --color-lavender-soft: #F3F1FF;
+
+  --reading-width: 720px;
+  --shape-radius: 12px;
+}
+```
+
+---
+
+# 8\. Editorial Layout System
+
+## Reading Width
+
+max-width: 720px
+
+## Typography
+
+Font:
+
+* Inter (primary — free, widely supported)
+
+Scale:
+
+```
+H1 → 36px
+H2 → 28px
+H3 → 22px
+Body → 17px
+```
+
+Line height: 1.75 – 1.8
+
+---
+
+# 9\. Editorial Typography (AUTO STYLING)
+
+Apply class: `.editorial`
+
+Rules:
+
+* Lavender link color
+* Diamond motif before H2
+* Blockquotes with lavender border
+* Lists with lavender markers
+* Improved paragraph spacing.
+
+Example:
+
+```css
+.editorial h2::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--color-lavender-500);
+  transform: rotate(45deg);
+}
+```
+
+---
+
+# 10\. Geometric Brand Identity
+
+Primary shape: Rotated square (diamond).
+
+Use for:
+
+* heading markers
+* callouts
+* subtle background accents.
+
+DO NOT use heavy decorative shapes.
+
+---
+
+# 11\. UX Polish \& Motion
+
+## Motion (subtle only)
+
+Page load: opacity 0 → 1, translateY 12px → 0, duration 300ms.
+
+CTA hover: scale(1.02).
+
+## Required UX Features
+
+* Reading progress bar (thin lavender bar at top of viewport)
+* Anchor links on headings (hover to reveal link icon)
+* Animated underline links
+* Smooth scroll
+* Consistent spacing rhythm
+* Rounded images (border-radius: var(--shape-radius))
+* Subtle hover microinteractions
+
+## Heading ID Generation
+
+Generate slugified IDs for all H2/H3 headings at build time (e.g., `## Profit \& Loss` → `id="profit-loss"`).
+
+Rules:
+
+* Lowercase, hyphenated, stripped of special characters
+* Generated at build time via Astro rehype plugin — no runtime JS
+* Required for anchor links and TOC deep-linking to work reliably
+
+## Reading Flow
+
+* Narrow reading column (720px max)
+* Short intro paragraph
+* Section chunking with clear heading hierarchy
+* Visual anchors every few screens
+* Consistent heading spacing
+
+---
+
+# 12\. Navigation \& Discovery
+
+## Tag Pages
+
+Auto-generated at `/blog/tag/\[tag]` during build. Lists all posts with that tag, sorted by date.
+
+## Client-Side Search
+
+Pagefind integration — builds a search index at deploy time. Renders as a lightweight search widget on the blog index page. Zero backend.
+
+## Previous / Next Navigation
+
+Links to adjacent posts within the same cluster, displayed at post bottom.
+
+## Breadcrumbs
+
+Format: `Blog > \[Cluster] > \[Post Title]`
+
+Rendered as structured data (BreadcrumbList schema) for SEO.
+
+## Table of Contents
+
+Auto-generated from H2/H3 headings in each post.
+
+* Desktop (≥1024px): sticky sidebar alongside reading column
+* Mobile (<1024px): collapses automatically into an accordion above content
+
+TOC must collapse automatically below 1024px viewport. No exceptions — otherwise mobile layout breaks.
+
+Pure CSS positioning + minimal JS for active-section highlighting.
+
+---
+
+# 13\. Engagement \& Growth
+
+## Share Buttons
+
+Static share links (no third-party SDKs):
+
+* WhatsApp (critical for Indian student audience)
+* Twitter/X
+* Copy link to clipboard
+
+Displayed at post bottom and optionally as a floating side bar on desktop.
+
+## Micro-Feedback
+
+Two buttons: 👍 👎 at post bottom.
+
+Fires GA4 custom event (`article\_feedback` with `value: helpful | not\_helpful`). No backend storage needed.
+
+## SignupCTA
+
+Lavender primary button. Fires GA4 event (`cta\_click`).
+
+Placed after ~40% scroll or at end of post.
+
+## Author Card
+
+Small component at post bottom showing author name, one-line bio, and optional avatar. Builds credibility for exam-prep content.
+
+---
+
+# 14\. SEO Architecture
+
+Auto-generated:
+
+* Canonical URLs
+* sitemap.xml
+* RSS feed
+* JSON-LD `BlogPosting` schema (title, description, datePublished, author, image)
+* JSON-LD `BreadcrumbList` schema
+* JSON-LD `FAQPage` schema (for posts using Q\&A format — triggered by a `faq: true` frontmatter flag)
+
+Open Graph:
+
+* Auto-generated OG images at build time using satori — post title + brand template
+* `og:title`, `og:description`, `og:image` meta tags on every post
+
+Related Posts:
+
+* Scoring system (computed at build time):
+
+  * +3 points: same `cluster`
+  * +1 point: per matching tag
+
+* Sort by score (descending), then by date (newest first)
+* Limit: 3 posts
+* Fallback: if fewer than 3 scored results, fill with most recent posts from any cluster.
+
+---
+
+# 15\. Components Summary
+
+|Component|Purpose|
+|-|-|
+|SignupCTA|Lavender CTA button with GA4 event|
+|ExamTip|Soft lavender callout with diamond motif|
+|RelatedPosts|Top 3 related articles by cluster/tags|
+|AuthorCard|Author name + bio at post bottom|
+|ShareButtons|WhatsApp, X, copy-link (static links)|
+|TableOfContents|Auto-generated from headings|
+|ReadingProgress|Thin lavender bar at viewport top|
+|SearchWidget|Pagefind-powered search|
+|PrevNextNav|Adjacent posts in same cluster|
+|Breadcrumbs|Blog > Cluster > Post|
+|MicroFeedback|👍👎 buttons firing GA4 events|
+
+---
+
+# 16\. Dark Mode
+
+Implementation: class-based dark mode using `html.dark` class.
+
+* Toggle button adds/removes `dark` class on `<html>`
+* Preference stored in `localStorage`
+* On load: check `localStorage` first, fall back to `prefers-color-scheme`
+* Use `html.dark` rather than `@media (prefers-color-scheme: dark)` alone — allows manual toggle and avoids hydration issues
+
+Scope: swap background, text, and border tokens. Lavender accent stays the same.
+
+---
+
+# 17\. Print Stylesheet
+
+`@media print` CSS block that:
+
+* Hides nav, footer, CTA, share buttons, progress bar, TOC sidebar
+* Removes background colors
+* Optimizes typography for paper
+* Shows full URLs after links
+* Code blocks: `white-space: pre-wrap; word-wrap: break-word;` to ensure lines wrap on paper
+
+Students print articles — this costs nothing and helps them.
+
+---
+
+# 18\. Performance Rules
+
+## Static Rendering Mode (EXPLICIT)
+
+```
+// astro.config.mjs
+export default defineConfig({
+  output: 'static'
+});
+```
+
+All pages are pre-rendered at build time. No SSR. No server runtime. If a feature cannot work with `output: 'static'`, it is rejected.
+
+## Rules
+
+* output: static (enforced — see above)
+* minimal JS (allowed: progress bar, TOC highlight, search widget, dark mode toggle, Pagefind)
+* avoid hydration unless necessary
+* lazy-load images below the fold
+* preload Inter font
+
+---
+
+# 19\. Analytics
+
+GA4 script (loaded async).
+
+Track:
+
+* page\_view (automatic)
+* cta\_click (SignupCTA)
+* article\_feedback (MicroFeedback 👍👎)
+* share\_click (ShareButtons, with platform label)
+* search\_query (Pagefind usage)
+
+---
+
+# 20\. Design Philosophy
+
+Visual style: Editorial + Academic + Calm Modern.
+
+NOT:
+
+* flashy startup design
+* heavy gradients
+* excessive animations.
+
+---
+
+# FINAL RULE
+
+If any feature introduces:
+
+* server runtime
+* database
+* admin UI
+
+Reject it. Prefer static alternative.
+</file>
+
+<file path="package.json">
+{
+  "name": "cprep-blog",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "node scripts/generate-og.mjs",
+    "build": "astro build",
+    "postbuild": "pagefind --site dist",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
+    "@fontsource/inter": "^5.2.8",
+    "@resvg/resvg-js": "^2.6.2",
+    "@tailwindcss/vite": "^4.1.18",
+    "@vite-pwa/astro": "^1.2.0",
+    "astro": "^5.17.2",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "pagefind": "^1.4.0",
+    "rehype-slug": "^6.0.0",
+    "satori": "^0.19.2",
+    "tailwindcss": "^4.1.18"
+  }
+}
+</file>
+
+<file path="scripts/generate-og.mjs">
+import fs from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import fg from "fast-glob";
+import matter from "gray-matter";
+import satori from "satori";
+import { Resvg } from "@resvg/resvg-js";
+
+const cwd = process.cwd();
+const postsPattern = "src/content/blog/**/*.{md,mdx}";
+const ogOutDir = path.join(cwd, "public", "blog", "og");
+const fontPath = path.join(
+  cwd,
+  "node_modules",
+  "@fontsource",
+  "inter",
+  "files",
+  "inter-latin-600-normal.woff"
+);
+
+function toSlug(filePath) {
+  const rel = path.relative(path.join(cwd, "src", "content", "blog"), filePath);
+  return rel.replace(/\\/g, "/").replace(/\.(md|mdx)$/i, "");
+}
+
+function cleanTitle(title) {
+  return String(title || "ChampionsPrep Blog").trim().slice(0, 120);
+}
+
+async function generateOne({ title, slug, fontData }) {
+  const element = {
+    type: "div",
+    props: {
+      style: {
+        width: "1200px",
+        height: "630px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "64px",
+        backgroundColor: "#ffffff",
+        color: "#111827",
+        fontFamily: "Inter"
+      },
+      children: [
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              color: "#6D5CF5",
+              fontSize: "30px",
+              fontWeight: 600
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: {
+                    width: "14px",
+                    height: "14px",
+                    transform: "rotate(45deg)",
+                    backgroundColor: "#8B7CF6"
+                  }
+                }
+              },
+              "ChampionsPrep Blog"
+            ]
+          }
+        },
+        {
+          type: "div",
+          props: {
+            style: {
+              fontSize: "60px",
+              lineHeight: 1.15,
+              fontWeight: 600,
+              maxWidth: "1000px"
+            },
+            children: cleanTitle(title)
+          }
+        },
+        {
+          type: "div",
+          props: {
+            style: {
+              fontSize: "28px",
+              color: "#4B5563"
+            },
+            children: `championsprep.in/blog/${slug}`
+          }
+        }
+      ]
+    }
+  };
+
+  const svg = await satori(element, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: "Inter",
+        data: fontData,
+        weight: 600,
+        style: "normal"
+      }
+    ]
+  });
+
+  const pngData = new Resvg(svg).render().asPng();
+  const outFile = path.join(ogOutDir, `${slug}.png`);
+  await fs.mkdir(path.dirname(outFile), { recursive: true });
+  await fs.writeFile(outFile, pngData);
+}
+
+async function main() {
+  const fontData = await fs.readFile(fontPath);
+  const files = await fg(postsPattern, { cwd, absolute: true });
+
+  await fs.mkdir(ogOutDir, { recursive: true });
+
+  for (const file of files) {
+    const base = path.basename(file);
+    if (base.startsWith("_")) continue;
+
+    const raw = await fs.readFile(file, "utf8");
+    const parsed = matter(raw);
+    if (parsed.data.draft) continue;
+
+    const slug = toSlug(file);
+    await generateOne({
+      title: parsed.data.title,
+      slug,
+      fontData
+    });
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
+</file>
+
+<file path="src/components/AuthorCard.astro">
+---
+interface Props {
+  name: string;
+  bio?: string;
+  avatar?: string;
+}
+
+const {
+  name,
+  bio = "ChampionsPrep editorial team",
+  avatar
+} = Astro.props as Props;
+---
+<section class="author-card" aria-label="Author information">
+  {avatar ? <img class="author-card__avatar" src={avatar} alt={`${name} avatar`} loading="lazy" /> : null}
+  <div class="author-card__content">
+    <h3 class="author-card__name">{name}</h3>
+    <p class="author-card__bio">{bio}</p>
+  </div>
+</section>
+
+<style>
+  .author-card {
+    margin: 2rem 0 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--color-bg-muted);
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .author-card:hover {
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+
+  .author-card__avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    object-fit: cover;
+    flex: 0 0 3rem;
+  }
+
+  .author-card__name {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .author-card__bio {
+    margin: 0.25rem 0 0;
+    color: var(--color-text-secondary);
+  }
+</style>
+</file>
+
+<file path="src/components/Breadcrumbs.astro">
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props as Props;
+---
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="/blog/">Blog</a>
+  <span aria-hidden="true">></span>
+  <span aria-current="page">{title}</span>
+</nav>
+
+<style>
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumbs a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-lavender-600);
+  }
+</style>
+</file>
+
+<file path="src/components/ExamTip.astro">
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Exam Tip" } = Astro.props as Props;
+---
+<aside class="exam-tip" aria-label="Exam preparation tip">
+  <h3 class="exam-tip__title">{title}</h3>
+  <div class="exam-tip__content">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .exam-tip {
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-lavender-500);
+    border-radius: var(--shape-radius);
+    padding: 0.9rem 1rem;
+    background: var(--color-lavender-soft);
+    margin: 1.5rem 0;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .exam-tip:hover {
+    border-color: var(--color-lavender-500);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-lavender-500), transparent 85%);
+  }
+
+  .exam-tip__title {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .exam-tip__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>
+</file>
+
+<file path="src/components/MicroFeedback.astro">
+---
+interface Props {
+  postSlug: string;
+  cluster: string;
+}
+
+const { postSlug, cluster } = Astro.props as Props;
+---
+<section class="micro-feedback" aria-label="Article feedback">
+  <h2>Was this helpful?</h2>
+  <div class="micro-feedback__buttons">
+    <button type="button" data-feedback-value="helpful" aria-label="Helpful">👍</button>
+    <button type="button" data-feedback-value="not_helpful" aria-label="Not helpful">👎</button>
+  </div>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const feedbackRoot = document.querySelector(".micro-feedback");
+  if (feedbackRoot) {
+    let submitted = false;
+    feedbackRoot.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-feedback-value]");
+      if (!(button instanceof HTMLButtonElement)) return;
+      if (submitted) return;
+      const value = button.getAttribute("data-feedback-value");
+      if (!value) return;
+
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("article_feedback", {
+          value,
+          post_slug: postSlug,
+          cluster
+        });
+      }
+
+      submitted = true;
+      feedbackRoot.setAttribute("data-submitted", "true");
+      button.textContent = "Thanks";
+    });
+  }
+</script>
+
+<style>
+  .micro-feedback {
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+  }
+
+  .micro-feedback h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .micro-feedback__buttons {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .micro-feedback button {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    min-width: 2.5rem;
+    min-height: 2.2rem;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .micro-feedback button:hover {
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+
+  .micro-feedback[data-submitted="true"] button {
+    opacity: 0.7;
+  }
+</style>
+</file>
+
+<file path="src/components/PrevNextNav.astro">
+---
+interface LinkItem {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  previous?: LinkItem;
+  next?: LinkItem;
+}
+
+const { previous, next } = Astro.props as Props;
+---
+<nav class="prev-next-nav" aria-label="Previous and next posts">
+  <div class="prev-next-nav__col">
+    <div class="prev-next-nav__label">Previous</div>
+    {previous ? (
+      <a href={previous.href}>{previous.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+  <div class="prev-next-nav__col prev-next-nav__col--right">
+    <div class="prev-next-nav__label">Next</div>
+    {next ? (
+      <a href={next.href}>{next.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+</nav>
+
+<style>
+  .prev-next-nav {
+    margin-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .prev-next-nav__col--right {
+    text-align: right;
+  }
+
+  .prev-next-nav__label {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .prev-next-nav__empty {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .prev-next-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .prev-next-nav__col--right {
+      text-align: left;
+    }
+  }
+</style>
+</file>
+
+<file path="src/components/ReadingProgress.astro">
+---
+---
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress__bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+  const bar = document.getElementById("reading-progress-bar");
+  const article = document.querySelector(".post-main");
+
+  if (bar && article) {
+    const updateProgress = () => {
+      const rect = article.getBoundingClientRect();
+      const total = article.scrollHeight - window.innerHeight;
+      if (total <= 0) {
+        bar.style.transform = "scaleX(0)";
+        return;
+      }
+      const current = Math.min(Math.max(window.scrollY - (window.scrollY + rect.top), 0), total);
+      const ratio = current / total;
+      bar.style.transform = `scaleX(${ratio})`;
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+  }
+</script>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 1000;
+    background: transparent;
+  }
+
+  .reading-progress__bar {
+    width: 100%;
+    height: 100%;
+    background: var(--color-lavender-500);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 80ms linear;
+  }
+</style>
+</file>
+
+<file path="src/components/RelatedPosts.astro">
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  currentSlug: string;
+  cluster: string;
+  tags: string[];
+  limit?: number;
+}
+
+const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
+const tagSet = new Set(tags);
+
+const candidates = (await getCollection("blog", ({ data }) => !data.draft)).filter(
+  (post) => post.slug !== currentSlug
+);
+
+const scored = candidates
+  .map((post) => {
+    let score = 0;
+    if (post.data.cluster === cluster) score += 3;
+    for (const tag of post.data.tags) {
+      if (tagSet.has(tag)) score += 1;
+    }
+    return { post, score };
+  })
+  .sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.post.data.date.getTime() - a.post.data.date.getTime();
+  });
+
+const selected: typeof scored = [];
+for (const item of scored) {
+  if (selected.length >= limit) break;
+  if (item.score > 0) selected.push(item);
+}
+if (selected.length < limit) {
+  for (const item of scored) {
+    if (selected.length >= limit) break;
+    if (!selected.some((picked) => picked.post.slug === item.post.slug)) {
+      selected.push(item);
+    }
+  }
+}
+---
+<section class="related-posts" aria-label="Related posts">
+  <h2>Related Posts</h2>
+  {selected.length === 0 ? (
+    <p>No related posts yet.</p>
+  ) : (
+    <ul>
+      {selected.map(({ post }) => (
+        <li>
+          <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+
+<style>
+  .related-posts {
+    margin-top: 1.8rem;
+  }
+
+  .related-posts ul {
+    padding-left: 1.1rem;
+  }
+
+  .related-posts a {
+    text-decoration: none;
+    transition: color 180ms ease;
+  }
+</style>
+</file>
+
+<file path="src/components/SearchWidget.astro">
+---
+---
+<section class="search-widget" aria-label="Search posts">
+  <h2>Search</h2>
+  <div id="search" data-pagefind-root></div>
+</section>
+
+<script>
+  const init = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "/pagefind/pagefind-ui.js";
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
+      });
+
+      if (typeof window.PagefindUI !== "function") throw new Error("PagefindUI not available");
+      // @ts-ignore
+      new window.PagefindUI({
+        element: "#search",
+        showSubResults: true,
+        showImages: false,
+        excerptLength: 18
+      });
+
+      const root = document.getElementById("search");
+      if (!root) return;
+      let debounce = 0;
+      root.addEventListener("input", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        const query = target.value.trim();
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          if (!query) return;
+          if (typeof window.cpTrack === "function") {
+            window.cpTrack("search_query", {
+              query,
+              page_path: window.location.pathname
+            });
+          }
+        }, 400);
+      });
+    } catch {
+      const root = document.getElementById("search");
+      if (root) {
+        root.textContent = "Search will be available after production build.";
+      }
+    }
+  };
+
+  init();
+</script>
+
+<style>
+  .search-widget {
+    margin: 1rem 0 1.5rem;
+  }
+
+  .search-widget h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+</style>
+</file>
+
+<file path="src/components/ShareButtons.astro">
+---
+interface Props {
+  url: string;
+  title: string;
+  postSlug: string;
+  cluster: string;
+  instagramId?: string;
+}
+
+const {
+  url,
+  title,
+  postSlug,
+  cluster,
+  instagramId = "champions.prep"
+} = Astro.props as Props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const whatsappHref = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+const xHref = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+const instagramHref = `https://www.instagram.com/${instagramId}/`;
+---
+<section class="share-buttons" aria-label="Share this article">
+  <h2>Share</h2>
+  <div class="share-buttons__row">
+    <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-share-platform="whatsapp">
+      WhatsApp
+    </a>
+    <a href={xHref} target="_blank" rel="noopener noreferrer" data-share-platform="x">
+      X
+    </a>
+    <button type="button" data-share-platform="copy">Copy Link</button>
+    <a href={instagramHref} target="_blank" rel="noopener noreferrer" data-share-platform="instagram">
+      Instagram @{instagramId}
+    </a>
+  </div>
+</section>
+
+<script define:vars={{ url, postSlug, cluster }}>
+  const shareRoot = document.querySelector(".share-buttons");
+  if (shareRoot) {
+    shareRoot.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const el = target.closest("[data-share-platform]");
+      if (!(el instanceof HTMLElement)) return;
+      const platform = el.getAttribute("data-share-platform");
+      if (!platform) return;
+
+      if (platform === "copy") {
+        try {
+          await navigator.clipboard.writeText(url);
+          el.textContent = "Copied";
+          setTimeout(() => {
+            el.textContent = "Copy Link";
+          }, 1200);
+        } catch {}
+      }
+
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("share_click", {
+          platform,
+          post_slug: postSlug,
+          cluster
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .share-buttons {
+    margin-top: 1.5rem;
+  }
+
+  .share-buttons h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .share-buttons__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .share-buttons a,
+  .share-buttons button {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.42rem 0.8rem;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
+  }
+
+  .share-buttons a:hover,
+  .share-buttons button:hover {
+    border-color: var(--color-lavender-500);
+    color: var(--color-lavender-600);
+    transform: translateY(-1px);
+  }
+</style>
+</file>
+
+<file path="src/components/SignupCTA.astro">
+---
+interface Props {
+  href?: string;
+  label?: string;
+  postSlug?: string;
+  cluster?: string;
+}
+
+const {
+  href = "https://www.championsprep.in/",
+  label = "Get more prep resources",
+  postSlug = "",
+  cluster = ""
+} = Astro.props as Props;
+---
+<section class="signup-cta" aria-label="Signup call to action">
+  <a class="signup-cta__link" href={href} data-cta="signup">
+    {label}
+  </a>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const ctaLink = document.querySelector(".signup-cta [data-cta='signup']");
+  if (ctaLink) {
+    ctaLink.addEventListener("click", () => {
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("cta_click", {
+          placement: "post_bottom",
+          post_slug: postSlug,
+          cluster
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .signup-cta {
+    margin: 2rem 0 0;
+  }
+
+  .signup-cta__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-lavender-600);
+    border-radius: var(--shape-radius);
+    padding: 0.6rem 1rem;
+    background: var(--color-lavender-600);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  }
+
+  .signup-cta__link:hover {
+    background: var(--color-lavender-500);
+    border-color: var(--color-lavender-500);
+    transform: scale(1.02);
+  }
+</style>
+</file>
+
+<file path="src/components/TableOfContents.astro">
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props as Props;
+const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+{tocItems.length > 0 && (
+  <aside class="toc" aria-label="Table of contents">
+    <details class="toc__mobile">
+      <summary>Table of Contents</summary>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`}>{item.text}</a>
+          </li>
+        ))}
+      </ul>
+    </details>
+
+    <div class="toc__desktop">
+      <h2>Table of Contents</h2>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`} data-toc-link={item.slug}>
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </aside>
+)}
+
+<script>
+  const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+  const sections = links
+    .map((link) => {
+      const slug = link.getAttribute("data-toc-link");
+      if (!slug) return null;
+      const el = document.getElementById(slug);
+      return el ? { slug, el } : null;
+    })
+    .filter(Boolean);
+
+  if (links.length > 0 && sections.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length === 0) return;
+        const active = visible[0].target.id;
+        links.forEach((link) => {
+          if (link.getAttribute("data-toc-link") === active) {
+            link.setAttribute("aria-current", "true");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      },
+      { rootMargin: "-25% 0px -65% 0px", threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section.el));
+  }
+</script>
+
+<style>
+  .toc {
+    width: 100%;
+  }
+
+  .toc h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+  }
+
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc__item {
+    margin: 0.35rem 0;
+  }
+
+  .toc__item--nested {
+    padding-left: 0.9rem;
+  }
+
+  .toc a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .toc a:hover,
+  .toc a[aria-current="true"] {
+    color: var(--color-lavender-600);
+  }
+
+  .toc__desktop {
+    display: none;
+  }
+
+  .toc__mobile summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .toc__mobile {
+      display: none;
+    }
+
+    .toc__desktop {
+      display: block;
+      position: sticky;
+      top: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--shape-radius);
+      padding: 0.9rem;
+      background: var(--color-bg);
+    }
+  }
+</style>
+</file>
+
+<file path="src/content/blog/_template.mdx">
+---
+title: 'Post Title'
+description: 'Post description.'
+date: 2026-02-14
+author: 'ChampionsPrep'
+tags:
+  - sample-tag
+cluster: sample-cluster
+draft: true
+---
+
+Draft content.
+</file>
+
+<file path="src/content/blog/sample-post-2.mdx">
+---
+title: "Sample Post Two"
+description: "Second sample post to validate related posts scoring."
+date: 2026-02-13
+author: "ChampionsPrep"
+tags:
+  - sample
+  - revision
+cluster: foundation
+draft: false
+---
+
+import InlineAssistant from "../../components/InlineAssistant.astro";
+import StudyTool from "../../components/StudyTool.astro";
+
+This is another sample post used for related content checks.
+
+<StudyTool
+  type="mistakes"
+  title="Common Mistakes"
+  mistakes={[
+    "Posting debit and credit in reverse order.",
+    "Ignoring balancing checks before final answer.",
+    "Confusing adjustment entries with regular entries."
+  ]}
+/>
+
+<StudyTool
+  type="check-understanding"
+  title="Concept Check"
+  insight="If two accounts mismatch, explain the likely source, then state how you would verify it in one pass."
+/>
+
+<InlineAssistant type="example" context="article" />
+</file>
+
+<file path="src/content/blog/sample-post.mdx">
+---
+title: "Sample Post"
+description: "A sample MDX post used to validate content rendering."
+date: 2026-02-14
+author: "ChampionsPrep"
+tags:
+  - sample
+cluster: foundation
+draft: false
+---
+
+import InlineAssistant from "../../components/InlineAssistant.astro";
+import StudyTool from "../../components/StudyTool.astro";
+
+This is a **sample MDX** article.
+
+## Why this exists
+
+It verifies that the blog index and dynamic blog route render collection content.
+
+<InlineAssistant type="simplify" context="section" />
+
+<StudyTool
+  type="revision"
+  title="Rapid Revision"
+  points={[
+    "Define trial balance in one sentence.",
+    "List what it checks and what it cannot detect.",
+    "Solve one short error-spotting question."
+  ]}
+/>
+</file>
+
+<file path="src/content/config.ts">
+import { defineCollection, z } from "astro:content";
+
+const blog = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.date(),
+    updatedDate: z.date().optional(),
+    author: z.string().default("ChampionsPrep"),
+    tags: z.array(z.string()),
+    cluster: z.string(),
+    draft: z.boolean().optional(),
+    minutesRead: z.number().optional(),
+    ogImage: z.string().optional(),
+    faqItems: z
+      .array(
+        z.object({
+          q: z.string(),
+          a: z.string()
+        })
+      )
+      .optional()
+  })
+});
+
+export const collections = { blog };
+</file>
+
+<file path="src/layouts/BlogLayout.astro">
+---
+import '../styles/global.css';
+import '../styles/tokens.css';
+import '../styles/typography.css';
+import '../styles/print.css';
+
+type JsonLdValue = Record<string, unknown>;
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: string;
+  noindex?: boolean;
+  jsonLd?: JsonLdValue | JsonLdValue[];
+  gaContext?: Record<string, string>;
+}
+
+const {
+  title = "ChampionsPrep Blog",
+  description = "High-performance editorial content for exam preparation.",
+  canonical,
+  ogImage,
+  ogType = "website",
+  noindex = false,
+  jsonLd = [],
+  gaContext = {}
+} = Astro.props as Props;
+
+const pageTitle = title.includes("ChampionsPrep") ? title : `${title} | ChampionsPrep Blog`;
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
+const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#6d5cf5" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    <script is:inline>
+      (() => {
+        const key = "theme";
+        let mode = "light";
+        try {
+          const saved = localStorage.getItem(key);
+          if (saved === "light" || saved === "dark") {
+            mode = saved;
+          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            mode = "dark";
+          }
+        } catch {}
+        if (mode === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+    <link
+      rel="preload"
+      href="/fonts/inter-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {jsonLdBlocks.map((block) => (
+      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+    ))}
+    {gaMeasurementId && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+        <script is:inline define:vars={{ gaMeasurementId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            window.dataLayer.push(arguments);
+          }
+          window.gtag = window.gtag || gtag;
+          window.gtag("js", new Date());
+          window.gtag("config", gaMeasurementId);
+        </script>
+      </>
+    )}
+    <script is:inline define:vars={{ gaContext }}>
+      window.__cpGaContext = gaContext;
+      window.cpTrack = function (eventName, eventParams) {
+        if (typeof window.gtag !== "function") return;
+        const merged = Object.assign({}, window.__cpGaContext || {}, eventParams || {});
+        window.gtag("event", eventName, merged);
+      };
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+      Toggle Theme
+    </button>
+    <main class="page-shell">
+      <article class="editorial" data-pagefind-body>
+        <slot />
+      </article>
+    </main>
+    <script is:inline>
+      (() => {
+        const key = "theme";
+        const button = document.querySelector("[data-theme-toggle]");
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        const syncLabel = () => {
+          const dark = document.documentElement.classList.contains("dark");
+          button.textContent = dark ? "Light Mode" : "Dark Mode";
+        };
+
+        syncLabel();
+        button.addEventListener("click", () => {
+          const isDark = document.documentElement.classList.toggle("dark");
+          try {
+            localStorage.setItem(key, isDark ? "dark" : "light");
+          } catch {}
+          syncLabel();
+        });
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js", { scope: "/blog/" }).catch(() => {});
+        });
+      })();
+    </script>
+  </body>
+</html>
+</file>
+
+<file path="src/pages/blog/[...slug].astro">
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import ExamTip from "../../components/ExamTip.astro";
+import RelatedPosts from "../../components/RelatedPosts.astro";
+import AuthorCard from "../../components/AuthorCard.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import PrevNextNav from "../../components/PrevNextNav.astro";
+import ReadingProgress from "../../components/ReadingProgress.astro";
+import ShareButtons from "../../components/ShareButtons.astro";
+import MicroFeedback from "../../components/MicroFeedback.astro";
+import SmartCTA from "../../components/SmartCTA.astro";
+import { calculateMinutesRead } from "../../utils/content";
+
+export function getStaticPaths() {
+  return getCollection("blog", ({ data }) => !data.draft).then((posts) =>
+    posts.map((entry) => ({
+      params: { slug: entry.slug },
+      props: { entry }
+    }))
+  );
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
+const { Content, headings } = await entry.render();
+const tocHeadings = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const canonical = new URL(`/blog/${entry.slug}/`, Astro.site ?? Astro.url).toString();
+const ogImagePath = entry.data.ogImage ?? `/blog/og/${entry.slug}.png`;
+const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
+const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
+const pageTitle = entry.data.title;
+const pageDescription = entry.data.description;
+const allPosts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);
+const clusterPostsAscending = [...clusterPosts].sort((a, b) => {
+  const byDate = a.data.date.getTime() - b.data.date.getTime();
+  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
+});
+const currentIndex = clusterPosts.findIndex((post) => post.slug === entry.slug);
+const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
+const nextPost =
+  currentIndex >= 0 && currentIndex < clusterPosts.length - 1
+    ? clusterPosts[currentIndex + 1]
+    : undefined;
+const blogPostingJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.date.toISOString(),
+  dateModified: (entry.data.updatedDate ?? entry.data.date).toISOString(),
+  image: ogImageUrl,
+  author: {
+    "@type": "Person",
+    name: entry.data.author
+  },
+  mainEntityOfPage: canonical,
+  url: canonical
+};
+const learningResourceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  learningResourceType: "Lesson",
+  educationalLevel: "Class 11-12",
+  teaches: entry.data.cluster,
+  name: entry.data.title,
+  description: entry.data.description,
+  url: canonical
+};
+const learningPathJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: `${entry.data.cluster} Learning Path`,
+  itemListOrder: "https://schema.org/ItemListOrderAscending",
+  itemListElement: clusterPostsAscending.map((post, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: post.data.title,
+    url: new URL(`/blog/${post.slug}/`, Astro.site ?? Astro.url).toString()
+  }))
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Blog",
+      item: new URL("/blog/", Astro.site ?? Astro.url).toString()
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: entry.data.title,
+      item: canonical
+    }
+  ]
+};
+
+const faqItems = entry.data.faqItems ?? [];
+const faqJsonLd =
+  faqItems.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqItems.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.a
+          }
+        }))
+      }
+    : undefined;
+
+const baseJsonLd = [blogPostingJsonLd, learningResourceJsonLd, breadcrumbJsonLd, learningPathJsonLd];
+const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
+---
+<BlogLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  ogImage={ogImagePath}
+  ogType="article"
+  jsonLd={jsonLd}
+  gaContext={{ post_slug: entry.slug, cluster: entry.data.cluster }}
+>
+  <ReadingProgress />
+  <Breadcrumbs title={entry.data.title} />
+  <div class="post-shell">
+    <div class="post-toc">
+      <TableOfContents headings={tocHeadings} />
+    </div>
+    <div class="post-main">
+      <div class="post-head">
+        <h1>{entry.data.title}</h1>
+        <p>{entry.data.description}</p>
+        <p>{minutesRead} min read</p>
+        <ExamTip title="Quick Revision Tip">
+          <p>Summarize each section in one sentence before moving to the next chapter.</p>
+        </ExamTip>
+      </div>
+      <div id="reading-trigger" aria-hidden="true"></div>
+      <div class="post-body">
+        <Content />
+      </div>
+      <PrevNextNav
+        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.data.title } : undefined}
+        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.data.title } : undefined}
+      />
+      <ShareButtons
+        url={canonical}
+        title={entry.data.title}
+        postSlug={entry.slug}
+        cluster={entry.data.cluster}
+        instagramId="champions.prep"
+      />
+      <MicroFeedback postSlug={entry.slug} cluster={entry.data.cluster} />
+      <RelatedPosts currentSlug={entry.slug} cluster={entry.data.cluster} tags={entry.data.tags} />
+      <SmartCTA postSlug={entry.slug} cluster={entry.data.cluster} />
+      <AuthorCard name={entry.data.author} />
+    </div>
+  </div>
+</BlogLayout>
+
+<script>
+  const headings = Array.from(document.querySelectorAll(".post-body h2[id], .post-body h3[id]"));
+  for (const heading of headings) {
+    if (heading.querySelector(".heading-anchor")) continue;
+    const id = heading.getAttribute("id");
+    if (!id) continue;
+    const anchor = document.createElement("a");
+    anchor.className = "heading-anchor";
+    anchor.href = `#${id}`;
+    anchor.setAttribute("aria-label", `Link to ${heading.textContent ?? "section"}`);
+    anchor.textContent = "#";
+    heading.append(anchor);
+  }
+
+  const readingTrigger = document.getElementById("reading-trigger");
+  if (readingTrigger) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry) return;
+        document.body.classList.toggle("reading-mode", !entry.isIntersecting);
+      },
+      {
+        threshold: 0
+      }
+    );
+    observer.observe(readingTrigger);
+  }
+
+  const postBody = document.querySelector(".post-body");
+  if (postBody instanceof HTMLElement) {
+    const sectionHeadings = Array.from(postBody.querySelectorAll("h2[id]"));
+    const breakpoints = sectionHeadings.length
+      ? sectionHeadings
+      : Array.from(postBody.querySelectorAll("h3[id]"));
+    const completionMarkers = [];
+
+    for (let index = 0; index < breakpoints.length; index++) {
+      const start = breakpoints[index];
+      const stop = breakpoints[index + 1] ?? null;
+      const section = document.createElement("section");
+      section.className = "reading-section";
+      section.setAttribute("data-learning-section", "");
+      section.setAttribute("data-complete", "false");
+
+      const cue = document.createElement("span");
+      cue.className = "section-completion-cue";
+      cue.setAttribute("aria-hidden", "true");
+      cue.textContent = "✓";
+      start.append(cue);
+
+      start.before(section);
+      let cursor = start;
+      while (cursor && cursor !== stop) {
+        const next = cursor.nextSibling;
+        section.append(cursor);
+        cursor = next;
+      }
+
+      const marker = document.createElement("span");
+      marker.className = "section-complete-marker";
+      marker.setAttribute("aria-hidden", "true");
+      section.append(marker);
+      completionMarkers.push(marker);
+    }
+
+    if (completionMarkers.length) {
+      const completionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const marker = entry.target;
+            const section = marker.closest(".reading-section");
+            if (!(section instanceof HTMLElement)) continue;
+            if (entry.isIntersecting) {
+              section.setAttribute("data-complete", "true");
+            } else if (entry.boundingClientRect.top > window.innerHeight) {
+              section.setAttribute("data-complete", "false");
+            }
+          }
+        },
+        {
+          threshold: 0,
+          rootMargin: "0px 0px -72% 0px"
+        }
+      );
+
+      for (const marker of completionMarkers) {
+        completionObserver.observe(marker);
+      }
+    }
+  }
+</script>
+
+<style>
+  .post-shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .post-toc {
+    order: 1;
+  }
+
+  .post-main {
+    order: 2;
+  }
+
+  .post-body {
+    border: 1px solid transparent;
+    border-radius: var(--shape-radius);
+    padding: 0.2rem;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 1rem;
+  }
+
+  .post-body :global(section.reading-section) {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    padding-bottom: 0.35rem;
+  }
+
+  .post-body :global(.section-complete-marker) {
+    display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .post-body :global(.section-completion-cue) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.35rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-lavender-600);
+    font-size: 0.7rem;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 200ms ease-out, transform 200ms ease-out, border-color 200ms ease-out;
+  }
+
+  .post-body :global(section.reading-section[data-complete="true"] .section-completion-cue) {
+    opacity: 0.92;
+    transform: scale(1);
+    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 42%);
+  }
+
+  .post-head,
+  .post-main :global(.breadcrumbs),
+  .post-toc,
+  .post-body,
+  :global(.theme-toggle) {
+    transition: opacity 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out,
+      border-color 200ms ease-out;
+  }
+
+  #reading-trigger {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(body.reading-mode) .post-head {
+    transform: scale(0.985);
+    transform-origin: top center;
+  }
+
+  :global(body.reading-mode) .post-main :global(.breadcrumbs),
+  :global(body.reading-mode) :global(.theme-toggle) {
+    opacity: 0.7;
+  }
+
+  :global(body.reading-mode) .post-toc {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+
+  :global(body.reading-mode) .post-toc:hover {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  :global(body.reading-mode) .post-body {
+    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 65%);
+    box-shadow: 0 6px 22px color-mix(in srgb, var(--color-lavender-500), transparent 92%);
+  }
+
+  @media (min-width: 1024px) {
+    .post-shell {
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .post-main {
+      order: 1;
+    }
+
+    .post-toc {
+      order: 2;
+    }
+  }
+</style>
+</file>
+
+<file path="src/pages/blog/index.astro">
+---
+import { getCollection } from "astro:content";
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import SearchWidget from "../../components/SearchWidget.astro";
+import { calculateMinutesRead } from "../../utils/content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((post) => ({
+    ...post,
+    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+  }));
+
+const pageTitle = "Blog";
+const pageDescription = "Editorial posts and exam-prep insights from ChampionsPrep.";
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: "ChampionsPrep Blog",
+  description: pageDescription,
+  url: canonical
+};
+---
+<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+  <h1>Blog</h1>
+  <p>Editorial posts and exam-prep insights.</p>
+  <SearchWidget />
+
+  <ul>
+    {posts.map((post) => (
+      <li>
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        <div>{post.data.date.toISOString().slice(0, 10)} · {post.minutesRead} min read</div>
+        <p>{post.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</BlogLayout>
+</file>
+
+<file path="src/pages/blog/tag/[tag].astro">
+---
+import { getCollection } from "astro:content";
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import { calculateMinutesRead, slugifyTag } from "../../../utils/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const tagMap = new Map<string, string>();
+
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = slugifyTag(tag);
+      if (!tagMap.has(slug)) tagMap.set(slug, tag);
+    }
+  }
+
+  return Array.from(tagMap.entries()).map(([slug, label]) => ({
+    params: { tag: slug },
+    props: { tagSlug: slug, tagLabel: label }
+  }));
+}
+
+const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const posts = allPosts
+  .filter((post) => post.data.tags.some((tag) => slugifyTag(tag) === tagSlug))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((post) => ({
+    ...post,
+    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+  }));
+
+const pageTitle = `Tag: ${tagLabel}`;
+const pageDescription = `Posts tagged with ${tagLabel}.`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+---
+<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
+  <h1>{pageTitle}</h1>
+  <ul>
+    {posts.map((post) => (
+      <li>
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        <div>{post.data.date.toISOString().slice(0, 10)} · {post.minutesRead} min read</div>
+        <p>{post.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</BlogLayout>
+</file>
+
+<file path="src/pages/rss.xml.ts">
+import rss from "@astrojs/rss";
+import { getCollection } from "astro:content";
+
+export async function GET(context: { site: URL | undefined }) {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+  );
+
+  return rss({
+    title: "ChampionsPrep Blog",
+    description: "Editorial posts and exam-prep insights from ChampionsPrep.",
+    site: context.site ?? new URL("https://www.championsprep.in/blog"),
+    items: posts.map((post) => ({
+      title: post.data.title,
+      description: post.data.description,
+      pubDate: post.data.date,
+      link: `/blog/${post.slug}/`
+    }))
+  });
+}
+</file>
+
+<file path="src/styles/global.css">
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-400-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-editorial);
+  line-height: var(--line-height-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-size: 17px;
+}
+
+main {
+  animation: fadeUp 300ms ease-out;
+}
+
+.page-shell {
+  width: min(100% - 2rem, calc(var(--reading-width) + 2rem));
+  margin-inline: auto;
+  padding-block: 1rem 3rem;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 1100;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-lavender-500);
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--shape-radius);
+}
+
+a {
+  color: var(--color-lavender-600);
+  text-decoration-color: color-mix(in srgb, var(--color-lavender-600), transparent 45%);
+  text-underline-offset: 0.18em;
+  transition: color 180ms ease, text-decoration-color 180ms ease, opacity 180ms ease;
+}
+
+a:hover {
+  text-decoration-color: var(--color-lavender-600);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+</file>
+
+<file path="src/styles/print.css">
+@media print {
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html,
+  body {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 12pt;
+    line-height: 1.45;
+  }
+
+  nav,
+  footer,
+  .signup-cta,
+  .share-buttons,
+  .reading-progress,
+  .toc,
+  .theme-toggle {
+    display: none !important;
+  }
+
+  .page-shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    word-break: break-all;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere;
+  }
+}
+</file>
+
+<file path="src/styles/tokens.css">
+:root {
+  --color-lavender-500: #8b7cf6;
+  --color-lavender-600: #6d5cf5;
+  --color-lavender-soft: #f3f1ff;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-border: #e5e7eb;
+  --color-bg: #ffffff;
+  --color-bg-muted: #f9fafb;
+  --color-code-bg: #f3f4f6;
+
+  --reading-width: 720px;
+  --shape-radius: 12px;
+  --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --line-height-body: 1.78;
+}
+
+html.dark {
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
+  --color-bg: #111827;
+  --color-bg-muted: #1f2937;
+  --color-code-bg: #111827;
+}
+</file>
+
+<file path="src/styles/typography.css">
+.editorial {
+  max-width: var(--reading-width);
+  margin-inline: auto;
+  color: var(--color-text-primary);
+  scroll-snap-type: y mandatory;
+}
+
+.editorial section {
+  scroll-snap-align: start;
+}
+
+.editorial > :first-child {
+  margin-top: 0;
+}
+
+.editorial > :last-child {
+  margin-bottom: 0;
+}
+
+.editorial h1,
+.editorial h2,
+.editorial h3 {
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-top: 2.2rem;
+  margin-bottom: 0.8rem;
+  scroll-margin-top: 1.2rem;
+}
+
+.editorial h1 {
+  font-size: clamp(2rem, 4vw, 2.25rem);
+}
+
+.editorial h2 {
+  font-size: clamp(1.55rem, 3vw, 1.75rem);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.editorial h2::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 0.5rem;
+  background: var(--color-lavender-500);
+  transform: rotate(45deg);
+}
+
+.editorial h3 {
+  font-size: clamp(1.3rem, 2.4vw, 1.375rem);
+}
+
+.editorial h2 .heading-anchor,
+.editorial h3 .heading-anchor {
+  opacity: 0;
+  margin-left: 0.4rem;
+  color: var(--color-lavender-600);
+  text-decoration: none;
+  font-size: 0.9em;
+  transition: opacity 180ms ease, transform 180ms ease;
+  transform: translateY(-1px);
+}
+
+.editorial h2:hover .heading-anchor,
+.editorial h3:hover .heading-anchor,
+.editorial h2:focus-within .heading-anchor,
+.editorial h3:focus-within .heading-anchor {
+  opacity: 1;
+}
+
+.editorial p,
+.editorial ul,
+.editorial ol,
+.editorial blockquote,
+.editorial pre {
+  margin-top: 0;
+  margin-bottom: 1.05rem;
+}
+
+.editorial p,
+.editorial li {
+  color: var(--color-text-primary);
+}
+
+.editorial ul,
+.editorial ol {
+  padding-left: 1.3rem;
+}
+
+.editorial li::marker {
+  color: var(--color-lavender-500);
+}
+
+.editorial blockquote {
+  border-left: 3px solid var(--color-lavender-500);
+  margin-left: 0;
+  padding: 0.45rem 0 0.45rem 1rem;
+  color: var(--color-text-secondary);
+}
+
+.editorial code {
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+
+.editorial pre {
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+
+.editorial pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+</file>
+
+<file path="src/utils/content.ts">
+export function calculateMinutesRead(rawContent: string): number {
+  const text = rawContent
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, " ")
+    .replace(/[#>*_\-~]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const words = text ? text.split(" ").length : 0;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+export function slugifyTag(tag: string): string {
+  return tag
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}
+</file>
+
+</files>
