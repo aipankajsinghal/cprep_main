@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "pnpm -s node scripts/generate-og.mjs",
+    "prebuild": "node scripts/generate-og.mjs",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
