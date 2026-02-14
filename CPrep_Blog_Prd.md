@@ -501,3 +501,125 @@ If any feature introduces:
 
 Reject it. Prefer static alternative.
 
+---
+
+# 21\. Enhancement Addendum (Implemented)
+
+This section documents enhancements implemented after the original v2 scope. These are additive and do not redesign architecture.
+
+## 21.1 PRD Clarifications That Supersede Earlier Lines
+
+* FAQ JSON-LD generation is explicit frontmatter-based, not automatic heading parsing.
+* Breadcrumb UX and schema use `Blog > [Post Title]` (cluster breadcrumb link removed).
+* Canonical base is `https://www.championsprep.in/blog`.
+
+## 21.2 Extended Content Model
+
+Additional frontmatter fields:
+
+```
+faqItems?: Array<{ q: string; a: string }>
+```
+
+Rules:
+
+* `FAQPage` JSON-LD is emitted only when `faqItems` exists and has values.
+* No heuristic extraction from markdown headings.
+
+## 21.3 Additional Components
+
+Implemented:
+
+|Component|Purpose|
+|-|-|
+|InlineAssistant|Inline stateless learning help with hybrid static+runtime flow|
+|StudyTool|Inline revision/mistakes/check-understanding learning blocks|
+|SmartCTA|Contextual mid/end conversion CTAs with GA event metadata|
+
+## 21.4 Hybrid AI Mode
+
+Inline assistant response order:
+
+1. Cached runtime response (in-memory)
+2. Static build artifact (`/data/assistant-responses.json`)
+3. Optional runtime enhancement via secure proxy (`/api/inline-ai`)
+
+Behavior:
+
+* Static response is rendered first for instant UX.
+* Runtime AI enhancement never blocks initial response.
+* If runtime fails, static response remains and runtime attempts are disabled in-memory for current session.
+* No browser-side API key exposure.
+
+## 21.5 Smart Context Extraction
+
+Inline assistant sends only nearest learning section context:
+
+* Sections wrapped as `<section data-learning-section>`.
+* Payload includes:
+
+```
+{
+  topic: string,
+  context: string, // truncated ~1200 chars
+  type: "simplify" | "exam-summary" | "example"
+}
+```
+
+Goal:
+
+* reduce token usage
+* improve topical relevance
+* preserve stateless behavior.
+
+## 21.6 Secure Proxy Exception
+
+A minimal stateless edge proxy is allowed for AI call security:
+
+* Route: `/api/inline-ai`
+* Runtime: edge
+* Reads `OPENAI_API_KEY` from environment
+* Proxies to OpenAI API
+* Enforces concise output settings:
+  * `max_output_tokens: 150`
+  * `temperature: 0.3`
+
+This is an exception for secure key handling and not a backend content system.
+
+## 21.7 Learning Graph SEO
+
+Added schema blocks:
+
+* `LearningResource`
+  * `learningResourceType: "Lesson"`
+  * `educationalLevel: "Class 11-12"`
+  * `teaches: cluster`
+* Cluster learning path as `ItemList`
+  * ordered by date ASC
+  * deterministic tie-break by slug
+  * draft posts excluded
+  * canonical URLs included
+
+## 21.8 Editorial Focus + Learning UX Enhancements
+
+Implemented:
+
+* `body.reading-mode` via `IntersectionObserver` intro sentinel
+* Subtle 200ms `ease-out` transitions:
+  * calmer header/nav presence
+  * reduced TOC visual weight until hover
+  * emphasized reading column
+* Section completion cue (subtle checkmark)
+* Section-based reading wrappers and snap behavior for guided flow
+
+## 21.9 PWA Layer (Lightweight)
+
+Added lightweight app shell support without framework-heavy PWA stack:
+
+* `manifest.webmanifest`
+* static service worker (`public/sw.js`)
+* icon assets (`public/icons/*`)
+* registration in layout
+
+Design remains aligned to lavender + geometric motif.
+
