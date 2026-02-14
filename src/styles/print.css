@@ -1,0 +1,44 @@
+@media print {
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html,
+  body {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 12pt;
+    line-height: 1.45;
+  }
+
+  nav,
+  footer,
+  .signup-cta,
+  .share-buttons,
+  .reading-progress,
+  .toc,
+  .theme-toggle {
+    display: none !important;
+  }
+
+  .page-shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    word-break: break-all;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere;
+  }
+}

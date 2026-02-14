@@ -1,0 +1,68 @@
+---
+---
+<section class="search-widget" aria-label="Search posts">
+  <h2>Search</h2>
+  <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  <div id="search" data-pagefind-root></div>
+</section>
+
+<script>
+  const init = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "/pagefind/pagefind-ui.js";
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
+      });
+
+      if (typeof window.PagefindUI !== "function") throw new Error("PagefindUI not available");
+      // @ts-ignore
+      new window.PagefindUI({
+        element: "#search",
+        showSubResults: true,
+        showImages: false,
+        excerptLength: 18
+      });
+
+      const root = document.getElementById("search");
+      if (!root) return;
+      let debounce = 0;
+      root.addEventListener("input", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        const query = target.value.trim();
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          if (!query) return;
+          if (typeof window.cpTrack === "function") {
+            window.cpTrack("search_query", {
+              query,
+              page_path: window.location.pathname
+            });
+          }
+        }, 400);
+      });
+    } catch {
+      const root = document.getElementById("search");
+      if (root) {
+        root.textContent = "Search will be available after production build.";
+      }
+    }
+  };
+
+  init();
+</script>
+
+<style>
+  .search-widget {
+    margin: 1rem 0 1.5rem;
+  }
+
+  .search-widget h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+</style>

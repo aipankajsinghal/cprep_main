@@ -1,0 +1,69 @@
+---
+interface LinkItem {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  previous?: LinkItem;
+  next?: LinkItem;
+}
+
+const { previous, next } = Astro.props as Props;
+---
+<nav class="prev-next-nav" aria-label="Previous and next posts">
+  <div class="prev-next-nav__col">
+    <div class="prev-next-nav__label">Previous</div>
+    {previous ? (
+      <a href={previous.href}>{previous.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+  <div class="prev-next-nav__col prev-next-nav__col--right">
+    <div class="prev-next-nav__label">Next</div>
+    {next ? (
+      <a href={next.href}>{next.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+</nav>
+
+<style>
+  .prev-next-nav {
+    margin-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .prev-next-nav__col--right {
+    text-align: right;
+  }
+
+  .prev-next-nav__label {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .prev-next-nav__empty {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .prev-next-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .prev-next-nav__col--right {
+      text-align: left;
+    }
+  }
+</style>

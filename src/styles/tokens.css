@@ -1,0 +1,26 @@
+:root {
+  --color-lavender-500: #8b7cf6;
+  --color-lavender-600: #6d5cf5;
+  --color-lavender-soft: #f3f1ff;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-border: #e5e7eb;
+  --color-bg: #ffffff;
+  --color-bg-muted: #f9fafb;
+  --color-code-bg: #f3f4f6;
+
+  --reading-width: 720px;
+  --shape-radius: 12px;
+  --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --line-height-body: 1.78;
+}
+
+html.dark {
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
+  --color-bg: #111827;
+  --color-bg-muted: #1f2937;
+  --color-code-bg: #111827;
+}

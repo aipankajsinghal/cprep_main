@@ -1,0 +1,40 @@
+---
+interface Props {
+  cluster: string;
+  title: string;
+}
+
+const { cluster, title } = Astro.props as Props;
+const clusterLabel = cluster
+  .split("-")
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
+---
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="/blog/">Blog</a>
+  <span aria-hidden="true">></span>
+  <span>{clusterLabel}</span>
+  <span aria-hidden="true">></span>
+  <span aria-current="page">{title}</span>
+</nav>
+
+<style>
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumbs a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-lavender-600);
+  }
+</style>

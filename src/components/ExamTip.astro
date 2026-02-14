@@ -1,0 +1,40 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Exam Tip" } = Astro.props as Props;
+---
+<aside class="exam-tip" aria-label="Exam preparation tip">
+  <h3 class="exam-tip__title">{title}</h3>
+  <div class="exam-tip__content">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .exam-tip {
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-lavender-500);
+    border-radius: var(--shape-radius);
+    padding: 0.9rem 1rem;
+    background: var(--color-lavender-soft);
+    margin: 1.5rem 0;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .exam-tip:hover {
+    border-color: var(--color-lavender-500);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-lavender-500), transparent 85%);
+  }
+
+  .exam-tip__title {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .exam-tip__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

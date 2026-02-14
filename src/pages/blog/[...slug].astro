@@ -1,0 +1,197 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import SignupCTA from "../../components/SignupCTA.astro";
+import ExamTip from "../../components/ExamTip.astro";
+import RelatedPosts from "../../components/RelatedPosts.astro";
+import AuthorCard from "../../components/AuthorCard.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import PrevNextNav from "../../components/PrevNextNav.astro";
+import ReadingProgress from "../../components/ReadingProgress.astro";
+import ShareButtons from "../../components/ShareButtons.astro";
+import MicroFeedback from "../../components/MicroFeedback.astro";
+import { calculateMinutesRead, extractFaqItemsFromBody, slugifyTag } from "../../utils/content";
+
+export function getStaticPaths() {
+  return getCollection("blog", ({ data }) => !data.draft).then((posts) =>
+    posts.map((entry) => ({
+      params: { slug: entry.slug },
+      props: { entry }
+    }))
+  );
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
+const { Content, headings } = await entry.render();
+const tocHeadings = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const canonical = new URL(`/blog/${entry.slug}/`, Astro.site ?? Astro.url).toString();
+const ogImagePath = entry.data.ogImage ?? `/blog/og/${entry.slug}.png`;
+const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
+const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
+const clusterLabel = entry.data.cluster
+  .split("-")
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
+const pageTitle = entry.data.title;
+const pageDescription = entry.data.description;
+const allPosts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);
+const currentIndex = clusterPosts.findIndex((post) => post.slug === entry.slug);
+const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
+const nextPost =
+  currentIndex >= 0 && currentIndex < clusterPosts.length - 1
+    ? clusterPosts[currentIndex + 1]
+    : undefined;
+const blogPostingJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.date.toISOString(),
+  dateModified: (entry.data.updatedDate ?? entry.data.date).toISOString(),
+  image: ogImageUrl,
+  author: {
+    "@type": "Person",
+    name: entry.data.author
+  },
+  mainEntityOfPage: canonical,
+  url: canonical
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Blog",
+      item: new URL("/blog/", Astro.site ?? Astro.url).toString()
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: clusterLabel,
+      item: new URL(`/blog/tag/${slugifyTag(entry.data.cluster)}/`, Astro.site ?? Astro.url).toString()
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: entry.data.title,
+      item: canonical
+    }
+  ]
+};
+
+const faqItems = entry.data.faq ? extractFaqItemsFromBody(entry.body) : [];
+const faqJsonLd =
+  entry.data.faq && faqItems.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqItems.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer
+          }
+        }))
+      }
+    : undefined;
+
+const jsonLd = faqJsonLd ? [blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd] : [blogPostingJsonLd, breadcrumbJsonLd];
+---
+<BlogLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  ogImage={ogImagePath}
+  ogType="article"
+  jsonLd={jsonLd}
+  gaContext={{ post_slug: entry.slug, cluster: entry.data.cluster }}
+>
+  <ReadingProgress />
+  <Breadcrumbs cluster={entry.data.cluster} title={entry.data.title} />
+  <div class="post-shell">
+    <div class="post-toc">
+      <TableOfContents headings={tocHeadings} />
+    </div>
+    <div class="post-main">
+      <h1>{entry.data.title}</h1>
+      <p>{entry.data.description}</p>
+      <p>{minutesRead} min read</p>
+      <ExamTip title="Quick Revision Tip">
+        <p>Summarize each section in one sentence before moving to the next chapter.</p>
+      </ExamTip>
+      <div class="post-body">
+        <Content />
+      </div>
+      <PrevNextNav
+        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.data.title } : undefined}
+        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.data.title } : undefined}
+      />
+      <ShareButtons
+        url={canonical}
+        title={entry.data.title}
+        postSlug={entry.slug}
+        cluster={entry.data.cluster}
+        instagramId="champions.prep"
+      />
+      <MicroFeedback postSlug={entry.slug} cluster={entry.data.cluster} />
+      <RelatedPosts currentSlug={entry.slug} cluster={entry.data.cluster} tags={entry.data.tags} />
+      <SignupCTA postSlug={entry.slug} cluster={entry.data.cluster} />
+      <AuthorCard name={entry.data.author} />
+    </div>
+  </div>
+</BlogLayout>
+
+<script>
+  const headings = Array.from(document.querySelectorAll(".post-body h2[id], .post-body h3[id]"));
+  for (const heading of headings) {
+    if (heading.querySelector(".heading-anchor")) continue;
+    const id = heading.getAttribute("id");
+    if (!id) continue;
+    const anchor = document.createElement("a");
+    anchor.className = "heading-anchor";
+    anchor.href = `#${id}`;
+    anchor.setAttribute("aria-label", `Link to ${heading.textContent ?? "section"}`);
+    anchor.textContent = "#";
+    heading.append(anchor);
+  }
+</script>
+
+<style>
+  .post-shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .post-toc {
+    order: 1;
+  }
+
+  .post-main {
+    order: 2;
+  }
+
+  @media (min-width: 1024px) {
+    .post-shell {
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .post-main {
+      order: 1;
+    }
+
+    .post-toc {
+      order: 2;
+    }
+  }
+</style>

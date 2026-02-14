@@ -1,0 +1,74 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  currentSlug: string;
+  cluster: string;
+  tags: string[];
+  limit?: number;
+}
+
+const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
+const tagSet = new Set(tags);
+
+const candidates = (await getCollection("blog", ({ data }) => !data.draft)).filter(
+  (post) => post.slug !== currentSlug
+);
+
+const scored = candidates
+  .map((post) => {
+    let score = 0;
+    if (post.data.cluster === cluster) score += 3;
+    for (const tag of post.data.tags) {
+      if (tagSet.has(tag)) score += 1;
+    }
+    return { post, score };
+  })
+  .sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.post.data.date.getTime() - a.post.data.date.getTime();
+  });
+
+const selected: typeof scored = [];
+for (const item of scored) {
+  if (selected.length >= limit) break;
+  if (item.score > 0) selected.push(item);
+}
+if (selected.length < limit) {
+  for (const item of scored) {
+    if (selected.length >= limit) break;
+    if (!selected.some((picked) => picked.post.slug === item.post.slug)) {
+      selected.push(item);
+    }
+  }
+}
+---
+<section class="related-posts" aria-label="Related posts">
+  <h2>Related Posts</h2>
+  {selected.length === 0 ? (
+    <p>No related posts yet.</p>
+  ) : (
+    <ul>
+      {selected.map(({ post }) => (
+        <li>
+          <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+
+<style>
+  .related-posts {
+    margin-top: 1.8rem;
+  }
+
+  .related-posts ul {
+    padding-left: 1.1rem;
+  }
+
+  .related-posts a {
+    text-decoration: none;
+    transition: color 180ms ease;
+  }
+</style>

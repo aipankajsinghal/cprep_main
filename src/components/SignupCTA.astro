@@ -1,0 +1,62 @@
+---
+interface Props {
+  href?: string;
+  label?: string;
+  postSlug?: string;
+  cluster?: string;
+}
+
+const {
+  href = "https://www.championsprep.in/",
+  label = "Get more prep resources",
+  postSlug = "",
+  cluster = ""
+} = Astro.props as Props;
+---
+<section class="signup-cta" aria-label="Signup call to action">
+  <a class="signup-cta__link" href={href} data-cta="signup">
+    {label}
+  </a>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const ctaLink = document.querySelector(".signup-cta [data-cta='signup']");
+  if (ctaLink) {
+    ctaLink.addEventListener("click", () => {
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("cta_click", {
+          placement: "post_bottom",
+          post_slug: postSlug,
+          cluster
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .signup-cta {
+    margin: 2rem 0 0;
+  }
+
+  .signup-cta__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-lavender-600);
+    border-radius: var(--shape-radius);
+    padding: 0.6rem 1rem;
+    background: var(--color-lavender-600);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  }
+
+  .signup-cta__link:hover {
+    background: var(--color-lavender-500);
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+</style>

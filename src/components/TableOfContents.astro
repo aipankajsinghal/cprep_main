@@ -1,0 +1,133 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props as Props;
+const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+{tocItems.length > 0 && (
+  <aside class="toc" aria-label="Table of contents">
+    <details class="toc__mobile">
+      <summary>Table of Contents</summary>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`}>{item.text}</a>
+          </li>
+        ))}
+      </ul>
+    </details>
+
+    <div class="toc__desktop">
+      <h2>Table of Contents</h2>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`} data-toc-link={item.slug}>
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </aside>
+)}
+
+<script>
+  const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+  const sections = links
+    .map((link) => {
+      const slug = link.getAttribute("data-toc-link");
+      if (!slug) return null;
+      const el = document.getElementById(slug);
+      return el ? { slug, el } : null;
+    })
+    .filter(Boolean);
+
+  if (links.length > 0 && sections.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length === 0) return;
+        const active = visible[0].target.id;
+        links.forEach((link) => {
+          if (link.getAttribute("data-toc-link") === active) {
+            link.setAttribute("aria-current", "true");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      },
+      { rootMargin: "-25% 0px -65% 0px", threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section.el));
+  }
+</script>
+
+<style>
+  .toc {
+    width: 100%;
+  }
+
+  .toc h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+  }
+
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc__item {
+    margin: 0.35rem 0;
+  }
+
+  .toc__item--nested {
+    padding-left: 0.9rem;
+  }
+
+  .toc a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .toc a:hover,
+  .toc a[aria-current="true"] {
+    color: var(--color-lavender-600);
+  }
+
+  .toc__desktop {
+    display: none;
+  }
+
+  .toc__mobile summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .toc__mobile {
+      display: none;
+    }
+
+    .toc__desktop {
+      display: block;
+      position: sticky;
+      top: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--shape-radius);
+      padding: 0.9rem;
+      background: var(--color-bg);
+    }
+  }
+</style>

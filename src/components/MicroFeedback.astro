@@ -1,0 +1,82 @@
+---
+interface Props {
+  postSlug: string;
+  cluster: string;
+}
+
+const { postSlug, cluster } = Astro.props as Props;
+---
+<section class="micro-feedback" aria-label="Article feedback">
+  <h2>Was this helpful?</h2>
+  <div class="micro-feedback__buttons">
+    <button type="button" data-feedback-value="helpful" aria-label="Helpful">👍</button>
+    <button type="button" data-feedback-value="not_helpful" aria-label="Not helpful">👎</button>
+  </div>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const feedbackRoot = document.querySelector(".micro-feedback");
+  if (feedbackRoot) {
+    let submitted = false;
+    feedbackRoot.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const button = target.closest("[data-feedback-value]");
+      if (!(button instanceof HTMLButtonElement)) return;
+      if (submitted) return;
+      const value = button.getAttribute("data-feedback-value");
+      if (!value) return;
+
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("article_feedback", {
+          value,
+          post_slug: postSlug,
+          cluster
+        });
+      }
+
+      submitted = true;
+      feedbackRoot.setAttribute("data-submitted", "true");
+      button.textContent = "Thanks";
+    });
+  }
+</script>
+
+<style>
+  .micro-feedback {
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+  }
+
+  .micro-feedback h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .micro-feedback__buttons {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .micro-feedback button {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    min-width: 2.5rem;
+    min-height: 2.2rem;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .micro-feedback button:hover {
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+
+  .micro-feedback[data-submitted="true"] button {
+    opacity: 0.7;
+  }
+</style>

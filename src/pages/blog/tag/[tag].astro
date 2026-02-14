@@ -1,0 +1,48 @@
+---
+import { getCollection } from "astro:content";
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import { calculateMinutesRead, slugifyTag } from "../../../utils/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const tagMap = new Map<string, string>();
+
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = slugifyTag(tag);
+      if (!tagMap.has(slug)) tagMap.set(slug, tag);
+    }
+  }
+
+  return Array.from(tagMap.entries()).map(([slug, label]) => ({
+    params: { tag: slug },
+    props: { tagSlug: slug, tagLabel: label }
+  }));
+}
+
+const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const posts = allPosts
+  .filter((post) => post.data.tags.some((tag) => slugifyTag(tag) === tagSlug))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((post) => ({
+    ...post,
+    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+  }));
+
+const pageTitle = `Tag: ${tagLabel}`;
+const pageDescription = `Posts tagged with ${tagLabel}.`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+---
+<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
+  <h1>{pageTitle}</h1>
+  <ul>
+    {posts.map((post) => (
+      <li>
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        <div>{post.data.date.toISOString().slice(0, 10)} · {post.minutesRead} min read</div>
+        <p>{post.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</BlogLayout>

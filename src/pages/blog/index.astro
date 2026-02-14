@@ -1,0 +1,39 @@
+---
+import { getCollection } from "astro:content";
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import SearchWidget from "../../components/SearchWidget.astro";
+import { calculateMinutesRead } from "../../utils/content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((post) => ({
+    ...post,
+    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+  }));
+
+const pageTitle = "Blog";
+const pageDescription = "Editorial posts and exam-prep insights from ChampionsPrep.";
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: "ChampionsPrep Blog",
+  description: pageDescription,
+  url: canonical
+};
+---
+<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+  <h1>Blog</h1>
+  <p>Editorial posts and exam-prep insights.</p>
+  <SearchWidget />
+
+  <ul>
+    {posts.map((post) => (
+      <li>
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        <div>{post.data.date.toISOString().slice(0, 10)} · {post.minutesRead} min read</div>
+        <p>{post.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</BlogLayout>

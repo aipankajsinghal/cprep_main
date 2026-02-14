@@ -1,0 +1,107 @@
+---
+interface Props {
+  url: string;
+  title: string;
+  postSlug: string;
+  cluster: string;
+  instagramId?: string;
+}
+
+const {
+  url,
+  title,
+  postSlug,
+  cluster,
+  instagramId = "champions.prep"
+} = Astro.props as Props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const whatsappHref = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+const xHref = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+const instagramHref = `https://www.instagram.com/${instagramId}/`;
+---
+<section class="share-buttons" aria-label="Share this article">
+  <h2>Share</h2>
+  <div class="share-buttons__row">
+    <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-share-platform="whatsapp">
+      WhatsApp
+    </a>
+    <a href={xHref} target="_blank" rel="noopener noreferrer" data-share-platform="x">
+      X
+    </a>
+    <button type="button" data-share-platform="copy">Copy Link</button>
+    <a href={instagramHref} target="_blank" rel="noopener noreferrer" data-share-platform="instagram">
+      Instagram @{instagramId}
+    </a>
+  </div>
+</section>
+
+<script define:vars={{ url, postSlug, cluster }}>
+  const shareRoot = document.querySelector(".share-buttons");
+  if (shareRoot) {
+    shareRoot.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const el = target.closest("[data-share-platform]");
+      if (!(el instanceof HTMLElement)) return;
+      const platform = el.getAttribute("data-share-platform");
+      if (!platform) return;
+
+      if (platform === "copy") {
+        try {
+          await navigator.clipboard.writeText(url);
+          el.textContent = "Copied";
+          setTimeout(() => {
+            el.textContent = "Copy Link";
+          }, 1200);
+        } catch {}
+      }
+
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("share_click", {
+          platform,
+          post_slug: postSlug,
+          cluster
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .share-buttons {
+    margin-top: 1.5rem;
+  }
+
+  .share-buttons h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .share-buttons__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .share-buttons a,
+  .share-buttons button {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.42rem 0.8rem;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
+  }
+
+  .share-buttons a:hover,
+  .share-buttons button:hover {
+    border-color: var(--color-lavender-500);
+    color: var(--color-lavender-600);
+    transform: translateY(-1px);
+  }
+</style>
