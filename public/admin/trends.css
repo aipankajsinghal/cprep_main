@@ -1,0 +1,117 @@
+:root {
+  --color-purple-deep: #6b5b95;
+  --color-purple-hover: #5a4a84;
+  --color-lavender-light: #f5f3ff;
+  --color-bg: #fff;
+  --color-bg-muted: #f8f7f4;
+  --color-text-primary: #4e5764;
+  --color-text-secondary: #636c7a;
+  --color-border: #e2dfd9;
+  --shape-radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #fdfcfa;
+  color: var(--color-text-primary);
+}
+
+.shell {
+  width: min(100% - 2rem, 1080px);
+  margin: 1.5rem auto 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.toolbar,
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--shape-radius);
+  background: var(--color-bg);
+  padding: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.toolbar--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+button,
+.link-btn {
+  appearance: none;
+  border: 1px solid var(--color-purple-deep);
+  border-radius: 999px;
+  background: var(--color-purple-deep);
+  color: #fff;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:hover,
+.link-btn:hover {
+  background: var(--color-purple-hover);
+}
+
+.muted {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.topics {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.topic-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--shape-radius);
+  background: var(--color-bg-muted);
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.topic-card h3 {
+  margin: 0;
+  color: #3a3f47;
+}
+
+.topic-card p {
+  margin: 0;
+}
+
+.topic-card .meta {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--color-purple-deep);
+  background: var(--color-lavender-light);
+}
+
+textarea {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.8rem;
+  font: 0.92rem/1.55 Consolas, "Courier New", monospace;
+  background: #fff;
+}
