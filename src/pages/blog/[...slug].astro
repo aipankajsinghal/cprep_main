@@ -11,7 +11,8 @@ import ReadingProgress from "../../components/ReadingProgress.astro";
 import ShareButtons from "../../components/ShareButtons.astro";
 import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
-import { calculateMinutesRead } from "../../utils/content";
+import { calculateMinutesRead, slugifyTag } from "../../utils/content";
+import { clusterLabel } from "../../utils/clusters";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -30,6 +31,16 @@ const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
 const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
 const pageTitle = entry.data.title;
 const pageDescription = entry.data.description;
+const publishedLabel = entry.data.date.toLocaleDateString("en-IN", {
+  year: "numeric",
+  month: "short",
+  day: "numeric"
+});
+const updatedLabel = (entry.data.updatedDate ?? entry.data.date).toLocaleDateString("en-IN", {
+  year: "numeric",
+  month: "short",
+  day: "numeric"
+});
 const allPosts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
@@ -132,23 +143,35 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 >
   <ReadingProgress />
   <Breadcrumbs title={entry.data.title} />
-  <div class="post-shell">
-    <div class="post-toc">
-      <TableOfContents headings={tocHeadings} />
-    </div>
+  <section class="post-shell">
     <div class="post-main">
-      <div class="post-head">
+      <header class="post-head">
+        <p class="post-head__eyebrow">{clusterLabel(entry.data.cluster)}</p>
         <h1>{entry.data.title}</h1>
-        <p>{entry.data.description}</p>
-        <p>{minutesRead} min read</p>
-        <ExamTip title="Quick Revision Tip">
-          <p>Summarize each section in one sentence before moving to the next chapter.</p>
-        </ExamTip>
-      </div>
-      <div id="reading-trigger" aria-hidden="true"></div>
+        <p class="post-head__dek">{entry.data.description}</p>
+        <div class="post-head__meta" aria-label="Article metadata">
+          <span>Published {publishedLabel}</span>
+          <span>Updated {updatedLabel}</span>
+          <span>{minutesRead} min read</span>
+          <span>By {entry.data.author}</span>
+        </div>
+        {entry.data.tags.length > 0 && (
+          <div class="post-head__tags" aria-label="Post tags">
+            {entry.data.tags.map((tag) => (
+              <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <ExamTip title="Quick Revision Tip">
+        <p>Summarize each section in one sentence before moving to the next chapter.</p>
+      </ExamTip>
+
       <div class="post-body">
         <Content />
       </div>
+
       <PrevNextNav
         previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.data.title } : undefined}
         next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.data.title } : undefined}
@@ -165,7 +188,13 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
       <SmartCTA postSlug={entry.slug} cluster={entry.data.cluster} />
       <AuthorCard name={entry.data.author} />
     </div>
-  </div>
+
+    <aside class="post-toc">
+      <div class="post-toc__panel">
+        <TableOfContents headings={tocHeadings} />
+      </div>
+    </aside>
+  </section>
 </BlogLayout>
 
 <script>
@@ -181,200 +210,113 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     anchor.textContent = "#";
     heading.append(anchor);
   }
-
-  const readingTrigger = document.getElementById("reading-trigger");
-  if (readingTrigger) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry) return;
-        document.body.classList.toggle("reading-mode", !entry.isIntersecting);
-      },
-      {
-        threshold: 0
-      }
-    );
-    observer.observe(readingTrigger);
-  }
-
-  const postBody = document.querySelector(".post-body");
-  if (postBody instanceof HTMLElement) {
-    const sectionHeadings = Array.from(postBody.querySelectorAll("h2[id]"));
-    const breakpoints = sectionHeadings.length
-      ? sectionHeadings
-      : Array.from(postBody.querySelectorAll("h3[id]"));
-    const completionMarkers = [];
-
-    for (let index = 0; index < breakpoints.length; index++) {
-      const start = breakpoints[index];
-      const stop = breakpoints[index + 1] ?? null;
-      const section = document.createElement("section");
-      section.className = "reading-section";
-      section.setAttribute("data-learning-section", "");
-      section.setAttribute("data-complete", "false");
-
-      const cue = document.createElement("span");
-      cue.className = "section-completion-cue";
-      cue.setAttribute("aria-hidden", "true");
-      cue.textContent = "✓";
-      start.append(cue);
-
-      start.before(section);
-      let cursor: ChildNode | null = start as ChildNode;
-      while (cursor && cursor !== stop) {
-        const next: ChildNode | null = cursor.nextSibling;
-        section.append(cursor);
-        cursor = next;
-      }
-
-      const marker = document.createElement("span");
-      marker.className = "section-complete-marker";
-      marker.setAttribute("aria-hidden", "true");
-      section.append(marker);
-      completionMarkers.push(marker);
-    }
-
-    if (completionMarkers.length) {
-      const completionObserver = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            const marker = entry.target;
-            const section = marker.closest(".reading-section");
-            if (!(section instanceof HTMLElement)) continue;
-            if (entry.isIntersecting) {
-              section.setAttribute("data-complete", "true");
-            } else if (entry.boundingClientRect.top > window.innerHeight) {
-              section.setAttribute("data-complete", "false");
-            }
-          }
-        },
-        {
-          threshold: 0,
-          rootMargin: "0px 0px -72% 0px"
-        }
-      );
-
-      for (const marker of completionMarkers) {
-        completionObserver.observe(marker);
-      }
-    }
-  }
 </script>
 
 <style>
-  .post-shell {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+  :global(.editorial) {
+    max-width: min(100%, 1120px);
   }
 
-  .post-toc {
-    order: 1;
+  .post-shell {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .post-main {
-    order: 2;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .post-head {
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border-radius: calc(var(--shape-radius) + 2px);
+    border: 1px solid var(--color-border);
+    background: linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--color-lavender-light), white 24%),
+      color-mix(in srgb, var(--color-bg), var(--color-cream) 24%)
+    );
+  }
+
+  .post-head h1 {
+    margin: 0.25rem 0 0;
+    line-height: 1.15;
+  }
+
+  .post-head__eyebrow {
+    margin: 0;
+    color: var(--color-purple-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .post-head__dek {
+    margin: 0.7rem 0 0;
+    color: var(--color-text-secondary);
+    max-width: 70ch;
+  }
+
+  .post-head__meta {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .post-head__meta span {
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 12%);
+    background: color-mix(in srgb, var(--color-bg), transparent 10%);
+    border-radius: 999px;
+    padding: 0.26rem 0.62rem;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+  }
+
+  .post-head__tags {
+    margin-top: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .post-head__tags a {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    padding: 0.2rem 0.55rem;
+    font-size: 0.78rem;
+    text-decoration: none;
   }
 
   .post-body {
-    border: 1px solid transparent;
-    border-radius: var(--shape-radius);
-    padding: 0.2rem;
-    scroll-snap-type: y mandatory;
-    scroll-padding-top: 1rem;
-  }
-
-  .post-body :global(section.reading-section) {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    position: relative;
-    padding-bottom: 0.35rem;
-  }
-
-  .post-body :global(.section-complete-marker) {
-    display: block;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .post-body :global(.section-completion-cue) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1rem;
-    height: 1rem;
-    margin-left: 0.35rem;
+    border-radius: calc(var(--shape-radius) + 2px);
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    color: var(--color-lavender-600);
-    font-size: 0.7rem;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 200ms ease-out, transform 200ms ease-out, border-color 200ms ease-out;
+    background: var(--color-bg);
+    padding: clamp(1rem, 2.4vw, 1.7rem);
+    box-shadow: 0 12px 26px color-mix(in srgb, var(--color-purple-deep), transparent 92%);
   }
 
-  .post-body :global(section.reading-section[data-complete="true"] .section-completion-cue) {
-    opacity: 0.92;
-    transform: scale(1);
-    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 42%);
+  .post-toc__panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+    padding: 0.75rem;
   }
 
-  .post-head,
-  .post-main :global(.breadcrumbs),
-  .post-toc,
-  .post-body,
-  :global(.site-header) {
-    transition: opacity 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out,
-      border-color 200ms ease-out;
-  }
-
-  #reading-trigger {
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  :global(body.reading-mode) .post-head {
-    transform: scale(0.985);
-    transform-origin: top center;
-  }
-
-  :global(body.reading-mode) .post-main :global(.breadcrumbs),
-  :global(body.reading-mode) :global(.site-header) {
-    opacity: 0.7;
-  }
-
-  :global(body.reading-mode) .post-toc {
-    opacity: 0.55;
-    transform: scale(0.98);
-  }
-
-  :global(body.reading-mode) .post-toc:hover {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  :global(body.reading-mode) .post-body {
-    border-color: color-mix(in srgb, var(--color-lavender-500), var(--color-border) 65%);
-    box-shadow: 0 6px 22px color-mix(in srgb, var(--color-lavender-500), transparent 92%);
-  }
-
-  @media (min-width: 1024px) {
+  @media (min-width: 1040px) {
     .post-shell {
-      grid-template-columns: minmax(0, 1fr) 260px;
-      gap: 2rem;
+      grid-template-columns: minmax(0, 1fr) 280px;
       align-items: start;
-    }
-
-    .post-main {
-      order: 1;
+      gap: 1.6rem;
     }
 
     .post-toc {
-      order: 2;
+      position: sticky;
+      top: 5.4rem;
     }
   }
 </style>
