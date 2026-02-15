@@ -77,7 +77,7 @@ const instagramHref = `https://www.instagram.com/${instagramId}/`;
 
 <style>
   .share-section {
-    margin-top: 1.5rem;
+    margin-top: var(--space-xl);
   }
 
   .share-section__title {
@@ -96,8 +96,8 @@ const instagramHref = `https://www.instagram.com/${instagramId}/`;
   .shareon > * {
     border-radius: 999px !important;
     transition: transform 180ms ease, opacity 180ms ease !important;
-    min-width: 2.3rem;
-    min-height: 2.3rem;
+    min-width: 2.6rem;
+    min-height: 2.6rem;
   }
 
   .shareon > *:hover {
@@ -138,6 +138,13 @@ const instagramHref = `https://www.instagram.com/${instagramId}/`;
   @media (min-width: 640px) {
     .share-section__title {
       font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .shareon > * {
+      min-width: 48px;
+      min-height: 48px;
     }
   }
 

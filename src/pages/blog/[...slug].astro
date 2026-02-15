@@ -218,31 +218,54 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   }
 
   .post-shell {
-    margin-top: 0.75rem;
+    margin-top: var(--space-lg);
     display: grid;
-    gap: 1.25rem;
+    gap: var(--space-lg);
     grid-template-columns: minmax(0, 1fr);
   }
 
   .post-main {
     display: grid;
-    gap: 1rem;
+    gap: var(--space-md);
   }
 
   .post-head {
-    padding: clamp(1rem, 2vw, 1.5rem);
-    border-radius: calc(var(--shape-radius) + 2px);
-    border: 1px solid var(--color-border);
-    background: linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--color-lavender-light), white 24%),
-      color-mix(in srgb, var(--color-bg), var(--color-cream) 24%)
-    );
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.2rem, 2.8vw, 2rem);
+    border-radius: var(--shape-radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 15%);
+    background:
+      radial-gradient(
+        ellipse 80% 62% at 20% 100%,
+        color-mix(in srgb, var(--color-lavender-light), transparent 45%),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 58% 46% at 92% 16%,
+        color-mix(in srgb, var(--color-cream), transparent 50%),
+        transparent
+      ),
+      var(--color-bg-warm);
+  }
+
+  .post-head::before {
+    content: "";
+    position: absolute;
+    top: -2.4rem;
+    right: -2.4rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 8px;
+    transform: rotate(45deg);
+    background: color-mix(in srgb, var(--color-purple-deep), transparent 92%);
+    pointer-events: none;
   }
 
   .post-head h1 {
     margin: 0.25rem 0 0;
-    line-height: 1.15;
+    line-height: 1.1;
+    max-width: 20ch;
   }
 
   .post-head__eyebrow {
@@ -255,29 +278,31 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   }
 
   .post-head__dek {
-    margin: 0.7rem 0 0;
+    margin: 0.85rem 0 0;
     color: var(--color-text-secondary);
-    max-width: 70ch;
+    max-width: 56ch;
+    font-size: 1.08rem;
+    line-height: 1.65;
   }
 
   .post-head__meta {
-    margin-top: 0.9rem;
+    margin-top: 1.2rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.5rem;
   }
 
   .post-head__meta span {
-    border: 1px solid color-mix(in srgb, var(--color-border), transparent 12%);
-    background: color-mix(in srgb, var(--color-bg), transparent 10%);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
+    background: color-mix(in srgb, var(--color-bg), transparent 42%);
     border-radius: 999px;
-    padding: 0.26rem 0.62rem;
+    padding: 0.3rem 0.7rem;
     font-size: 0.82rem;
     color: var(--color-text-secondary);
   }
 
   .post-head__tags {
-    margin-top: 0.8rem;
+    margin-top: 0.95rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
@@ -287,17 +312,16 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     background: var(--color-bg);
-    padding: 0.2rem 0.55rem;
-    font-size: 0.78rem;
+    padding: 0.25rem 0.68rem;
+    font-size: 0.82rem;
     text-decoration: none;
   }
 
   .post-body {
-    border-radius: calc(var(--shape-radius) + 2px);
-    border: 1px solid var(--color-border);
-    background: var(--color-bg);
-    padding: clamp(1rem, 2.4vw, 1.7rem);
-    box-shadow: 0 12px 26px color-mix(in srgb, var(--color-purple-deep), transparent 92%);
+    border-radius: var(--shape-radius);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 42%);
+    background: color-mix(in srgb, var(--color-bg), transparent 8%);
+    padding: clamp(1rem, 2.5vw, 1.8rem);
   }
 
   .post-toc__panel {
@@ -307,16 +331,54 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     padding: 0.75rem;
   }
 
+  .post-toc {
+    order: -1;
+  }
+
+  .post-main {
+    order: 1;
+  }
+
   @media (min-width: 1040px) {
     .post-shell {
       grid-template-columns: minmax(0, 1fr) 280px;
       align-items: start;
-      gap: 1.6rem;
+      gap: var(--space-xl);
     }
 
     .post-toc {
+      order: 0;
       position: sticky;
       top: 5.4rem;
+    }
+
+    .post-main {
+      order: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .post-head {
+      padding: 1rem;
+    }
+
+    .post-head__meta {
+      gap: 0.36rem;
+    }
+
+    .post-head__meta span {
+      font-size: 0.76rem;
+      padding: 0.23rem 0.55rem;
+    }
+
+    .post-head__tags {
+      gap: 0.32rem;
+    }
+
+    .post-head__tags a {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      line-height: 1.2;
     }
   }
 </style>

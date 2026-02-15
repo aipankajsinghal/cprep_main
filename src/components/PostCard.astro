@@ -55,6 +55,8 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     </div>
   )}
 
+  <div class="post-card__reading-bar" aria-hidden="true"></div>
+
   <a class="post-card__cta" href={href} aria-label={`Read ${title}`}>
     Continue reading
     <span aria-hidden="true">→</span>
@@ -63,7 +65,11 @@ const dateLabel = date.toLocaleDateString("en-IN", {
 
 <style>
   .post-card {
+    --cluster-color: var(--color-purple-deep);
+    position: relative;
+    overflow: hidden;
     border: 1px solid var(--color-border);
+    border-left: 4px solid var(--cluster-color);
     border-radius: var(--shape-radius);
     background: linear-gradient(165deg, var(--color-bg) 0%, var(--color-bg-muted) 100%);
     padding: 1.1rem 1.15rem;
@@ -80,13 +86,30 @@ const dateLabel = date.toLocaleDateString("en-IN", {
   }
 
   .post-card--featured {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
     background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-cream), transparent 20%),
-      color-mix(in srgb, var(--color-lavender-light), transparent 8%)
+      to top,
+      color-mix(in srgb, var(--color-purple-deep), transparent 15%) 0%,
+      color-mix(in srgb, var(--color-lavender-light), transparent 20%) 52%,
+      var(--color-bg-warm) 100%
     );
-    border-color: color-mix(in srgb, var(--color-purple-deep), transparent 72%);
-    padding: 1.45rem;
+    border-color: color-mix(in srgb, var(--cluster-color), transparent 65%);
+    padding: clamp(1.5rem, 3vw, 2.2rem);
+  }
+
+  .post-card--featured .post-card__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+  }
+
+  .post-card--featured .post-card__description {
+    -webkit-line-clamp: 3;
+    font-size: 1.03rem;
   }
 
   .post-card__meta {
@@ -99,7 +122,7 @@ const dateLabel = date.toLocaleDateString("en-IN", {
   }
 
   .post-card__cluster {
-    color: var(--color-purple-deep);
+    color: var(--cluster-color);
     font-weight: 600;
   }
 
@@ -139,6 +162,20 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     text-decoration: none;
   }
 
+  .post-card__reading-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: color-mix(in srgb, var(--cluster-color), transparent 65%);
+    transition: background-color 180ms ease;
+  }
+
+  .post-card:hover .post-card__reading-bar {
+    background: color-mix(in srgb, var(--cluster-color), transparent 42%);
+  }
+
   .post-card__cta {
     margin-top: 1rem;
     width: fit-content;
@@ -157,5 +194,57 @@ const dateLabel = date.toLocaleDateString("en-IN", {
 
   .post-card:hover .post-card__cta span {
     transform: translateX(3px);
+  }
+
+  .post-card[data-cluster="taxation"] {
+    --cluster-color: #e07c3e;
+  }
+
+  .post-card[data-cluster="accountancy"] {
+    --cluster-color: #4a90d9;
+  }
+
+  .post-card[data-cluster="business-studies"] {
+    --cluster-color: #5da55d;
+  }
+
+  .post-card[data-cluster="economics"] {
+    --cluster-color: #d4af37;
+  }
+
+  .post-card[data-cluster="finance"] {
+    --cluster-color: #6b5b95;
+  }
+
+  .post-card[data-cluster="corporate-law"] {
+    --cluster-color: #c0392b;
+  }
+
+  .post-card[data-cluster="tips-tricks"] {
+    --cluster-color: #16a085;
+  }
+
+  .post-card[data-cluster="shortcuts"] {
+    --cluster-color: #f39c12;
+  }
+
+  .post-card[data-cluster="mindmaps"] {
+    --cluster-color: #8e44ad;
+  }
+
+  .post-card[data-cluster="quick-quiz"] {
+    --cluster-color: #2980b9;
+  }
+
+  @media (max-width: 640px) {
+    .post-card__tags {
+      gap: 0.35rem;
+    }
+
+    .post-card__tag {
+      padding: 0.32rem 0.72rem;
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
   }
 </style>

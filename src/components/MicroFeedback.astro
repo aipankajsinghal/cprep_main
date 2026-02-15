@@ -44,7 +44,7 @@ const { postSlug, cluster } = Astro.props as Props;
 
 <style>
   .micro-feedback {
-    margin-top: 1.5rem;
+    margin-top: var(--space-xl);
     padding: 0.8rem;
     border: 1px solid var(--color-border);
     border-radius: var(--shape-radius);
@@ -64,8 +64,8 @@ const { postSlug, cluster } = Astro.props as Props;
   .micro-feedback button {
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    min-width: 2.5rem;
-    min-height: 2.2rem;
+    min-width: 2.8rem;
+    min-height: 2.6rem;
     background: var(--color-bg);
     cursor: pointer;
     transition: border-color 180ms ease, transform 180ms ease;
@@ -78,5 +78,13 @@ const { postSlug, cluster } = Astro.props as Props;
 
   .micro-feedback[data-submitted="true"] button {
     opacity: 0.7;
+  }
+
+  @media (max-width: 640px) {
+    .micro-feedback button {
+      min-width: 56px;
+      min-height: 48px;
+      font-size: 1.3rem;
+    }
   }
 </style>
