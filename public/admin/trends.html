@@ -2,6 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin — Trends & Drafts</title>
+    <style>
+      :root{--surface:#fff;--muted:#6b7280;--accent:#6B5B95;--card:#f8f7fb}
+      body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px;background:var(--surface);color:#111827}
+      h1{margin:0 0 12px;font-size:1.25rem}
+      .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+      button{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+      .list{display:grid;gap:10px}
+      .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid #eee}
+      .card h3{margin:0 0 6px;font-size:1rem}
+      .meta{font-size:0.85rem;color:var(--muted);margin-bottom:8px}
+      .actions{display:flex;gap:8px}
+      .draft{white-space:pre-wrap;background:#fff;padding:10px;border-radius:6px;border:1px dashed #e6e6e6;margin-top:10px}
+      .small{font-size:0.85rem}
+    </style>
+  </head>
+  <body>
+    <h1>Discover Trends & Generate Drafts</h1>
+    <div class="controls">
+      <button id="discover">Discover Trending Topics</button>
+      <span class="small" id="status"></span>
+    </div>
+
+    <main id="results" class="list" aria-live="polite"></main>
+
+    <script src="/admin/trends.js"></script>
+  </body>
+</html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ChampionsPrep Trends Desk</title>
     <style>
