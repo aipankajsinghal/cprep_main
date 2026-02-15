@@ -1,0 +1,64 @@
+backend:
+  name: github
+  repo: aipankajsinghal/CPrep_Blog
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "blog"
+    label: "Blog Posts"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    extension: "mdx"
+    format: "frontmatter"
+    editor:
+      preview: false
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime" }
+      - { label: "Updated Date", name: "updatedDate", widget: "datetime", required: false }
+      - { label: "Author", name: "author", widget: "string", default: "ChampionsPrep" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - label: "Cluster"
+        name: "cluster"
+        widget: "select"
+        options:
+          - taxation
+          - accountancy
+          - business-studies
+          - economics
+          - finance
+          - corporate-law
+          - tips-tricks
+          - shortcuts
+          - mindmaps
+          - quick-quiz
+      - { label: "Draft", name: "draft", widget: "boolean", default: true }
+      - label: "FAQ Items"
+        name: "faqItems"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Question", name: "q", widget: "string" }
+          - { label: "Answer", name: "a", widget: "text" }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - file: "src/data/site-settings.json"
+        label: "Global Site Settings"
+        name: "site_settings"
+        format: "json"
+        fields:
+          - { label: "Main Site URL", name: "mainSiteUrl", widget: "string" }
+          - { label: "About URL", name: "aboutUrl", widget: "string" }
+          - { label: "Privacy URL", name: "privacyUrl", widget: "string" }
+          - { label: "Terms URL", name: "termsUrl", widget: "string" }
+          - { label: "Instagram URL", name: "instagramUrl", widget: "string" }
+          - { label: "X URL", name: "xUrl", widget: "string" }
+          - { label: "Footer Tagline", name: "footerTagline", widget: "string" }

@@ -1,4 +1,5 @@
 import { defineCollection, z } from "astro:content";
+import { CLUSTERS } from "../utils/clusters";
 
 const blog = defineCollection({
   type: "content",
@@ -9,7 +10,7 @@ const blog = defineCollection({
     updatedDate: z.date().optional(),
     author: z.string().default("ChampionsPrep"),
     tags: z.array(z.string()),
-    cluster: z.string(),
+    cluster: z.enum(CLUSTERS),
     draft: z.boolean().optional(),
     minutesRead: z.number().optional(),
     ogImage: z.string().optional(),

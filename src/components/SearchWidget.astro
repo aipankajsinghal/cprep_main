@@ -28,12 +28,12 @@
 
       const root = document.getElementById("search");
       if (!root) return;
-      let debounce = 0;
+      let debounce: ReturnType<typeof setTimeout> | null = null;
       root.addEventListener("input", (event) => {
         const target = event.target;
         if (!(target instanceof HTMLInputElement)) return;
         const query = target.value.trim();
-        clearTimeout(debounce);
+        if (debounce) clearTimeout(debounce);
         debounce = setTimeout(() => {
           if (!query) return;
           if (typeof window.cpTrack === "function") {

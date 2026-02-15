@@ -16,9 +16,12 @@
   footer,
   .signup-cta,
   .share-buttons,
+  .share-section,
   .reading-progress,
   .toc,
-  .theme-toggle {
+  .theme-toggle,
+  .site-header,
+  .site-footer {
     display: none !important;
   }
 

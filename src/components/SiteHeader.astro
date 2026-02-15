@@ -1,0 +1,238 @@
+---
+import siteSettings from "../data/site-settings.json";
+
+interface TagLink {
+  slug: string;
+  label: string;
+}
+
+interface Props {
+  tags?: TagLink[];
+}
+
+const { tags = [] } = Astro.props as Props;
+const mainSiteUrl = String(siteSettings.mainSiteUrl ?? "https://www.championsprep.in/");
+const isMainSiteExternal = /^https?:\/\//i.test(mainSiteUrl);
+---
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="/blog/" class="site-header__brand">
+      <span class="site-header__brand-mark" aria-hidden="true"></span>
+      <span>ChampionsPrep Blog</span>
+    </a>
+
+    <button
+      class="site-header__menu-toggle"
+      type="button"
+      data-nav-toggle
+      aria-expanded="false"
+      aria-controls="site-nav"
+    >
+      Menu
+    </button>
+
+    <nav id="site-nav" class="site-header__nav" data-site-nav>
+      <a href="/blog/">Blog</a>
+      <a
+        href={mainSiteUrl}
+        target={isMainSiteExternal ? "_blank" : undefined}
+        rel={isMainSiteExternal ? "noopener noreferrer" : undefined}
+      >
+        Main Site
+      </a>
+      {tags.length > 0 && (
+        <details class="site-header__tags">
+          <summary>Tags</summary>
+          <div class="site-header__tag-list">
+            {tags.map((tag) => (
+              <a href={`/blog/tag/${tag.slug}/`}>{tag.label}</a>
+            ))}
+          </div>
+        </details>
+      )}
+      <button class="site-header__theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+        Dark Mode
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  (() => {
+    const nav = document.querySelector("[data-site-nav]");
+    const toggle = document.querySelector("[data-nav-toggle]");
+    if (!(nav instanceof HTMLElement) || !(toggle instanceof HTMLButtonElement)) return;
+
+    const desktopQuery = window.matchMedia("(min-width: 900px)");
+    const syncNavState = () => {
+      const open = desktopQuery.matches || nav.dataset.open === "true";
+      nav.dataset.open = open ? "true" : "false";
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    nav.dataset.open = "false";
+    syncNavState();
+
+    toggle.addEventListener("click", () => {
+      nav.dataset.open = nav.dataset.open === "true" ? "false" : "true";
+      syncNavState();
+    });
+
+    desktopQuery.addEventListener("change", () => {
+      if (!desktopQuery.matches) {
+        nav.dataset.open = "false";
+      }
+      syncNavState();
+    });
+  })();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-warm), transparent 6%);
+    backdrop-filter: blur(6px);
+  }
+
+  .site-header__inner {
+    width: min(100% - 2rem, 1120px);
+    margin-inline: auto;
+    padding: 0.8rem 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .site-header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-text-heading);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .site-header__brand-mark {
+    width: 0.72rem;
+    height: 0.72rem;
+    flex: 0 0 0.72rem;
+    transform: rotate(45deg);
+    border-radius: 2px;
+    background: var(--color-purple-deep);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-purple-deep), white 45%);
+  }
+
+  .site-header__menu-toggle {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    padding: 0.38rem 0.8rem;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .site-header__nav {
+    grid-column: 1 / -1;
+    display: none;
+    flex-direction: column;
+    gap: 0.7rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.8rem;
+  }
+
+  .site-header__nav[data-open="true"] {
+    display: flex;
+  }
+
+  .site-header__nav a,
+  .site-header__theme-toggle,
+  .site-header__tags summary {
+    font-size: 0.92rem;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .site-header__theme-toggle {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg);
+    padding: 0.34rem 0.78rem;
+    font: inherit;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .site-header__tags summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .site-header__tags summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .site-header__tag-list {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .site-header__tag-list a {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.22rem 0.58rem;
+    background: var(--color-bg);
+    font-size: 0.8rem;
+  }
+
+  @media (min-width: 900px) {
+    .site-header__inner {
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      padding: 0.9rem 0;
+    }
+
+    .site-header__menu-toggle {
+      display: none;
+    }
+
+    .site-header__nav {
+      grid-column: auto;
+      display: flex !important;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      border-top: 0;
+      padding-top: 0;
+      gap: 0.9rem;
+    }
+
+    .site-header__tags {
+      position: relative;
+    }
+
+    .site-header__tag-list {
+      position: absolute;
+      top: calc(100% + 0.45rem);
+      right: 0;
+      min-width: 260px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--shape-radius);
+      padding: 0.65rem;
+      box-shadow: 0 14px 30px color-mix(in srgb, var(--color-purple-deep), transparent 90%);
+    }
+  }
+</style>

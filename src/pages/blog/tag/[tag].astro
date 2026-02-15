@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BlogLayout from '../../../layouts/BlogLayout.astro';
+import PostCard from "../../../components/PostCard.astro";
 import { calculateMinutesRead, slugifyTag } from "../../../utils/content";
 
 export async function getStaticPaths() {
@@ -35,14 +36,52 @@ const pageDescription = `Posts tagged with ${tagLabel}.`;
 const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toString();
 ---
 <BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
-  <h1>{pageTitle}</h1>
-  <ul>
+  <header class="tag-page__head">
+    <h1>{pageTitle}</h1>
+    <p>{pageDescription}</p>
+    <p class="tag-page__back">
+      <a href="/blog/">Back to all posts</a>
+    </p>
+  </header>
+
+  <section class="tag-page__grid">
     {posts.map((post) => (
-      <li>
-        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-        <div>{post.data.date.toISOString().slice(0, 10)} · {post.minutesRead} min read</div>
-        <p>{post.data.description}</p>
-      </li>
+      <PostCard
+        href={`/blog/${post.slug}/`}
+        title={post.data.title}
+        description={post.data.description}
+        date={post.data.date}
+        minutesRead={post.minutesRead}
+        cluster={post.data.cluster}
+        tags={post.data.tags}
+      />
     ))}
-  </ul>
+  </section>
+
+  {posts.length === 0 && <p>No posts found for this tag.</p>}
 </BlogLayout>
+
+<style>
+  .tag-page__head p {
+    margin-top: 0.4rem;
+    color: var(--color-text-secondary);
+  }
+
+  .tag-page__back {
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+  }
+
+  .tag-page__grid {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  @media (min-width: 900px) {
+    .tag-page__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+</style>

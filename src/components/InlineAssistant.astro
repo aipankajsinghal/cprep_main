@@ -26,10 +26,10 @@ const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = 
 
 <script>
   const blocks = Array.from(document.querySelectorAll("[data-inline-assistant]"));
-  const normalizeTopic = (value) =>
+  const normalizeTopic = (value: string) =>
     value.replace(/[✓#]/g, " ").replace(/\s+/g, " ").trim();
 
-  const extractContext = (root, mode) => {
+  const extractContext = (root: Element, mode: string) => {
     if (mode === "article") {
       const body = document.querySelector(".post-body");
       const articleText = body?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
@@ -75,7 +75,7 @@ const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = 
     if (!(output instanceof HTMLElement) || !buttons.length) continue;
 
     let activeAction = block.getAttribute("data-default-action") ?? "";
-    let loaded = null;
+    let loaded: Promise<any> | null = null;
     let activeRequestId = 0;
 
     const closeAll = () => {
@@ -147,7 +147,7 @@ const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = 
             contextText,
             cacheKey
           })
-          .then((runtimeText) => {
+          .then((runtimeText: string | undefined) => {
             if (requestId !== activeRequestId) return;
             if (activeAction !== action) return;
             if (!runtimeText || runtimeText === output.textContent) return;

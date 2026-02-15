@@ -3,10 +3,10 @@
   "short_name": "CPrep Blog",
   "description": "Editorial exam-prep content from ChampionsPrep.",
   "start_url": "/blog/",
-  "scope": "/blog/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#6d5cf5",
+  "theme_color": "#6b5b95",
   "icons": [
     {
       "src": "/icons/icon-192.svg",

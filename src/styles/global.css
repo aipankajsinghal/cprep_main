@@ -8,6 +8,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-600-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
@@ -19,7 +35,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: var(--color-bg);
+  background: var(--color-bg-warm);
   color: var(--color-text-primary);
   font-family: var(--font-editorial);
   line-height: var(--line-height-body);
@@ -45,27 +61,9 @@ main {
 }
 
 .page-shell {
-  width: min(100% - 2rem, calc(var(--reading-width) + 2rem));
+  width: min(100% - 2rem, 1120px);
   margin-inline: auto;
   padding-block: 1rem 3rem;
-}
-
-.theme-toggle {
-  position: fixed;
-  top: 0.75rem;
-  right: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-bg);
-  color: var(--color-text-primary);
-  padding: 0.35rem 0.7rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  z-index: 1100;
-}
-
-.theme-toggle:hover {
-  border-color: var(--color-lavender-500);
 }
 
 img,
@@ -76,14 +74,15 @@ video {
 }
 
 a {
-  color: var(--color-lavender-600);
-  text-decoration-color: color-mix(in srgb, var(--color-lavender-600), transparent 45%);
+  color: var(--color-link);
+  text-decoration-color: color-mix(in srgb, var(--color-link), transparent 45%);
   text-underline-offset: 0.18em;
   transition: color 180ms ease, text-decoration-color 180ms ease, opacity 180ms ease;
 }
 
 a:hover {
-  text-decoration-color: var(--color-lavender-600);
+  color: var(--color-link-hover);
+  text-decoration-color: var(--color-link-hover);
 }
 
 @keyframes fadeUp {

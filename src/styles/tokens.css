@@ -1,26 +1,56 @@
 :root {
-  --color-lavender-500: #8b7cf6;
-  --color-lavender-600: #6d5cf5;
-  --color-lavender-soft: #f3f1ff;
+  --color-purple-deep: #6b5b95;
+  --color-purple-hover: #5a4a84;
+  --color-purple-soft: #f5f3ff;
+  --color-lavender: #e6e6fa;
+  --color-lavender-light: #f5f3ff;
+  --color-cream: #eee9dd;
+  --color-gold: #d4af37;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #4b5563;
-  --color-border: #e5e7eb;
+  --color-text-primary: #4e5764;
+  --color-text-heading: #3a3f47;
+  --color-text-secondary: #636c7a;
+
   --color-bg: #ffffff;
-  --color-bg-muted: #f9fafb;
-  --color-code-bg: #f3f4f6;
+  --color-bg-warm: #fdfcfa;
+  --color-bg-muted: #f8f7f4;
+  --color-bg-section-alt: var(--color-lavender-light);
+
+  --color-border: #e2dfd9;
+  --color-border-accent: color-mix(in srgb, var(--color-purple-deep), transparent 70%);
+  --color-code-bg: #f6f5f2;
+
+  --color-link: var(--color-purple-deep);
+  --color-link-hover: var(--color-purple-hover);
+  --color-cta-bg: var(--color-purple-deep);
+  --color-cta-text: #ffffff;
+  --color-cta-hover: var(--color-purple-hover);
+
+  --color-success: #4caf50;
 
   --reading-width: 720px;
   --shape-radius: 12px;
   --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --line-height-body: 1.78;
+
+  /* Aliases for migration (remove after all components are updated). */
+  --color-lavender-500: var(--color-purple-deep);
+  --color-lavender-600: var(--color-purple-hover);
+  --color-lavender-soft: var(--color-purple-soft);
 }
 
 html.dark {
-  --color-text-primary: #f3f4f6;
+  --color-text-primary: #e8e6e1;
+  --color-text-heading: #f3f1ed;
   --color-text-secondary: #9ca3af;
-  --color-border: #374151;
-  --color-bg: #111827;
-  --color-bg-muted: #1f2937;
-  --color-code-bg: #111827;
+  --color-bg: #1a1814;
+  --color-bg-warm: #1e1c17;
+  --color-bg-muted: #252219;
+  --color-bg-section-alt: #1e1c17;
+  --color-border: #3d3830;
+  --color-code-bg: #1e1c17;
+  --color-cream: #2a261f;
+  --color-lavender: #2d2940;
+  --color-lavender-light: #252238;
+  --color-border-accent: color-mix(in srgb, var(--color-lavender), transparent 55%);
 }

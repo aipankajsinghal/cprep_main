@@ -20,7 +20,7 @@
 .editorial h1,
 .editorial h2,
 .editorial h3 {
-  color: var(--color-text-primary);
+  color: var(--color-text-heading);
   line-height: 1.3;
   letter-spacing: -0.01em;
   margin-top: 2.2rem;

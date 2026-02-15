@@ -326,7 +326,7 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   .post-main :global(.breadcrumbs),
   .post-toc,
   .post-body,
-  :global(.theme-toggle) {
+  :global(.site-header) {
     transition: opacity 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out,
       border-color 200ms ease-out;
   }
@@ -344,7 +344,7 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   }
 
   :global(body.reading-mode) .post-main :global(.breadcrumbs),
-  :global(body.reading-mode) :global(.theme-toggle) {
+  :global(body.reading-mode) :global(.site-header) {
     opacity: 0.7;
   }
 

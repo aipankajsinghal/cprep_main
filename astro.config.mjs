@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import rehypeSlug from "rehype-slug";
 
 export default defineConfig({
-  site: "https://www.championsprep.in/blog",
+  site: "https://www.championsprep.in",
   output: "static",
   trailingSlash: "always",
   integrations: [

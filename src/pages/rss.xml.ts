@@ -9,7 +9,7 @@ export async function GET(context: { site: URL | undefined }) {
   return rss({
     title: "ChampionsPrep Blog",
     description: "Editorial posts and exam-prep insights from ChampionsPrep.",
-    site: context.site ?? new URL("https://www.championsprep.in/blog"),
+    site: context.site ?? new URL("https://www.championsprep.in"),
     items: posts.map((post) => ({
       title: post.data.title,
       description: post.data.description,

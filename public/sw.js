@@ -1,5 +1,5 @@
 const CACHE_VERSION = "cp-blog-v1";
-const APP_SHELL = ["/blog/", "/manifest.webmanifest"];
+const APP_SHELL = ["/", "/blog/", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

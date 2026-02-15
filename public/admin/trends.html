@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChampionsPrep Trends Desk</title>
+    <style>
+      :root {
+        --color-purple-deep: #6b5b95;
+        --color-purple-hover: #5a4a84;
+        --color-lavender-light: #f5f3ff;
+        --color-bg: #fff;
+        --color-bg-muted: #f8f7f4;
+        --color-text-primary: #4e5764;
+        --color-text-secondary: #636c7a;
+        --color-border: #e2dfd9;
+        --shape-radius: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+        background: #fdfcfa;
+        color: var(--color-text-primary);
+      }
+
+      .shell {
+        width: min(100% - 2rem, 1080px);
+        margin: 1.5rem auto 2rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .toolbar,
+      .panel {
+        border: 1px solid var(--color-border);
+        border-radius: var(--shape-radius);
+        background: var(--color-bg);
+        padding: 1rem;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+      }
+
+      button,
+      .link-btn {
+        appearance: none;
+        border: 1px solid var(--color-purple-deep);
+        border-radius: 999px;
+        background: var(--color-purple-deep);
+        color: #fff;
+        padding: 0.45rem 0.9rem;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      button:hover,
+      .link-btn:hover {
+        background: var(--color-purple-hover);
+      }
+
+      .muted {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .topics {
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      .topic-card {
+        border: 1px solid var(--color-border);
+        border-radius: var(--shape-radius);
+        background: var(--color-bg-muted);
+        padding: 0.85rem;
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .topic-card h3 {
+        margin: 0;
+        color: #3a3f47;
+      }
+
+      .topic-card p {
+        margin: 0;
+      }
+
+      .topic-card .meta {
+        display: inline-flex;
+        width: fit-content;
+        border-radius: 999px;
+        border: 1px solid var(--color-border);
+        padding: 0.15rem 0.6rem;
+        font-size: 0.8rem;
+        color: var(--color-purple-deep);
+        background: var(--color-lavender-light);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 320px;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        padding: 0.8rem;
+        font: 0.92rem/1.55 Consolas, "Courier New", monospace;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="toolbar">
+        <button id="discoverBtn" type="button">Discover Trending Topics</button>
+        <a class="link-btn" href="/admin/" target="_blank" rel="noopener noreferrer">Open Decap Admin</a>
+        <span id="status" class="muted">Ready</span>
+      </section>
+
+      <section class="panel">
+        <h2>Trending Topics</h2>
+        <p class="muted">Pick a topic and generate a draft starter for editorial review.</p>
+        <div id="topics" class="topics"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Generated Draft</h2>
+        <p class="muted">Review, edit, then paste into Decap as a new draft post.</p>
+        <textarea id="draftOutput" readonly></textarea>
+        <div class="toolbar" style="padding:0;border:0;background:transparent;">
+          <button id="copyBtn" type="button">Copy to Clipboard</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const topicsEl = document.getElementById("topics");
+      const statusEl = document.getElementById("status");
+      const discoverBtn = document.getElementById("discoverBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const draftOutput = document.getElementById("draftOutput");
+
+      const setStatus = (message) => {
+        statusEl.textContent = message;
+      };
+
+      const renderDraft = (payload) => {
+        const text = [
+          `Title: ${payload.title}`,
+          `Description: ${payload.description}`,
+          `Tags: ${payload.tags.join(", ")}`,
+          "",
+          payload.body
+        ].join("\n");
+        draftOutput.value = text;
+      };
+
+      const generateDraft = async (topic) => {
+        setStatus(`Generating draft for "${topic.topic}"...`);
+        try {
+          const response = await fetch("/api/generate-draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              topic: topic.topic,
+              angle: topic.suggested_angle,
+              cluster: topic.suggested_cluster
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error("Draft generation failed");
+          }
+
+          const data = await response.json();
+          renderDraft(data);
+          setStatus(`Draft ready for "${topic.topic}"`);
+        } catch (error) {
+          setStatus("Could not generate draft. Please retry.");
+          console.error(error);
+        }
+      };
+
+      const renderTopics = (topics) => {
+        topicsEl.innerHTML = "";
+        if (!Array.isArray(topics) || topics.length === 0) {
+          topicsEl.innerHTML = '<p class="muted">No commerce-relevant trends found right now.</p>';
+          return;
+        }
+
+        for (const topic of topics) {
+          const card = document.createElement("article");
+          card.className = "topic-card";
+          card.innerHTML = `
+            <h3>${topic.topic}</h3>
+            <p><strong>Why it matters:</strong> ${topic.why_it_matters}</p>
+            <p><strong>Suggested angle:</strong> ${topic.suggested_angle}</p>
+            <p class="meta">${topic.suggested_cluster}</p>
+          `;
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "Generate Draft";
+          button.addEventListener("click", () => generateDraft(topic));
+          card.appendChild(button);
+          topicsEl.appendChild(card);
+        }
+      };
+
+      discoverBtn.addEventListener("click", async () => {
+        setStatus("Fetching trends...");
+        topicsEl.innerHTML = "";
+        try {
+          const response = await fetch("/api/trends");
+          if (!response.ok) {
+            throw new Error("Trends fetch failed");
+          }
+          const data = await response.json();
+          renderTopics(data.items || []);
+          setStatus(`Found ${(data.items || []).length} trend candidates`);
+        } catch (error) {
+          topicsEl.innerHTML = '<p class="muted">Could not load trends. Try again.</p>';
+          setStatus("Failed to fetch trends");
+          console.error(error);
+        }
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        const text = draftOutput.value.trim();
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus("Draft copied to clipboard");
+        } catch {
+          setStatus("Copy failed. Select text manually.");
+        }
+      });
+    </script>
+  </body>
+</html>

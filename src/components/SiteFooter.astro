@@ -1,0 +1,72 @@
+---
+import siteSettings from "../data/site-settings.json";
+
+const year = new Date().getFullYear();
+const aboutUrl = String(siteSettings.aboutUrl ?? "https://www.championsprep.in/");
+const privacyUrl = String(siteSettings.privacyUrl ?? "/privacy/");
+const termsUrl = String(siteSettings.termsUrl ?? "/terms/");
+const instagramUrl = String(siteSettings.instagramUrl ?? "https://www.instagram.com/champions.prep/");
+const xUrl = String(siteSettings.xUrl ?? "https://x.com/championsprep");
+const footerTagline = String(siteSettings.footerTagline ?? "Built for Class 11-12 Commerce students");
+const isAboutExternal = /^https?:\/\//i.test(aboutUrl);
+const isInstagramExternal = /^https?:\/\//i.test(instagramUrl);
+const isXExternal = /^https?:\/\//i.test(xUrl);
+---
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <p class="site-footer__tagline">{footerTagline}</p>
+    <nav class="site-footer__links" aria-label="Footer navigation">
+      <a href="/blog/">Blog</a>
+      <a href={aboutUrl} target={isAboutExternal ? "_blank" : undefined} rel={isAboutExternal ? "noopener noreferrer" : undefined}>
+        About ChampionsPrep
+      </a>
+      <a href={privacyUrl}>Privacy</a>
+      <a href={termsUrl}>Terms</a>
+    </nav>
+    <div class="site-footer__social">
+      <a href={instagramUrl} target={isInstagramExternal ? "_blank" : undefined} rel={isInstagramExternal ? "noopener noreferrer" : undefined}>
+        Instagram
+      </a>
+      <a href={xUrl} target={isXExternal ? "_blank" : undefined} rel={isXExternal ? "noopener noreferrer" : undefined}>
+        X
+      </a>
+    </div>
+    <p class="site-footer__copyright">© {year} ChampionsPrep. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+  }
+
+  .site-footer__inner {
+    width: min(100% - 2rem, 1120px);
+    margin-inline: auto;
+    padding: 1.7rem 0 2rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .site-footer__tagline,
+  .site-footer__copyright {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .site-footer__links,
+  .site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .site-footer__links a,
+  .site-footer__social a {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>

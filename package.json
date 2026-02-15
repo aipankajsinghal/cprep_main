@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
@@ -25,6 +26,7 @@
     "rehype-slug": "^6.0.0",
     "satori": "^0.19.2",
     "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
     "vercel": "^50.17.1"
   }
 }
