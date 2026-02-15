@@ -28,5 +28,8 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vercel": "^50.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
   }
 }

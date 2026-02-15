@@ -1,4 +1,4 @@
-import { CLUSTERS, isCluster } from "../src/utils/clusters";
+import { CLUSTERS, isCluster } from "../src/utils/clusters.js";
 
 export const config = {
   runtime: "edge"
