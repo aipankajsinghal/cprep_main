@@ -13,7 +13,6 @@ The architecture of this project is FINAL and must not be altered.
 # 1. PROJECT PHILOSOPHY
 
 This project is:
-
 - Static-first
 - Content-driven
 - Editorial-focused
