@@ -13,13 +13,12 @@ import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
 import { calculateMinutesRead } from "../../utils/content";
 
-export function getStaticPaths() {
-  return getCollection("blog", ({ data }) => !data.draft).then((posts) =>
-    posts.map((entry) => ({
-      params: { slug: entry.slug },
-      props: { entry }
-    }))
-  );
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry }
+  }));
 }
 
 const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
@@ -221,9 +220,9 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
       start.append(cue);
 
       start.before(section);
-      let cursor = start;
+      let cursor: ChildNode | null = start as ChildNode;
       while (cursor && cursor !== stop) {
-        const next = cursor.nextSibling;
+        const next: ChildNode | null = cursor.nextSibling;
         section.append(cursor);
         cursor = next;
       }

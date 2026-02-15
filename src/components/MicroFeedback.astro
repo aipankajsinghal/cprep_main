@@ -14,7 +14,7 @@ const { postSlug, cluster } = Astro.props as Props;
   </div>
 </section>
 
-<script define:vars={{ postSlug, cluster }}>
+<script is:inline define:vars={{ postSlug, cluster }}>
   const feedbackRoot = document.querySelector(".micro-feedback");
   if (feedbackRoot) {
     let submitted = false;

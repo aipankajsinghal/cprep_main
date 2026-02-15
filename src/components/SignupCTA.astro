@@ -19,7 +19,7 @@ const {
   </a>
 </section>
 
-<script define:vars={{ postSlug, cluster }}>
+<script is:inline define:vars={{ postSlug, cluster }}>
   const ctaLink = document.querySelector(".signup-cta [data-cta='signup']");
   if (ctaLink) {
     ctaLink.addEventListener("click", () => {

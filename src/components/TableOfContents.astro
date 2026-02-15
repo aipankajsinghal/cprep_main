@@ -45,7 +45,7 @@ const tocItems = headings.filter((heading) => heading.depth === 2 || heading.dep
       const el = document.getElementById(slug);
       return el ? { slug, el } : null;
     })
-    .filter(Boolean);
+    .filter((v): v is { slug: string; el: HTMLElement } => v !== null);
 
   if (links.length > 0 && sections.length > 0) {
     const observer = new IntersectionObserver(

@@ -119,14 +119,14 @@ const navTags = (
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/vendor/shareon/shareon.min.css" />
-    <script defer src="/vendor/shareon/shareon.iife.js"></script>
+    <script defer is:inline src="/vendor/shareon/shareon.iife.js"></script>
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     {jsonLdBlocks.map((block) => (
-      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(block)} />
     ))}
     {gaMeasurementId && (
       <>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+        <script async is:inline src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
         <script is:inline define:vars={{ gaMeasurementId }}>
           window.dataLayer = window.dataLayer || [];
           function gtag() {

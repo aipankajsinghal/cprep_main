@@ -94,7 +94,7 @@ const jsonLd = {
   const cards = Array.from(document.querySelectorAll("[data-cluster-card]"));
 
   if (filterButtons.length > 0 && cards.length > 0) {
-    const setFilter = (cluster) => {
+    const setFilter = (cluster: string) => {
       for (const button of filterButtons) {
         if (!(button instanceof HTMLButtonElement)) continue;
         button.classList.toggle("is-active", button.dataset.clusterFilter === cluster);

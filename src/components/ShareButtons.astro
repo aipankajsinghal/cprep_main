@@ -42,7 +42,7 @@ const instagramHref = `https://www.instagram.com/${instagramId}/`;
   </div>
 </section>
 
-<script define:vars={{ postSlug, cluster }}>
+<script is:inline define:vars={{ postSlug, cluster }}>
   const shareContainer = document.querySelector(`.shareon[data-post-slug="${postSlug}"]`);
   if (shareContainer) {
     const platformSelector = [
