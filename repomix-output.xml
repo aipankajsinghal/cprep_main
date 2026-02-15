@@ -42,10 +42,15 @@ The content is organized as follows:
 
 <directory_structure>
 .gitignore
+.npmrc
 AGENTS.md
 api/inline-ai.ts
 astro.config.mjs
 CPrep_Blog_Prd.md
+docs/ARCHITECTURE.md
+docs/COMPONENTS.md
+docs/ENHANCEMENTS.md
+docs/OPERATIONS.md
 package.json
 public/blog/og/sample-post-2.png
 public/blog/og/sample-post.png
@@ -55,6 +60,7 @@ public/icons/icon-192.svg
 public/icons/icon-512.svg
 public/manifest.webmanifest
 public/sw.js
+README.md
 scripts/generate-og.mjs
 src/components/AuthorCard.astro
 src/components/Breadcrumbs.astro
@@ -78,6 +84,7 @@ src/layouts/BlogLayout.astro
 src/pages/blog/[...slug].astro
 src/pages/blog/index.astro
 src/pages/blog/tag/[tag].astro
+src/pages/index.astro
 src/pages/rss.xml.ts
 src/styles/global.css
 src/styles/print.css
@@ -90,6 +97,244 @@ tsconfig.json
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+</file>
+
+<file path=".npmrc">
+package-manager=pnpm@10
+</file>
+
+<file path="AGENTS.md">
+Ambiguous behavior must never be guessed. If unclear, request clarification instead of implementing assumptions.
+Environment rule: This project runs on Windows with PowerShell terminal. All local commands MUST use valid PowerShell syntax to avoid command failures.
+
+# AGENTS.md
+
+This file defines mandatory rules and operating constraints for any AI agent
+(Codex, GPT, automation tools) contributing to this repository.
+
+The architecture of this project is FINAL and must not be altered.
+
+---
+
+# 1. PROJECT PHILOSOPHY
+
+This project is:
+
+- Static-first
+- Content-driven
+- Editorial-focused
+- Performance-first
+- Backend-free
+
+Core principle:
+
+Content is code.
+
+All blog posts are MDX files stored in the repository.
+
+---
+
+# 2. ABSOLUTE CONSTRAINTS (DO NOT VIOLATE)
+
+AI agents MUST NOT introduce:
+
+- Backend APIs
+- Databases
+- Server runtime logic
+- Authentication systems
+- CMS dashboards
+- Admin panels
+- External content APIs
+- SSR frameworks or server rendering
+- Full-stack frameworks
+
+If a feature appears to require backend logic:
+
+-> propose a STATIC alternative.
+
+---
+
+# 3. TECHNOLOGY STACK (LOCKED)
+
+Framework:
+
+- Astro (static output)
+
+Styling:
+
+- Tailwind CSS v4
+- CSS design tokens
+
+Content:
+
+- Astro Content Collections
+- MDX files
+
+Search:
+
+- Pagefind (static index)
+
+SEO:
+
+- JSON-LD schema generated at build time
+
+Deployment target:
+
+- Static hosting via CDN (Vercel)
+
+---
+
+# 4. STATIC-FIRST RULE
+
+All dynamic behavior must be:
+
+- precomputed at build time OR
+- client-side enhancement only when strictly necessary.
+
+Examples:
+
+GOOD:
+
+- reading time computed during build
+- related posts computed during build
+- OG images generated during build
+
+BAD:
+
+- server API for content
+- runtime database queries
+- dynamic content fetching
+
+---
+
+# 5. DESIGN SYSTEM RULES
+
+Brand identity:
+
+- Lavender accent color
+- Editorial typography
+- Geometric diamond motif
+
+Visual style:
+
+- Editorial
+- Academic
+- Minimal motion
+
+DO NOT introduce:
+
+- flashy gradients
+- heavy animation frameworks
+- UI libraries without approval.
+
+---
+
+# 6. PERFORMANCE PRIORITY
+
+Agents must:
+
+- minimize JavaScript
+- avoid unnecessary hydration
+- prefer CSS over JS
+- avoid large dependencies.
+
+---
+
+# 7. COMPONENT DESIGN GUIDELINES
+
+Components must:
+
+- be small and composable
+- follow editorial layout system
+- avoid state-heavy patterns.
+
+Examples:
+
+Allowed:
+
+- TableOfContents
+- ReadingProgress
+- ShareButtons
+
+Not allowed:
+
+- interactive dashboards
+- user accounts
+- real-time features.
+
+---
+
+# 8. SEO AUTOMATION
+
+SEO must be implemented via:
+
+- static metadata generation
+- structured data (JSON-LD)
+- sitemap + RSS
+- internal linking logic.
+
+Agents should never introduce SEO plugins requiring backend.
+
+---
+
+# 9. DARK MODE
+
+Dark mode must:
+
+- use CSS variables
+- avoid heavy JS frameworks.
+
+---
+
+# 10. FILE STRUCTURE
+
+Agents must respect existing folder structure.
+
+Do not reorganize directories without explicit instruction.
+
+---
+
+# 11. WHEN UNSURE
+
+If implementation options include:
+
+A) static solution
+B) dynamic/backend solution
+
+Always choose:
+
+-> static solution.
+
+---
+
+# 12. NON-GOALS
+
+This project is NOT:
+
+- a blogging platform
+- a CMS
+- a SaaS application
+- a user-facing web app
+
+It is:
+
+-> a high-performance editorial website.
+
+---
+
+# FINAL RULE
+
+Architecture is final.
+
+Agents must extend within constraints, not redesign them.
+</file>
 
 <file path="api/inline-ai.ts">
 export const config = {
@@ -188,6 +433,219 @@ export default async function handler(request: Request): Promise<Response> {
     headers: { "Content-Type": "application/json" }
   });
 }
+</file>
+
+<file path="docs/ARCHITECTURE.md">
+# Architecture
+
+## Core Principles
+
+- Static-first
+- Content-driven
+- Editorial-focused
+- Performance-first
+
+## Hard Constraints
+
+- No database
+- No CMS dashboard
+- No SSR conversion
+- No route redesign
+- No heavy UI/runtime frameworks
+
+## Runtime Model
+
+- Astro output mode is static.
+- Content is compiled from MDX at build time.
+- Dynamic behavior is limited to lightweight client-side enhancement.
+
+## Build Pipeline
+
+1. `prebuild`: generate OG images (`scripts/generate-og.mjs`)
+2. `build`: Astro static build
+3. `postbuild`: Pagefind index generation
+
+## Content + Rendering
+
+- Source: `src/content/blog/*.mdx`
+- Schema: `src/content/config.ts`
+- Routes:
+  - `src/pages/blog/index.astro`
+  - `src/pages/blog/[...slug].astro`
+  - `src/pages/blog/tag/[tag].astro`
+
+## Styling System
+
+- Tokens: `src/styles/tokens.css`
+- Global/base: `src/styles/global.css`
+- Editorial typography: `src/styles/typography.css`
+- Print styles: `src/styles/print.css`
+
+## Search and Discovery
+
+- Pagefind static index (`dist/pagefind`)
+- Table of contents from heading data
+- Tag pages generated at build time
+- Related posts scored from cluster/tags
+
+## SEO Data Layer
+
+Implemented as static metadata + build-time structured data:
+
+- Canonical links
+- Open Graph / Twitter tags
+- Sitemap
+- RSS
+- JSON-LD:
+  - BlogPosting
+  - BreadcrumbList
+  - LearningResource
+  - cluster learning path ItemList
+  - FAQPage (frontmatter-driven)
+
+## AI Layer
+
+Hybrid behavior in InlineAssistant:
+
+1. Runtime cache (in-memory)
+2. Static response file (`public/data/assistant-responses.json`)
+3. Optional runtime proxy call (`/api/inline-ai`)
+
+Smart context extraction sends nearest learning section context only.
+
+## Exception Route
+
+`api/inline-ai.ts` is a minimal stateless edge proxy for secure AI key usage.
+It is not used for content persistence, CMS behavior, or server-rendered page logic.
+</file>
+
+<file path="docs/COMPONENTS.md">
+# Components
+
+## Core Editorial Components
+
+- `Breadcrumbs.astro`
+  - Breadcrumb navigation (`Blog > Post`)
+- `TableOfContents.astro`
+  - H2/H3 navigation for post structure
+- `ReadingProgress.astro`
+  - Top progress indicator
+- `PrevNextNav.astro`
+  - Adjacent posts within cluster
+- `RelatedPosts.astro`
+  - Cluster/tag scored recommendations
+- `AuthorCard.astro`
+  - Author attribution block
+
+## Engagement Components
+
+- `ShareButtons.astro`
+  - Share actions + GA events
+- `MicroFeedback.astro`
+  - Helpful/not-helpful event capture
+- `SignupCTA.astro`
+  - Conversion CTA with GA click event
+- `SmartCTA.astro`
+  - Mid and end contextual conversion blocks
+
+## Learning Components
+
+- `ExamTip.astro`
+  - Editorial callout block
+- `StudyTool.astro`
+  - Modes:
+    - `revision`
+    - `mistakes`
+    - `check-understanding`
+- `InlineAssistant.astro`
+  - Stateless contextual AI help
+  - Hybrid response strategy:
+    - cache
+    - static response
+    - optional runtime enhancement
+
+## Search Component
+
+- `SearchWidget.astro`
+  - Pagefind UI mount on blog index
+
+## Layout
+
+- `BlogLayout.astro`
+  - Metadata, global styles, theme init, GA base context, manifest link, service worker registration
+
+## Interaction Notes
+
+- Use minimal vanilla JS for interactions.
+- Avoid whole-page hydration patterns.
+- Keep each component self-contained and composable.
+</file>
+
+<file path="docs/OPERATIONS.md">
+# Operations
+
+## Requirements
+
+- Node.js 20+
+- npm
+- Windows PowerShell commands for local usage
+
+## Install
+
+```powershell
+npm install
+```
+
+## Run
+
+```powershell
+npm run dev
+```
+
+## Build
+
+```powershell
+npm run build
+```
+
+Build includes:
+
+- OG image generation (`prebuild`)
+- Astro static output
+- Pagefind index generation (`postbuild`)
+
+## Environment Variables
+
+Optional:
+
+- `PUBLIC_GA_MEASUREMENT_ID`
+  - Enables GA event tracking.
+- `OPENAI_API_KEY`
+  - Used only by `api/inline-ai.ts` when runtime proxy is deployed.
+
+## Deployment Notes
+
+- Primary target: static hosting/CDN.
+- Runtime proxy `/api/inline-ai` is optional enhancement.
+- Site behavior remains functional without runtime proxy because InlineAssistant has static fallback.
+
+## PWA Notes
+
+- Manifest: `public/manifest.webmanifest`
+- Service worker: `public/sw.js`
+- Icons: `public/icons/`
+
+## Troubleshooting
+
+- Missing search results:
+  - Ensure `npm run build` completes and `pagefind` postbuild runs.
+- Missing OG images:
+  - Verify `scripts/generate-og.mjs` runs in `prebuild`.
+- Inline assistant runtime not responding:
+  - Check proxy deployment and `OPENAI_API_KEY`.
+  - Static fallback should still render responses.
+- FAQ rich results not appearing:
+  - Ensure `faqItems` exists in post frontmatter.
 </file>
 
 <file path="public/data/assistant-responses.json">
@@ -314,240 +772,724 @@ self.addEventListener("fetch", (event) => {
 });
 </file>
 
-<file path="src/components/InlineAssistant.astro">
----
-interface Props {
-  type?: "simplify" | "exam-summary" | "example";
-  context?: "section" | "article";
-  endpoint?: string;
+<file path="README.md">
+# ChampionsPrep Blog
+
+Static-first editorial blog for ChampionsPrep, built with Astro + MDX.
+
+## Overview
+
+- Output mode: static
+- Content source: repository MDX files
+- Styling: Tailwind CSS v4 + CSS tokens
+- Search: Pagefind static index
+- SEO: build-time metadata + JSON-LD + sitemap + RSS
+- Design: editorial, academic, lavender + diamond motif
+
+## Tech Stack
+
+- Astro
+- `@astrojs/mdx`
+- `@astrojs/sitemap`
+- `@astrojs/rss`
+- Tailwind CSS v4 (`@tailwindcss/vite`)
+- Pagefind
+- Satori + Resvg (build-time OG images)
+
+## Project Structure
+
+```text
+api/
+  inline-ai.ts
+public/
+  blog/og/
+  data/assistant-responses.json
+  icons/
+  manifest.webmanifest
+  sw.js
+src/
+  components/
+  content/
+    blog/
+    config.ts
+  layouts/
+  pages/
+    blog/
+  styles/
+  utils/
+scripts/
+  generate-og.mjs
+```
+
+## Local Development (PowerShell)
+
+```powershell
+npm install
+npm run dev
+```
+
+Build production output:
+
+```powershell
+npm run build
+```
+
+## Content Workflow
+
+1. Copy `src/content/blog/_template.mdx`
+2. Fill frontmatter and content
+3. Commit and deploy
+
+## Required Frontmatter
+
+```yaml
+title: "Post Title"
+description: "Post description"
+date: 2026-01-01
+author: "ChampionsPrep"
+tags:
+  - sample
+cluster: foundation
+draft: false
+```
+
+Optional fields:
+
+```yaml
+updatedDate: 2026-01-15
+minutesRead: 5
+ogImage: /blog/og/custom.png
+faqItems:
+  - q: "Question?"
+    a: "Answer."
+```
+
+## Hybrid Inline AI
+
+Inline assistant is progressive and backend-optional:
+
+1. Runtime cache (in-memory)
+2. Static response (`public/data/assistant-responses.json`)
+3. Optional runtime enhancement (`POST /api/inline-ai`)
+
+The site remains usable when backend runtime is unavailable.
+
+## SEO + Structured Data
+
+Each post includes:
+
+- `BlogPosting`
+- `BreadcrumbList`
+- `LearningResource`
+- cluster `ItemList` learning path
+- optional `FAQPage` (only when `faqItems` exists)
+
+Also generated:
+
+- `sitemap.xml`
+- `rss.xml`
+- canonical links
+- Open Graph/Twitter metadata
+
+## Documentation
+
+- `CPrep_Blog_Prd.md` - primary PRD with enhancement addendum
+- `docs/ARCHITECTURE.md` - architecture constraints and runtime model
+- `docs/COMPONENTS.md` - component responsibilities and behavior
+- `docs/OPERATIONS.md` - env vars, build/deploy, troubleshooting
+</file>
+
+<file path="scripts/generate-og.mjs">
+import fs from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import fg from "fast-glob";
+import matter from "gray-matter";
+import satori from "satori";
+import { Resvg } from "@resvg/resvg-js";
+
+const cwd = process.cwd();
+const postsPattern = "src/content/blog/**/*.{md,mdx}";
+const ogOutDir = path.join(cwd, "public", "blog", "og");
+const fontPath = path.join(
+  cwd,
+  "node_modules",
+  "@fontsource",
+  "inter",
+  "files",
+  "inter-latin-600-normal.woff"
+);
+
+function toSlug(filePath) {
+  const rel = path.relative(path.join(cwd, "src", "content", "blog"), filePath);
+  return rel.replace(/\\/g, "/").replace(/\.(md|mdx)$/i, "");
 }
 
-const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = Astro.props as Props;
----
-<aside
-  class="inline-assistant"
-  data-inline-assistant
-  data-default-action={type}
-  data-context={context}
-  data-endpoint={endpoint}
-  aria-label="Inline study assistant"
->
-  <p class="inline-assistant__label">AI Study Assist</p>
-  <div class="inline-assistant__actions">
-    <button type="button" data-assistant-action="simplify" aria-expanded="false">Simplify explanation</button>
-    <button type="button" data-assistant-action="exam-summary" aria-expanded="false">Exam-focused summary</button>
-    <button type="button" data-assistant-action="example" aria-expanded="false">Show example</button>
-  </div>
-  <div class="inline-assistant__output" data-assistant-output hidden></div>
-</aside>
+function cleanTitle(title) {
+  return String(title || "ChampionsPrep Blog").trim().slice(0, 120);
+}
 
-<script>
-  const blocks = Array.from(document.querySelectorAll("[data-inline-assistant]"));
-  const normalizeTopic = (value) =>
-    value.replace(/[✓#]/g, " ").replace(/\s+/g, " ").trim();
-
-  const extractContext = (root, mode) => {
-    if (mode === "article") {
-      const body = document.querySelector(".post-body");
-      const articleText = body?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
-      return {
-        topic: "Article",
-        contextText: articleText
-      };
-    }
-
-    const section = root.closest("[data-learning-section]");
-    if (section instanceof HTMLElement) {
-      const heading = section.querySelector("h2,h3");
-      const shadow = section.cloneNode(true);
-      if (shadow instanceof HTMLElement) {
-        for (const assistant of shadow.querySelectorAll("[data-inline-assistant]")) {
-          assistant.remove();
+async function generateOne({ title, slug, fontData }) {
+  const element = {
+    type: "div",
+    props: {
+      style: {
+        width: "1200px",
+        height: "630px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "64px",
+        backgroundColor: "#ffffff",
+        color: "#111827",
+        fontFamily: "Inter"
+      },
+      children: [
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              color: "#6D5CF5",
+              fontSize: "30px",
+              fontWeight: 600
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: {
+                    width: "14px",
+                    height: "14px",
+                    transform: "rotate(45deg)",
+                    backgroundColor: "#8B7CF6"
+                  }
+                }
+              },
+              "ChampionsPrep Blog"
+            ]
+          }
+        },
+        {
+          type: "div",
+          props: {
+            style: {
+              fontSize: "60px",
+              lineHeight: 1.15,
+              fontWeight: 600,
+              maxWidth: "1000px"
+            },
+            children: cleanTitle(title)
+          }
+        },
+        {
+          type: "div",
+          props: {
+            style: {
+              fontSize: "28px",
+              color: "#4B5563"
+            },
+            children: `championsprep.in/blog/${slug}`
+          }
         }
-      }
-      return {
-        topic: normalizeTopic(heading?.textContent ?? "") || "Section",
-        contextText:
-          (shadow instanceof HTMLElement ? shadow.innerText : section.innerText)
-            .replace(/\s+/g, " ")
-            .trim()
-            .slice(0, 1200)
-      };
+      ]
     }
-
-    // Fallback path when section wrappers are absent.
-    const fallbackHeading =
-      (root.previousElementSibling instanceof HTMLHeadingElement ? root.previousElementSibling.textContent : "") || "";
-    const fallbackText =
-      root.parentElement?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
-    return {
-      topic: normalizeTopic(fallbackHeading) || "Section",
-      contextText: fallbackText
-    };
   };
 
-  for (const block of blocks) {
-    const buttons = Array.from(block.querySelectorAll("[data-assistant-action]"));
-    const output = block.querySelector("[data-assistant-output]");
-    if (!(output instanceof HTMLElement) || !buttons.length) continue;
-
-    let activeAction = block.getAttribute("data-default-action") ?? "";
-    let loaded = null;
-    let activeRequestId = 0;
-
-    const closeAll = () => {
-      for (const button of buttons) {
-        if (button instanceof HTMLButtonElement) {
-          button.setAttribute("aria-expanded", "false");
-        }
+  const svg = await satori(element, {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: "Inter",
+        data: fontData,
+        weight: 600,
+        style: "normal"
       }
-      output.hidden = true;
-      output.textContent = "";
-      activeAction = "";
-    };
+    ]
+  });
 
-    block.addEventListener("click", async (event) => {
+  const pngData = new Resvg(svg).render().asPng();
+  const outFile = path.join(ogOutDir, `${slug}.png`);
+  await fs.mkdir(path.dirname(outFile), { recursive: true });
+  await fs.writeFile(outFile, pngData);
+}
+
+async function main() {
+  const fontData = await fs.readFile(fontPath);
+  const files = await fg(postsPattern, { cwd, absolute: true });
+
+  await fs.mkdir(ogOutDir, { recursive: true });
+
+  for (const file of files) {
+    const base = path.basename(file);
+    if (base.startsWith("_")) continue;
+
+    const raw = await fs.readFile(file, "utf8");
+    const parsed = matter(raw);
+    if (parsed.data.draft) continue;
+
+    const slug = toSlug(file);
+    await generateOne({
+      title: parsed.data.title,
+      slug,
+      fontData
+    });
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
+</file>
+
+<file path="src/components/AuthorCard.astro">
+---
+interface Props {
+  name: string;
+  bio?: string;
+  avatar?: string;
+}
+
+const {
+  name,
+  bio = "ChampionsPrep editorial team",
+  avatar
+} = Astro.props as Props;
+---
+<section class="author-card" aria-label="Author information">
+  {avatar ? <img class="author-card__avatar" src={avatar} alt={`${name} avatar`} loading="lazy" /> : null}
+  <div class="author-card__content">
+    <h3 class="author-card__name">{name}</h3>
+    <p class="author-card__bio">{bio}</p>
+  </div>
+</section>
+
+<style>
+  .author-card {
+    margin: 2rem 0 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--color-bg-muted);
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .author-card:hover {
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+
+  .author-card__avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    object-fit: cover;
+    flex: 0 0 3rem;
+  }
+
+  .author-card__name {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .author-card__bio {
+    margin: 0.25rem 0 0;
+    color: var(--color-text-secondary);
+  }
+</style>
+</file>
+
+<file path="src/components/ExamTip.astro">
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Exam Tip" } = Astro.props as Props;
+---
+<aside class="exam-tip" aria-label="Exam preparation tip">
+  <h3 class="exam-tip__title">{title}</h3>
+  <div class="exam-tip__content">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .exam-tip {
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-lavender-500);
+    border-radius: var(--shape-radius);
+    padding: 0.9rem 1rem;
+    background: var(--color-lavender-soft);
+    margin: 1.5rem 0;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .exam-tip:hover {
+    border-color: var(--color-lavender-500);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-lavender-500), transparent 85%);
+  }
+
+  .exam-tip__title {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .exam-tip__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>
+</file>
+
+<file path="src/components/MicroFeedback.astro">
+---
+interface Props {
+  postSlug: string;
+  cluster: string;
+}
+
+const { postSlug, cluster } = Astro.props as Props;
+---
+<section class="micro-feedback" aria-label="Article feedback">
+  <h2>Was this helpful?</h2>
+  <div class="micro-feedback__buttons">
+    <button type="button" data-feedback-value="helpful" aria-label="Helpful">👍</button>
+    <button type="button" data-feedback-value="not_helpful" aria-label="Not helpful">👎</button>
+  </div>
+</section>
+
+<script define:vars={{ postSlug, cluster }}>
+  const feedbackRoot = document.querySelector(".micro-feedback");
+  if (feedbackRoot) {
+    let submitted = false;
+    feedbackRoot.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-      const button = target.closest("[data-assistant-action]");
+      const button = target.closest("[data-feedback-value]");
       if (!(button instanceof HTMLButtonElement)) return;
+      if (submitted) return;
+      const value = button.getAttribute("data-feedback-value");
+      if (!value) return;
 
-      const action = button.getAttribute("data-assistant-action");
-      if (!action) return;
-
-      if (activeAction === action && !output.hidden) {
-        closeAll();
-        return;
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("article_feedback", {
+          value,
+          post_slug: postSlug,
+          cluster
+        });
       }
 
-      for (const item of buttons) {
-        if (item instanceof HTMLButtonElement) {
-          item.setAttribute("aria-expanded", item === button ? "true" : "false");
-        }
+      submitted = true;
+      feedbackRoot.setAttribute("data-submitted", "true");
+      button.textContent = "Thanks";
+    });
+  }
+</script>
+
+<style>
+  .micro-feedback {
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--shape-radius);
+    background: var(--color-bg-muted);
+  }
+
+  .micro-feedback h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .micro-feedback__buttons {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .micro-feedback button {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    min-width: 2.5rem;
+    min-height: 2.2rem;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .micro-feedback button:hover {
+    border-color: var(--color-lavender-500);
+    transform: translateY(-1px);
+  }
+
+  .micro-feedback[data-submitted="true"] button {
+    opacity: 0.7;
+  }
+</style>
+</file>
+
+<file path="src/components/PrevNextNav.astro">
+---
+interface LinkItem {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  previous?: LinkItem;
+  next?: LinkItem;
+}
+
+const { previous, next } = Astro.props as Props;
+---
+<nav class="prev-next-nav" aria-label="Previous and next posts">
+  <div class="prev-next-nav__col">
+    <div class="prev-next-nav__label">Previous</div>
+    {previous ? (
+      <a href={previous.href}>{previous.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+  <div class="prev-next-nav__col prev-next-nav__col--right">
+    <div class="prev-next-nav__label">Next</div>
+    {next ? (
+      <a href={next.href}>{next.title}</a>
+    ) : (
+      <span class="prev-next-nav__empty">None</span>
+    )}
+  </div>
+</nav>
+
+<style>
+  .prev-next-nav {
+    margin-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .prev-next-nav__col--right {
+    text-align: right;
+  }
+
+  .prev-next-nav__label {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .prev-next-nav__empty {
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .prev-next-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .prev-next-nav__col--right {
+      text-align: left;
+    }
+  }
+</style>
+</file>
+
+<file path="src/components/RelatedPosts.astro">
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  currentSlug: string;
+  cluster: string;
+  tags: string[];
+  limit?: number;
+}
+
+const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
+const tagSet = new Set(tags);
+
+const candidates = (await getCollection("blog", ({ data }) => !data.draft)).filter(
+  (post) => post.slug !== currentSlug
+);
+
+const scored = candidates
+  .map((post) => {
+    let score = 0;
+    if (post.data.cluster === cluster) score += 3;
+    for (const tag of post.data.tags) {
+      if (tagSet.has(tag)) score += 1;
+    }
+    return { post, score };
+  })
+  .sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.post.data.date.getTime() - a.post.data.date.getTime();
+  });
+
+const selected: typeof scored = [];
+for (const item of scored) {
+  if (selected.length >= limit) break;
+  if (item.score > 0) selected.push(item);
+}
+if (selected.length < limit) {
+  for (const item of scored) {
+    if (selected.length >= limit) break;
+    if (!selected.some((picked) => picked.post.slug === item.post.slug)) {
+      selected.push(item);
+    }
+  }
+}
+---
+<section class="related-posts" aria-label="Related posts">
+  <h2>Related Posts</h2>
+  {selected.length === 0 ? (
+    <p>No related posts yet.</p>
+  ) : (
+    <ul>
+      {selected.map(({ post }) => (
+        <li>
+          <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+
+<style>
+  .related-posts {
+    margin-top: 1.8rem;
+  }
+
+  .related-posts ul {
+    padding-left: 1.1rem;
+  }
+
+  .related-posts a {
+    text-decoration: none;
+    transition: color 180ms ease;
+  }
+</style>
+</file>
+
+<file path="src/components/ShareButtons.astro">
+---
+interface Props {
+  url: string;
+  title: string;
+  postSlug: string;
+  cluster: string;
+  instagramId?: string;
+}
+
+const {
+  url,
+  title,
+  postSlug,
+  cluster,
+  instagramId = "champions.prep"
+} = Astro.props as Props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const whatsappHref = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+const xHref = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+const instagramHref = `https://www.instagram.com/${instagramId}/`;
+---
+<section class="share-buttons" aria-label="Share this article">
+  <h2>Share</h2>
+  <div class="share-buttons__row">
+    <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-share-platform="whatsapp">
+      WhatsApp
+    </a>
+    <a href={xHref} target="_blank" rel="noopener noreferrer" data-share-platform="x">
+      X
+    </a>
+    <button type="button" data-share-platform="copy">Copy Link</button>
+    <a href={instagramHref} target="_blank" rel="noopener noreferrer" data-share-platform="instagram">
+      Instagram @{instagramId}
+    </a>
+  </div>
+</section>
+
+<script define:vars={{ url, postSlug, cluster }}>
+  const shareRoot = document.querySelector(".share-buttons");
+  if (shareRoot) {
+    shareRoot.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const el = target.closest("[data-share-platform]");
+      if (!(el instanceof HTMLElement)) return;
+      const platform = el.getAttribute("data-share-platform");
+      if (!platform) return;
+
+      if (platform === "copy") {
+        try {
+          await navigator.clipboard.writeText(url);
+          el.textContent = "Copied";
+          setTimeout(() => {
+            el.textContent = "Copy Link";
+          }, 1200);
+        } catch {}
       }
 
-      output.hidden = false;
-      output.textContent = "Loading focused help...";
-
-      try {
-        if (!loaded) {
-          loaded = import("../utils/inlineAssistantClient");
-        }
-        const module = await loaded;
-        const context = block.getAttribute("data-context") ?? "section";
-        const endpoint = block.getAttribute("data-endpoint") ?? "";
-        const { topic, contextText } = extractContext(block, context);
-        const postSlug = window.__cpGaContext?.post_slug ?? "";
-        const cacheKey = `${postSlug}::${topic}::${action}`;
-        const requestId = ++activeRequestId;
-
-        // 1) Runtime cache first.
-        const cached = module.getCachedRuntimeResponse(cacheKey);
-        if (cached) {
-          output.textContent = cached;
-          activeAction = action;
-          return;
-        }
-
-        // 2) Static response next (instant first paint for the hint).
-        const staticText = await module.getStaticResponse(action, cacheKey);
-        if (requestId !== activeRequestId) return;
-        output.textContent = staticText;
-        activeAction = action;
-
-        // 3) Runtime enhancement last (optional progressive upgrade).
-        module
-          .requestRuntimeHint({
-            endpoint: endpoint || undefined,
-            action,
-            topic,
-            contextText,
-            cacheKey
-          })
-          .then((runtimeText) => {
-            if (requestId !== activeRequestId) return;
-            if (activeAction !== action) return;
-            if (!runtimeText || runtimeText === output.textContent) return;
-            output.classList.add("inline-assistant__output--refresh");
-            output.textContent = runtimeText;
-            requestAnimationFrame(() => {
-              output.classList.remove("inline-assistant__output--refresh");
-            });
-          })
-          .catch(() => {});
-      } catch {
-        output.textContent = "Unable to fetch assistance right now. Try again in a moment.";
+      if (typeof window.cpTrack === "function") {
+        window.cpTrack("share_click", {
+          platform,
+          post_slug: postSlug,
+          cluster
+        });
       }
     });
   }
 </script>
 
 <style>
-  .inline-assistant {
-    margin: 1.2rem 0;
-    border: 1px solid var(--color-border);
-    border-radius: var(--shape-radius);
-    padding: 0.85rem;
-    background: var(--color-bg-muted);
+  .share-buttons {
+    margin-top: 1.5rem;
   }
 
-  .inline-assistant__label {
-    margin: 0 0 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--color-text-secondary);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+  .share-buttons h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
   }
 
-  .inline-assistant__label::before {
-    content: "";
-    width: 0.48rem;
-    height: 0.48rem;
-    background: var(--color-lavender-500);
-    transform: rotate(45deg);
-  }
-
-  .inline-assistant__actions {
+  .share-buttons__row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.55rem;
   }
 
-  .inline-assistant__actions button {
+  .share-buttons a,
+  .share-buttons button {
+    appearance: none;
     border: 1px solid var(--color-border);
     border-radius: 999px;
+    padding: 0.42rem 0.8rem;
     background: var(--color-bg);
     color: var(--color-text-primary);
-    padding: 0.38rem 0.68rem;
-    font-size: 0.82rem;
+    text-decoration: none;
     cursor: pointer;
-    transition: border-color 180ms ease, transform 180ms ease;
+    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
   }
 
-  .inline-assistant__actions button:hover {
+  .share-buttons a:hover,
+  .share-buttons button:hover {
     border-color: var(--color-lavender-500);
-    transform: scale(1.02);
-  }
-
-  .inline-assistant__actions button[aria-expanded="true"] {
-    border-color: var(--color-lavender-500);
-    background: var(--color-lavender-soft);
-  }
-
-  .inline-assistant__output {
-    margin-top: 0.7rem;
-    border-top: 1px solid var(--color-border);
-    padding-top: 0.65rem;
-    color: var(--color-text-primary);
-    font-size: 0.95rem;
-  }
-
-  .inline-assistant__output--refresh {
-    opacity: 0.86;
-    transition: opacity 180ms ease-out;
+    color: var(--color-lavender-600);
+    transform: translateY(-1px);
   }
 </style>
 </file>
@@ -806,340 +1748,281 @@ const {
 </style>
 </file>
 
-<file path="src/utils/inlineAssistantClient.ts">
-export type AssistantAction = "simplify" | "exam-summary" | "example";
+<file path="src/components/TableOfContents.astro">
+---
+import type { MarkdownHeading } from "astro";
 
-interface RequestInput {
-  endpoint?: string;
-  action: AssistantAction;
-  topic: string;
-  contextText: string;
-  cacheKey?: string;
+interface Props {
+  headings: MarkdownHeading[];
 }
 
-interface FallbackPayload {
-  simplify?: string[];
-  "exam-summary"?: string[];
-  example?: string[];
-}
+const { headings } = Astro.props as Props;
+const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+{tocItems.length > 0 && (
+  <aside class="toc" aria-label="Table of contents">
+    <details class="toc__mobile">
+      <summary>Table of Contents</summary>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`}>{item.text}</a>
+          </li>
+        ))}
+      </ul>
+    </details>
 
-const FALLBACK_ENDPOINT = "/data/assistant-responses.json";
-let endpointAvailable = true;
-const runtimeCache = new Map<string, string>();
-let staticPayloadPromise: Promise<FallbackPayload> | null = null;
+    <div class="toc__desktop">
+      <h2>Table of Contents</h2>
+      <ul>
+        {tocItems.map((item) => (
+          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
+            <a href={`#${item.slug}`} data-toc-link={item.slug}>
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </aside>
+)}
 
-function concise(text: string): string {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= 260) return normalized;
-  return `${normalized.slice(0, 257).trimEnd()}...`;
-}
+<script>
+  const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+  const sections = links
+    .map((link) => {
+      const slug = link.getAttribute("data-toc-link");
+      if (!slug) return null;
+      const el = document.getElementById(slug);
+      return el ? { slug, el } : null;
+    })
+    .filter(Boolean);
 
-function hashKey(input: string): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+  if (links.length > 0 && sections.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length === 0) return;
+        const active = visible[0].target.id;
+        links.forEach((link) => {
+          if (link.getAttribute("data-toc-link") === active) {
+            link.setAttribute("aria-current", "true");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      },
+      { rootMargin: "-25% 0px -65% 0px", threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section.el));
   }
-  return hash;
-}
+</script>
 
-function pickFallback(payload: FallbackPayload, action: AssistantAction, seed = ""): string {
-  const options = payload[action] ?? [];
-  if (!options.length) return "Focus on the core concept, then solve one question before moving forward.";
-  const index = hashKey(`${action}:${seed}`) % options.length;
-  return options[index];
-}
-
-async function getStaticPayload(): Promise<FallbackPayload> {
-  if (!staticPayloadPromise) {
-    staticPayloadPromise = fetch(`${FALLBACK_ENDPOINT}?t=${Date.now()}`, { cache: "no-store" }).then((response) => {
-      if (!response.ok) throw new Error("assistant_fallback_failed");
-      return response.json() as Promise<FallbackPayload>;
-    });
+<style>
+  .toc {
+    width: 100%;
   }
-  return staticPayloadPromise;
-}
 
-export function getCachedRuntimeResponse(cacheKey?: string): string | undefined {
-  if (!cacheKey) return undefined;
-  return runtimeCache.get(cacheKey);
-}
+  .toc h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+  }
 
-export async function getStaticResponse(action: AssistantAction, seed = ""): Promise<string> {
-  const payload = await getStaticPayload();
-  return concise(pickFallback(payload, action, seed));
-}
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 
-export async function requestRuntimeHint(input: RequestInput): Promise<string> {
-  const { endpoint, action, topic, contextText, cacheKey } = input;
+  .toc__item {
+    margin: 0.35rem 0;
+  }
 
-  if (endpoint && endpointAvailable) {
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          topic: topic.slice(0, 160),
-          context: contextText.slice(0, 1200),
-          type: action
-        })
-      });
+  .toc__item--nested {
+    padding-left: 0.9rem;
+  }
 
-      if (!response.ok) {
-        throw new Error("assistant_request_failed");
-      }
+  .toc a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
 
-      const data = await response.json();
-      if (!data || typeof data.output !== "string") {
-        throw new Error("assistant_invalid_payload");
-      }
-      const value = concise(data.output);
-      if (cacheKey) runtimeCache.set(cacheKey, value);
-      return value;
-    } catch {
-      // Keep static-first behavior when runtime API is unavailable on static hosting.
-      endpointAvailable = false;
-      throw new Error("assistant_request_failed");
+  .toc a:hover,
+  .toc a[aria-current="true"] {
+    color: var(--color-lavender-600);
+  }
+
+  .toc__desktop {
+    display: none;
+  }
+
+  .toc__mobile summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .toc__mobile {
+      display: none;
+    }
+
+    .toc__desktop {
+      display: block;
+      position: sticky;
+      top: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--shape-radius);
+      padding: 0.9rem;
+      background: var(--color-bg);
     }
   }
+</style>
+</file>
 
-  throw new Error("assistant_endpoint_unavailable");
+<file path="src/content/blog/_template.mdx">
+---
+title: 'Post Title'
+description: 'Post description.'
+date: 2026-02-14
+author: 'ChampionsPrep'
+tags:
+  - sample-tag
+cluster: sample-cluster
+draft: true
+---
+
+Draft content.
+</file>
+
+<file path="src/pages/index.astro">
+---
+---
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=/blog/" />
+  <link rel="canonical" href="/blog/" />
+  <title>Redirecting…</title>
+</head>
+<body>
+  Redirecting to <a href="/blog/">/blog/</a>
+</body>
+</file>
+
+<file path="src/pages/rss.xml.ts">
+import rss from "@astrojs/rss";
+import { getCollection } from "astro:content";
+
+export async function GET(context: { site: URL | undefined }) {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+  );
+
+  return rss({
+    title: "ChampionsPrep Blog",
+    description: "Editorial posts and exam-prep insights from ChampionsPrep.",
+    site: context.site ?? new URL("https://www.championsprep.in/blog"),
+    items: posts.map((post) => ({
+      title: post.data.title,
+      description: post.data.description,
+      pubDate: post.data.date,
+      link: `/blog/${post.slug}/`
+    }))
+  });
 }
 </file>
 
-<file path=".gitignore">
-node_modules/
-dist/
-.astro/
-.DS_Store
-*.log
+<file path="src/styles/print.css">
+@media print {
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html,
+  body {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 12pt;
+    line-height: 1.45;
+  }
+
+  nav,
+  footer,
+  .signup-cta,
+  .share-buttons,
+  .reading-progress,
+  .toc,
+  .theme-toggle {
+    display: none !important;
+  }
+
+  .page-shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    word-break: break-all;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere;
+  }
+}
 </file>
 
-<file path="AGENTS.md">
-Ambiguous behavior must never be guessed. If unclear, request clarification instead of implementing assumptions.
-Environment rule: This project runs on Windows with PowerShell terminal. All local commands MUST use valid PowerShell syntax to avoid command failures.
-
-# AGENTS.md
-
-This file defines mandatory rules and operating constraints for any AI agent
-(Codex, GPT, automation tools) contributing to this repository.
-
-The architecture of this project is FINAL and must not be altered.
-
----
-
-# 1. PROJECT PHILOSOPHY
-
-This project is:
-
-- Static-first
-- Content-driven
-- Editorial-focused
-- Performance-first
-- Backend-free
-
-Core principle:
-
-Content is code.
-
-All blog posts are MDX files stored in the repository.
-
----
-
-# 2. ABSOLUTE CONSTRAINTS (DO NOT VIOLATE)
-
-AI agents MUST NOT introduce:
-
-- Backend APIs
-- Databases
-- Server runtime logic
-- Authentication systems
-- CMS dashboards
-- Admin panels
-- External content APIs
-- SSR frameworks or server rendering
-- Full-stack frameworks
-
-If a feature appears to require backend logic:
-
--> propose a STATIC alternative.
-
----
-
-# 3. TECHNOLOGY STACK (LOCKED)
-
-Framework:
-
-- Astro (static output)
-
-Styling:
-
-- Tailwind CSS v4
-- CSS design tokens
-
-Content:
-
-- Astro Content Collections
-- MDX files
-
-Search:
-
-- Pagefind (static index)
-
-SEO:
-
-- JSON-LD schema generated at build time
-
-Deployment target:
-
-- Static hosting via CDN (Vercel)
-
----
-
-# 4. STATIC-FIRST RULE
-
-All dynamic behavior must be:
-
-- precomputed at build time OR
-- client-side enhancement only when strictly necessary.
-
-Examples:
-
-GOOD:
-
-- reading time computed during build
-- related posts computed during build
-- OG images generated during build
-
-BAD:
-
-- server API for content
-- runtime database queries
-- dynamic content fetching
-
----
-
-# 5. DESIGN SYSTEM RULES
-
-Brand identity:
-
-- Lavender accent color
-- Editorial typography
-- Geometric diamond motif
-
-Visual style:
-
-- Editorial
-- Academic
-- Minimal motion
-
-DO NOT introduce:
-
-- flashy gradients
-- heavy animation frameworks
-- UI libraries without approval.
-
----
-
-# 6. PERFORMANCE PRIORITY
-
-Agents must:
-
-- minimize JavaScript
-- avoid unnecessary hydration
-- prefer CSS over JS
-- avoid large dependencies.
-
----
-
-# 7. COMPONENT DESIGN GUIDELINES
-
-Components must:
-
-- be small and composable
-- follow editorial layout system
-- avoid state-heavy patterns.
-
-Examples:
-
-Allowed:
-
-- TableOfContents
-- ReadingProgress
-- ShareButtons
-
-Not allowed:
-
-- interactive dashboards
-- user accounts
-- real-time features.
-
----
-
-# 8. SEO AUTOMATION
-
-SEO must be implemented via:
-
-- static metadata generation
-- structured data (JSON-LD)
-- sitemap + RSS
-- internal linking logic.
-
-Agents should never introduce SEO plugins requiring backend.
-
----
-
-# 9. DARK MODE
-
-Dark mode must:
-
-- use CSS variables
-- avoid heavy JS frameworks.
-
----
-
-# 10. FILE STRUCTURE
-
-Agents must respect existing folder structure.
-
-Do not reorganize directories without explicit instruction.
-
----
-
-# 11. WHEN UNSURE
-
-If implementation options include:
-
-A) static solution
-B) dynamic/backend solution
-
-Always choose:
-
--> static solution.
-
----
-
-# 12. NON-GOALS
-
-This project is NOT:
-
-- a blogging platform
-- a CMS
-- a SaaS application
-- a user-facing web app
-
-It is:
-
--> a high-performance editorial website.
-
----
-
-# FINAL RULE
-
-Architecture is final.
-
-Agents must extend within constraints, not redesign them.
+<file path="src/styles/tokens.css">
+:root {
+  --color-lavender-500: #8b7cf6;
+  --color-lavender-600: #6d5cf5;
+  --color-lavender-soft: #f3f1ff;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-border: #e5e7eb;
+  --color-bg: #ffffff;
+  --color-bg-muted: #f9fafb;
+  --color-code-bg: #f3f4f6;
+
+  --reading-width: 720px;
+  --shape-radius: 12px;
+  --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --line-height-body: 1.78;
+}
+
+html.dark {
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
+  --color-bg: #111827;
+  --color-bg-muted: #1f2937;
+  --color-code-bg: #111827;
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [
+    ".astro/types.d.ts",
+    "**/*"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}
 </file>
 
 <file path="astro.config.mjs">
@@ -1153,6 +2036,7 @@ import rehypeSlug from "rehype-slug";
 export default defineConfig({
   site: "https://www.championsprep.in/blog",
   output: "static",
+  trailingSlash: "always",
   integrations: [
     mdx({
       rehypePlugins: [rehypeSlug]
@@ -1668,247 +2552,128 @@ If any feature introduces:
 * admin UI
 
 Reject it. Prefer static alternative.
-</file>
 
-<file path="package.json">
+---
+
+# 21\. Enhancement Addendum (Implemented)
+
+This section documents enhancements implemented after the original v2 scope. These are additive and do not redesign architecture.
+
+## 21.1 PRD Clarifications That Supersede Earlier Lines
+
+* FAQ JSON-LD generation is explicit frontmatter-based, not automatic heading parsing.
+* Breadcrumb UX and schema use `Blog > [Post Title]` (cluster breadcrumb link removed).
+* Canonical base is `https://www.championsprep.in/blog`.
+
+## 21.2 Extended Content Model
+
+Additional frontmatter fields:
+
+```
+faqItems?: Array<{ q: string; a: string }>
+```
+
+Rules:
+
+* `FAQPage` JSON-LD is emitted only when `faqItems` exists and has values.
+* No heuristic extraction from markdown headings.
+
+## 21.3 Additional Components
+
+Implemented:
+
+|Component|Purpose|
+|-|-|
+|InlineAssistant|Inline stateless learning help with hybrid static+runtime flow|
+|StudyTool|Inline revision/mistakes/check-understanding learning blocks|
+|SmartCTA|Contextual mid/end conversion CTAs with GA event metadata|
+
+## 21.4 Hybrid AI Mode
+
+Inline assistant response order:
+
+1. Cached runtime response (in-memory)
+2. Static build artifact (`/data/assistant-responses.json`)
+3. Optional runtime enhancement via secure proxy (`/api/inline-ai`)
+
+Behavior:
+
+* Static response is rendered first for instant UX.
+* Runtime AI enhancement never blocks initial response.
+* If runtime fails, static response remains and runtime attempts are disabled in-memory for current session.
+* No browser-side API key exposure.
+
+## 21.5 Smart Context Extraction
+
+Inline assistant sends only nearest learning section context:
+
+* Sections wrapped as `<section data-learning-section>`.
+* Payload includes:
+
+```
 {
-  "name": "cprep-blog",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "astro dev",
-    "prebuild": "node scripts/generate-og.mjs",
-    "build": "astro build",
-    "postbuild": "pagefind --site dist",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/mdx": "^4.3.13",
-    "@astrojs/rss": "^4.0.15",
-    "@astrojs/sitemap": "^3.7.0",
-    "@fontsource/inter": "^5.2.8",
-    "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.1.18",
-    "@vite-pwa/astro": "^1.2.0",
-    "astro": "^5.17.2",
-    "fast-glob": "^3.3.3",
-    "gray-matter": "^4.0.3",
-    "pagefind": "^1.4.0",
-    "rehype-slug": "^6.0.0",
-    "satori": "^0.19.2",
-    "tailwindcss": "^4.1.18"
-  }
+  topic: string,
+  context: string, // truncated ~1200 chars
+  type: "simplify" | "exam-summary" | "example"
 }
-</file>
+```
 
-<file path="scripts/generate-og.mjs">
-import fs from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
-import fg from "fast-glob";
-import matter from "gray-matter";
-import satori from "satori";
-import { Resvg } from "@resvg/resvg-js";
+Goal:
 
-const cwd = process.cwd();
-const postsPattern = "src/content/blog/**/*.{md,mdx}";
-const ogOutDir = path.join(cwd, "public", "blog", "og");
-const fontPath = path.join(
-  cwd,
-  "node_modules",
-  "@fontsource",
-  "inter",
-  "files",
-  "inter-latin-600-normal.woff"
-);
+* reduce token usage
+* improve topical relevance
+* preserve stateless behavior.
 
-function toSlug(filePath) {
-  const rel = path.relative(path.join(cwd, "src", "content", "blog"), filePath);
-  return rel.replace(/\\/g, "/").replace(/\.(md|mdx)$/i, "");
-}
+## 21.6 Secure Proxy Exception
 
-function cleanTitle(title) {
-  return String(title || "ChampionsPrep Blog").trim().slice(0, 120);
-}
+A minimal stateless edge proxy is allowed for AI call security:
 
-async function generateOne({ title, slug, fontData }) {
-  const element = {
-    type: "div",
-    props: {
-      style: {
-        width: "1200px",
-        height: "630px",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "64px",
-        backgroundColor: "#ffffff",
-        color: "#111827",
-        fontFamily: "Inter"
-      },
-      children: [
-        {
-          type: "div",
-          props: {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              color: "#6D5CF5",
-              fontSize: "30px",
-              fontWeight: 600
-            },
-            children: [
-              {
-                type: "div",
-                props: {
-                  style: {
-                    width: "14px",
-                    height: "14px",
-                    transform: "rotate(45deg)",
-                    backgroundColor: "#8B7CF6"
-                  }
-                }
-              },
-              "ChampionsPrep Blog"
-            ]
-          }
-        },
-        {
-          type: "div",
-          props: {
-            style: {
-              fontSize: "60px",
-              lineHeight: 1.15,
-              fontWeight: 600,
-              maxWidth: "1000px"
-            },
-            children: cleanTitle(title)
-          }
-        },
-        {
-          type: "div",
-          props: {
-            style: {
-              fontSize: "28px",
-              color: "#4B5563"
-            },
-            children: `championsprep.in/blog/${slug}`
-          }
-        }
-      ]
-    }
-  };
+* Route: `/api/inline-ai`
+* Runtime: edge
+* Reads `OPENAI_API_KEY` from environment
+* Proxies to OpenAI API
+* Enforces concise output settings:
+  * `max_output_tokens: 150`
+  * `temperature: 0.3`
 
-  const svg = await satori(element, {
-    width: 1200,
-    height: 630,
-    fonts: [
-      {
-        name: "Inter",
-        data: fontData,
-        weight: 600,
-        style: "normal"
-      }
-    ]
-  });
+This is an exception for secure key handling and not a backend content system.
 
-  const pngData = new Resvg(svg).render().asPng();
-  const outFile = path.join(ogOutDir, `${slug}.png`);
-  await fs.mkdir(path.dirname(outFile), { recursive: true });
-  await fs.writeFile(outFile, pngData);
-}
+## 21.7 Learning Graph SEO
 
-async function main() {
-  const fontData = await fs.readFile(fontPath);
-  const files = await fg(postsPattern, { cwd, absolute: true });
+Added schema blocks:
 
-  await fs.mkdir(ogOutDir, { recursive: true });
+* `LearningResource`
+  * `learningResourceType: "Lesson"`
+  * `educationalLevel: "Class 11-12"`
+  * `teaches: cluster`
+* Cluster learning path as `ItemList`
+  * ordered by date ASC
+  * deterministic tie-break by slug
+  * draft posts excluded
+  * canonical URLs included
 
-  for (const file of files) {
-    const base = path.basename(file);
-    if (base.startsWith("_")) continue;
+## 21.8 Editorial Focus + Learning UX Enhancements
 
-    const raw = await fs.readFile(file, "utf8");
-    const parsed = matter(raw);
-    if (parsed.data.draft) continue;
+Implemented:
 
-    const slug = toSlug(file);
-    await generateOne({
-      title: parsed.data.title,
-      slug,
-      fontData
-    });
-  }
-}
+* `body.reading-mode` via `IntersectionObserver` intro sentinel
+* Subtle 200ms `ease-out` transitions:
+  * calmer header/nav presence
+  * reduced TOC visual weight until hover
+  * emphasized reading column
+* Section completion cue (subtle checkmark)
+* Section-based reading wrappers and snap behavior for guided flow
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
-</file>
+## 21.9 PWA Layer (Lightweight)
 
-<file path="src/components/AuthorCard.astro">
----
-interface Props {
-  name: string;
-  bio?: string;
-  avatar?: string;
-}
+Added lightweight app shell support without framework-heavy PWA stack:
 
-const {
-  name,
-  bio = "ChampionsPrep editorial team",
-  avatar
-} = Astro.props as Props;
----
-<section class="author-card" aria-label="Author information">
-  {avatar ? <img class="author-card__avatar" src={avatar} alt={`${name} avatar`} loading="lazy" /> : null}
-  <div class="author-card__content">
-    <h3 class="author-card__name">{name}</h3>
-    <p class="author-card__bio">{bio}</p>
-  </div>
-</section>
+* `manifest.webmanifest`
+* static service worker (`public/sw.js`)
+* icon assets (`public/icons/*`)
+* registration in layout
 
-<style>
-  .author-card {
-    margin: 2rem 0 0;
-    border: 1px solid var(--color-border);
-    border-radius: var(--shape-radius);
-    padding: 0.9rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    background: var(--color-bg-muted);
-    transition: border-color 180ms ease, transform 180ms ease;
-  }
-
-  .author-card:hover {
-    border-color: var(--color-lavender-500);
-    transform: translateY(-1px);
-  }
-
-  .author-card__avatar {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 999px;
-    object-fit: cover;
-    flex: 0 0 3rem;
-  }
-
-  .author-card__name {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.3;
-  }
-
-  .author-card__bio {
-    margin: 0.25rem 0 0;
-    color: var(--color-text-secondary);
-  }
-</style>
+Design remains aligned to lavender + geometric motif.
 </file>
 
 <file path="src/components/Breadcrumbs.astro">
@@ -1947,202 +2712,241 @@ const { title } = Astro.props as Props;
 </style>
 </file>
 
-<file path="src/components/ExamTip.astro">
+<file path="src/components/InlineAssistant.astro">
 ---
 interface Props {
-  title?: string;
+  type?: "simplify" | "exam-summary" | "example";
+  context?: "section" | "article";
+  endpoint?: string;
 }
 
-const { title = "Exam Tip" } = Astro.props as Props;
+const { type = "simplify", context = "section", endpoint = "/api/inline-ai" } = Astro.props as Props;
 ---
-<aside class="exam-tip" aria-label="Exam preparation tip">
-  <h3 class="exam-tip__title">{title}</h3>
-  <div class="exam-tip__content">
-    <slot />
+<aside
+  class="inline-assistant"
+  data-inline-assistant
+  data-default-action={type}
+  data-context={context}
+  data-endpoint={endpoint}
+  aria-label="Inline study assistant"
+>
+  <p class="inline-assistant__label">AI Study Assist</p>
+  <div class="inline-assistant__actions">
+    <button type="button" data-assistant-action="simplify" aria-expanded="false">Simplify explanation</button>
+    <button type="button" data-assistant-action="exam-summary" aria-expanded="false">Exam-focused summary</button>
+    <button type="button" data-assistant-action="example" aria-expanded="false">Show example</button>
   </div>
+  <div class="inline-assistant__output" data-assistant-output hidden></div>
 </aside>
 
-<style>
-  .exam-tip {
-    border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-lavender-500);
-    border-radius: var(--shape-radius);
-    padding: 0.9rem 1rem;
-    background: var(--color-lavender-soft);
-    margin: 1.5rem 0;
-    transition: border-color 180ms ease, box-shadow 180ms ease;
-  }
+<script>
+  const blocks = Array.from(document.querySelectorAll("[data-inline-assistant]"));
+  const normalizeTopic = (value) =>
+    value.replace(/[✓#]/g, " ").replace(/\s+/g, " ").trim();
 
-  .exam-tip:hover {
-    border-color: var(--color-lavender-500);
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-lavender-500), transparent 85%);
-  }
+  const extractContext = (root, mode) => {
+    if (mode === "article") {
+      const body = document.querySelector(".post-body");
+      const articleText = body?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+      return {
+        topic: "Article",
+        contextText: articleText
+      };
+    }
 
-  .exam-tip__title {
-    margin: 0 0 0.4rem;
-    font-size: 1rem;
-    line-height: 1.35;
-  }
+    const section = root.closest("[data-learning-section]");
+    if (section instanceof HTMLElement) {
+      const heading = section.querySelector("h2,h3");
+      const shadow = section.cloneNode(true);
+      if (shadow instanceof HTMLElement) {
+        for (const assistant of shadow.querySelectorAll("[data-inline-assistant]")) {
+          assistant.remove();
+        }
+      }
+      return {
+        topic: normalizeTopic(heading?.textContent ?? "") || "Section",
+        contextText:
+          (shadow instanceof HTMLElement ? shadow.innerText : section.innerText)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 1200)
+      };
+    }
 
-  .exam-tip__content :global(p:last-child) {
-    margin-bottom: 0;
-  }
-</style>
-</file>
+    // Fallback path when section wrappers are absent.
+    const fallbackHeading =
+      (root.previousElementSibling instanceof HTMLHeadingElement ? root.previousElementSibling.textContent : "") || "";
+    const fallbackText =
+      root.parentElement?.textContent?.replace(/\s+/g, " ").trim().slice(0, 1200) ?? "";
+    return {
+      topic: normalizeTopic(fallbackHeading) || "Section",
+      contextText: fallbackText
+    };
+  };
 
-<file path="src/components/MicroFeedback.astro">
----
-interface Props {
-  postSlug: string;
-  cluster: string;
-}
+  for (const block of blocks) {
+    const buttons = Array.from(block.querySelectorAll("[data-assistant-action]"));
+    const output = block.querySelector("[data-assistant-output]");
+    if (!(output instanceof HTMLElement) || !buttons.length) continue;
 
-const { postSlug, cluster } = Astro.props as Props;
----
-<section class="micro-feedback" aria-label="Article feedback">
-  <h2>Was this helpful?</h2>
-  <div class="micro-feedback__buttons">
-    <button type="button" data-feedback-value="helpful" aria-label="Helpful">👍</button>
-    <button type="button" data-feedback-value="not_helpful" aria-label="Not helpful">👎</button>
-  </div>
-</section>
+    let activeAction = block.getAttribute("data-default-action") ?? "";
+    let loaded = null;
+    let activeRequestId = 0;
 
-<script define:vars={{ postSlug, cluster }}>
-  const feedbackRoot = document.querySelector(".micro-feedback");
-  if (feedbackRoot) {
-    let submitted = false;
-    feedbackRoot.addEventListener("click", (event) => {
+    const closeAll = () => {
+      for (const button of buttons) {
+        if (button instanceof HTMLButtonElement) {
+          button.setAttribute("aria-expanded", "false");
+        }
+      }
+      output.hidden = true;
+      output.textContent = "";
+      activeAction = "";
+    };
+
+    block.addEventListener("click", async (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-      const button = target.closest("[data-feedback-value]");
+      const button = target.closest("[data-assistant-action]");
       if (!(button instanceof HTMLButtonElement)) return;
-      if (submitted) return;
-      const value = button.getAttribute("data-feedback-value");
-      if (!value) return;
 
-      if (typeof window.cpTrack === "function") {
-        window.cpTrack("article_feedback", {
-          value,
-          post_slug: postSlug,
-          cluster
-        });
+      const action = button.getAttribute("data-assistant-action");
+      if (!action) return;
+
+      if (activeAction === action && !output.hidden) {
+        closeAll();
+        return;
       }
 
-      submitted = true;
-      feedbackRoot.setAttribute("data-submitted", "true");
-      button.textContent = "Thanks";
+      for (const item of buttons) {
+        if (item instanceof HTMLButtonElement) {
+          item.setAttribute("aria-expanded", item === button ? "true" : "false");
+        }
+      }
+
+      output.hidden = false;
+      output.textContent = "Loading focused help...";
+
+      try {
+        if (!loaded) {
+          loaded = import("../utils/inlineAssistantClient");
+        }
+        const module = await loaded;
+        const context = block.getAttribute("data-context") ?? "section";
+        const endpoint = block.getAttribute("data-endpoint") ?? "";
+        const { topic, contextText } = extractContext(block, context);
+        const postSlug = window.__cpGaContext?.post_slug ?? "";
+        const cacheKey = `${postSlug}::${topic}::${action}`;
+        const requestId = ++activeRequestId;
+
+        // 1) Runtime cache first.
+        const cached = module.getCachedRuntimeResponse(cacheKey);
+        if (cached) {
+          output.textContent = cached;
+          activeAction = action;
+          return;
+        }
+
+        // 2) Static response next (instant first paint for the hint).
+        const staticText = await module.getStaticResponse(action, cacheKey);
+        if (requestId !== activeRequestId) return;
+        output.textContent = staticText;
+        activeAction = action;
+
+        // 3) Runtime enhancement last (optional progressive upgrade).
+        module
+          .requestRuntimeHint({
+            endpoint: endpoint || undefined,
+            action,
+            topic,
+            contextText,
+            cacheKey
+          })
+          .then((runtimeText) => {
+            if (requestId !== activeRequestId) return;
+            if (activeAction !== action) return;
+            if (!runtimeText || runtimeText === output.textContent) return;
+            output.classList.add("inline-assistant__output--refresh");
+            output.textContent = runtimeText;
+            requestAnimationFrame(() => {
+              output.classList.remove("inline-assistant__output--refresh");
+            });
+          })
+          .catch(() => {});
+      } catch {
+        output.textContent = "Unable to fetch assistance right now. Try again in a moment.";
+      }
     });
   }
 </script>
 
 <style>
-  .micro-feedback {
-    margin-top: 1.5rem;
-    padding: 0.8rem;
+  .inline-assistant {
+    margin: 1.2rem 0;
     border: 1px solid var(--color-border);
     border-radius: var(--shape-radius);
+    padding: 0.85rem;
     background: var(--color-bg-muted);
   }
 
-  .micro-feedback h2 {
+  .inline-assistant__label {
     margin: 0 0 0.5rem;
-    font-size: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
-  .micro-feedback__buttons {
+  .inline-assistant__label::before {
+    content: "";
+    width: 0.48rem;
+    height: 0.48rem;
+    background: var(--color-lavender-500);
+    transform: rotate(45deg);
+  }
+
+  .inline-assistant__actions {
     display: flex;
-    gap: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.45rem;
   }
 
-  .micro-feedback button {
+  .inline-assistant__actions button {
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    min-width: 2.5rem;
-    min-height: 2.2rem;
     background: var(--color-bg);
+    color: var(--color-text-primary);
+    padding: 0.38rem 0.68rem;
+    font-size: 0.82rem;
     cursor: pointer;
     transition: border-color 180ms ease, transform 180ms ease;
   }
 
-  .micro-feedback button:hover {
+  .inline-assistant__actions button:hover {
     border-color: var(--color-lavender-500);
-    transform: translateY(-1px);
+    transform: scale(1.02);
   }
 
-  .micro-feedback[data-submitted="true"] button {
-    opacity: 0.7;
+  .inline-assistant__actions button[aria-expanded="true"] {
+    border-color: var(--color-lavender-500);
+    background: var(--color-lavender-soft);
   }
-</style>
-</file>
 
-<file path="src/components/PrevNextNav.astro">
----
-interface LinkItem {
-  href: string;
-  title: string;
-}
-
-interface Props {
-  previous?: LinkItem;
-  next?: LinkItem;
-}
-
-const { previous, next } = Astro.props as Props;
----
-<nav class="prev-next-nav" aria-label="Previous and next posts">
-  <div class="prev-next-nav__col">
-    <div class="prev-next-nav__label">Previous</div>
-    {previous ? (
-      <a href={previous.href}>{previous.title}</a>
-    ) : (
-      <span class="prev-next-nav__empty">None</span>
-    )}
-  </div>
-  <div class="prev-next-nav__col prev-next-nav__col--right">
-    <div class="prev-next-nav__label">Next</div>
-    {next ? (
-      <a href={next.href}>{next.title}</a>
-    ) : (
-      <span class="prev-next-nav__empty">None</span>
-    )}
-  </div>
-</nav>
-
-<style>
-  .prev-next-nav {
-    margin-top: 2rem;
+  .inline-assistant__output {
+    margin-top: 0.7rem;
     border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-    padding: 1rem 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    padding-top: 0.65rem;
+    min-height: 2.4rem;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
   }
 
-  .prev-next-nav__col--right {
-    text-align: right;
-  }
-
-  .prev-next-nav__label {
-    font-size: 0.78rem;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.25rem;
-  }
-
-  .prev-next-nav__empty {
-    color: var(--color-text-secondary);
-  }
-
-  @media (max-width: 640px) {
-    .prev-next-nav {
-      grid-template-columns: 1fr;
-    }
-
-    .prev-next-nav__col--right {
-      text-align: left;
-    }
+  .inline-assistant__output--refresh {
+    opacity: 0.86;
+    transition: opacity 180ms ease-out;
   }
 </style>
 </file>
@@ -2171,9 +2975,21 @@ const { previous, next } = Astro.props as Props;
       bar.style.transform = `scaleX(${ratio})`;
     };
 
+    let ticking = false;
+    const scheduleUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        updateProgress();
+      });
+    };
+
+    const cleanupController = new AbortController();
     updateProgress();
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    window.addEventListener("resize", updateProgress);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true, signal: cleanupController.signal });
+    window.addEventListener("resize", scheduleUpdate, { signal: cleanupController.signal });
+    window.addEventListener("pagehide", () => cleanupController.abort(), { once: true });
   }
 </script>
 
@@ -2195,83 +3011,6 @@ const { previous, next } = Astro.props as Props;
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 80ms linear;
-  }
-</style>
-</file>
-
-<file path="src/components/RelatedPosts.astro">
----
-import { getCollection } from "astro:content";
-
-interface Props {
-  currentSlug: string;
-  cluster: string;
-  tags: string[];
-  limit?: number;
-}
-
-const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
-const tagSet = new Set(tags);
-
-const candidates = (await getCollection("blog", ({ data }) => !data.draft)).filter(
-  (post) => post.slug !== currentSlug
-);
-
-const scored = candidates
-  .map((post) => {
-    let score = 0;
-    if (post.data.cluster === cluster) score += 3;
-    for (const tag of post.data.tags) {
-      if (tagSet.has(tag)) score += 1;
-    }
-    return { post, score };
-  })
-  .sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return b.post.data.date.getTime() - a.post.data.date.getTime();
-  });
-
-const selected: typeof scored = [];
-for (const item of scored) {
-  if (selected.length >= limit) break;
-  if (item.score > 0) selected.push(item);
-}
-if (selected.length < limit) {
-  for (const item of scored) {
-    if (selected.length >= limit) break;
-    if (!selected.some((picked) => picked.post.slug === item.post.slug)) {
-      selected.push(item);
-    }
-  }
-}
----
-<section class="related-posts" aria-label="Related posts">
-  <h2>Related Posts</h2>
-  {selected.length === 0 ? (
-    <p>No related posts yet.</p>
-  ) : (
-    <ul>
-      {selected.map(({ post }) => (
-        <li>
-          <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
-        </li>
-      ))}
-    </ul>
-  )}
-</section>
-
-<style>
-  .related-posts {
-    margin-top: 1.8rem;
-  }
-
-  .related-posts ul {
-    padding-left: 1.1rem;
-  }
-
-  .related-posts a {
-    text-decoration: none;
-    transition: color 180ms ease;
   }
 </style>
 </file>
@@ -2346,116 +3085,6 @@ if (selected.length < limit) {
 </style>
 </file>
 
-<file path="src/components/ShareButtons.astro">
----
-interface Props {
-  url: string;
-  title: string;
-  postSlug: string;
-  cluster: string;
-  instagramId?: string;
-}
-
-const {
-  url,
-  title,
-  postSlug,
-  cluster,
-  instagramId = "champions.prep"
-} = Astro.props as Props;
-
-const encodedUrl = encodeURIComponent(url);
-const encodedTitle = encodeURIComponent(title);
-const whatsappHref = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
-const xHref = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
-const instagramHref = `https://www.instagram.com/${instagramId}/`;
----
-<section class="share-buttons" aria-label="Share this article">
-  <h2>Share</h2>
-  <div class="share-buttons__row">
-    <a href={whatsappHref} target="_blank" rel="noopener noreferrer" data-share-platform="whatsapp">
-      WhatsApp
-    </a>
-    <a href={xHref} target="_blank" rel="noopener noreferrer" data-share-platform="x">
-      X
-    </a>
-    <button type="button" data-share-platform="copy">Copy Link</button>
-    <a href={instagramHref} target="_blank" rel="noopener noreferrer" data-share-platform="instagram">
-      Instagram @{instagramId}
-    </a>
-  </div>
-</section>
-
-<script define:vars={{ url, postSlug, cluster }}>
-  const shareRoot = document.querySelector(".share-buttons");
-  if (shareRoot) {
-    shareRoot.addEventListener("click", async (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
-      const el = target.closest("[data-share-platform]");
-      if (!(el instanceof HTMLElement)) return;
-      const platform = el.getAttribute("data-share-platform");
-      if (!platform) return;
-
-      if (platform === "copy") {
-        try {
-          await navigator.clipboard.writeText(url);
-          el.textContent = "Copied";
-          setTimeout(() => {
-            el.textContent = "Copy Link";
-          }, 1200);
-        } catch {}
-      }
-
-      if (typeof window.cpTrack === "function") {
-        window.cpTrack("share_click", {
-          platform,
-          post_slug: postSlug,
-          cluster
-        });
-      }
-    });
-  }
-</script>
-
-<style>
-  .share-buttons {
-    margin-top: 1.5rem;
-  }
-
-  .share-buttons h2 {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .share-buttons__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.55rem;
-  }
-
-  .share-buttons a,
-  .share-buttons button {
-    appearance: none;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.42rem 0.8rem;
-    background: var(--color-bg);
-    color: var(--color-text-primary);
-    text-decoration: none;
-    cursor: pointer;
-    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
-  }
-
-  .share-buttons a:hover,
-  .share-buttons button:hover {
-    border-color: var(--color-lavender-500);
-    color: var(--color-lavender-600);
-    transform: translateY(-1px);
-  }
-</style>
-</file>
-
 <file path="src/components/SignupCTA.astro">
 ---
 interface Props {
@@ -2519,157 +3148,6 @@ const {
     transform: scale(1.02);
   }
 </style>
-</file>
-
-<file path="src/components/TableOfContents.astro">
----
-import type { MarkdownHeading } from "astro";
-
-interface Props {
-  headings: MarkdownHeading[];
-}
-
-const { headings } = Astro.props as Props;
-const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
----
-{tocItems.length > 0 && (
-  <aside class="toc" aria-label="Table of contents">
-    <details class="toc__mobile">
-      <summary>Table of Contents</summary>
-      <ul>
-        {tocItems.map((item) => (
-          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
-            <a href={`#${item.slug}`}>{item.text}</a>
-          </li>
-        ))}
-      </ul>
-    </details>
-
-    <div class="toc__desktop">
-      <h2>Table of Contents</h2>
-      <ul>
-        {tocItems.map((item) => (
-          <li class={item.depth === 3 ? "toc__item toc__item--nested" : "toc__item"}>
-            <a href={`#${item.slug}`} data-toc-link={item.slug}>
-              {item.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </aside>
-)}
-
-<script>
-  const links = Array.from(document.querySelectorAll("[data-toc-link]"));
-  const sections = links
-    .map((link) => {
-      const slug = link.getAttribute("data-toc-link");
-      if (!slug) return null;
-      const el = document.getElementById(slug);
-      return el ? { slug, el } : null;
-    })
-    .filter(Boolean);
-
-  if (links.length > 0 && sections.length > 0) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length === 0) return;
-        const active = visible[0].target.id;
-        links.forEach((link) => {
-          if (link.getAttribute("data-toc-link") === active) {
-            link.setAttribute("aria-current", "true");
-          } else {
-            link.removeAttribute("aria-current");
-          }
-        });
-      },
-      { rootMargin: "-25% 0px -65% 0px", threshold: 0.1 }
-    );
-
-    sections.forEach((section) => observer.observe(section.el));
-  }
-</script>
-
-<style>
-  .toc {
-    width: 100%;
-  }
-
-  .toc h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1rem;
-  }
-
-  .toc ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .toc__item {
-    margin: 0.35rem 0;
-  }
-
-  .toc__item--nested {
-    padding-left: 0.9rem;
-  }
-
-  .toc a {
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    transition: color 160ms ease;
-  }
-
-  .toc a:hover,
-  .toc a[aria-current="true"] {
-    color: var(--color-lavender-600);
-  }
-
-  .toc__desktop {
-    display: none;
-  }
-
-  .toc__mobile summary {
-    cursor: pointer;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  @media (min-width: 1024px) {
-    .toc__mobile {
-      display: none;
-    }
-
-    .toc__desktop {
-      display: block;
-      position: sticky;
-      top: 1rem;
-      border: 1px solid var(--color-border);
-      border-radius: var(--shape-radius);
-      padding: 0.9rem;
-      background: var(--color-bg);
-    }
-  }
-</style>
-</file>
-
-<file path="src/content/blog/_template.mdx">
----
-title: 'Post Title'
-description: 'Post description.'
-date: 2026-02-14
-author: 'ChampionsPrep'
-tags:
-  - sample-tag
-cluster: sample-cluster
-draft: true
----
-
-Draft content.
 </file>
 
 <file path="src/content/blog/sample-post-2.mdx">
@@ -2771,156 +3249,6 @@ const blog = defineCollection({
 });
 
 export const collections = { blog };
-</file>
-
-<file path="src/layouts/BlogLayout.astro">
----
-import '../styles/global.css';
-import '../styles/tokens.css';
-import '../styles/typography.css';
-import '../styles/print.css';
-
-type JsonLdValue = Record<string, unknown>;
-
-interface Props {
-  title?: string;
-  description?: string;
-  canonical?: string;
-  ogImage?: string;
-  ogType?: string;
-  noindex?: boolean;
-  jsonLd?: JsonLdValue | JsonLdValue[];
-  gaContext?: Record<string, string>;
-}
-
-const {
-  title = "ChampionsPrep Blog",
-  description = "High-performance editorial content for exam preparation.",
-  canonical,
-  ogImage,
-  ogType = "website",
-  noindex = false,
-  jsonLd = [],
-  gaContext = {}
-} = Astro.props as Props;
-
-const pageTitle = title.includes("ChampionsPrep") ? title : `${title} | ChampionsPrep Blog`;
-const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
-const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
-const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
-const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
----
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <meta name="theme-color" content="#6d5cf5" />
-    <meta property="og:type" content={ogType} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
-    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={description} />
-    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
-    <script is:inline>
-      (() => {
-        const key = "theme";
-        let mode = "light";
-        try {
-          const saved = localStorage.getItem(key);
-          if (saved === "light" || saved === "dark") {
-            mode = saved;
-          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            mode = "dark";
-          }
-        } catch {}
-        if (mode === "dark") {
-          document.documentElement.classList.add("dark");
-        }
-      })();
-    </script>
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
-    <link
-      rel="preload"
-      href="/fonts/inter-latin-400-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin="anonymous"
-    />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
-    {jsonLdBlocks.map((block) => (
-      <script type="application/ld+json" set:html={JSON.stringify(block)} />
-    ))}
-    {gaMeasurementId && (
-      <>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
-        <script is:inline define:vars={{ gaMeasurementId }}>
-          window.dataLayer = window.dataLayer || [];
-          function gtag() {
-            window.dataLayer.push(arguments);
-          }
-          window.gtag = window.gtag || gtag;
-          window.gtag("js", new Date());
-          window.gtag("config", gaMeasurementId);
-        </script>
-      </>
-    )}
-    <script is:inline define:vars={{ gaContext }}>
-      window.__cpGaContext = gaContext;
-      window.cpTrack = function (eventName, eventParams) {
-        if (typeof window.gtag !== "function") return;
-        const merged = Object.assign({}, window.__cpGaContext || {}, eventParams || {});
-        window.gtag("event", eventName, merged);
-      };
-    </script>
-  </head>
-  <body>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
-      Toggle Theme
-    </button>
-    <main class="page-shell">
-      <article class="editorial" data-pagefind-body>
-        <slot />
-      </article>
-    </main>
-    <script is:inline>
-      (() => {
-        const key = "theme";
-        const button = document.querySelector("[data-theme-toggle]");
-        if (!(button instanceof HTMLButtonElement)) return;
-
-        const syncLabel = () => {
-          const dark = document.documentElement.classList.contains("dark");
-          button.textContent = dark ? "Light Mode" : "Dark Mode";
-        };
-
-        syncLabel();
-        button.addEventListener("click", () => {
-          const isDark = document.documentElement.classList.toggle("dark");
-          try {
-            localStorage.setItem(key, isDark ? "dark" : "light");
-          } catch {}
-          syncLabel();
-        });
-      })();
-    </script>
-    <script is:inline>
-      (() => {
-        if (!("serviceWorker" in navigator)) return;
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js", { scope: "/blog/" }).catch(() => {});
-        });
-      })();
-    </script>
-  </body>
-</html>
 </file>
 
 <file path="src/pages/blog/[...slug].astro">
@@ -3323,7 +3651,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
 
 const pageTitle = "Blog";
 const pageDescription = "Editorial posts and exam-prep insights from ChampionsPrep.";
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const canonical = new URL("/blog/", Astro.site ?? Astro.url).toString();
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Blog",
@@ -3332,7 +3660,7 @@ const jsonLd = {
   url: canonical
 };
 ---
-<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd} pagefindStyles={true}>
   <h1>Blog</h1>
   <p>Editorial posts and exam-prep insights.</p>
   <SearchWidget />
@@ -3384,7 +3712,7 @@ const posts = allPosts
 
 const pageTitle = `Tag: ${tagLabel}`;
 const pageDescription = `Posts tagged with ${tagLabel}.`;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toString();
 ---
 <BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
   <h1>{pageTitle}</h1>
@@ -3398,29 +3726,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
     ))}
   </ul>
 </BlogLayout>
-</file>
-
-<file path="src/pages/rss.xml.ts">
-import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
-
-export async function GET(context: { site: URL | undefined }) {
-  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.date.getTime() - a.data.date.getTime()
-  );
-
-  return rss({
-    title: "ChampionsPrep Blog",
-    description: "Editorial posts and exam-prep insights from ChampionsPrep.",
-    site: context.site ?? new URL("https://www.championsprep.in/blog"),
-    items: posts.map((post) => ({
-      title: post.data.title,
-      description: post.data.description,
-      pubDate: post.data.date,
-      link: `/blog/${post.slug}/`
-    }))
-  });
-}
 </file>
 
 <file path="src/styles/global.css">
@@ -3533,82 +3838,6 @@ a:hover {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
-}
-</file>
-
-<file path="src/styles/print.css">
-@media print {
-  * {
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  html,
-  body {
-    color: #000 !important;
-    background: #fff !important;
-    font-size: 12pt;
-    line-height: 1.45;
-  }
-
-  nav,
-  footer,
-  .signup-cta,
-  .share-buttons,
-  .reading-progress,
-  .toc,
-  .theme-toggle {
-    display: none !important;
-  }
-
-  .page-shell {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  a[href]::after {
-    content: " (" attr(href) ")";
-    font-size: 90%;
-    word-break: break-all;
-  }
-
-  pre,
-  code {
-    white-space: pre-wrap !important;
-    word-wrap: break-word !important;
-    overflow-wrap: anywhere;
-  }
-}
-</file>
-
-<file path="src/styles/tokens.css">
-:root {
-  --color-lavender-500: #8b7cf6;
-  --color-lavender-600: #6d5cf5;
-  --color-lavender-soft: #f3f1ff;
-
-  --color-text-primary: #111827;
-  --color-text-secondary: #4b5563;
-  --color-border: #e5e7eb;
-  --color-bg: #ffffff;
-  --color-bg-muted: #f9fafb;
-  --color-code-bg: #f3f4f6;
-
-  --reading-width: 720px;
-  --shape-radius: 12px;
-  --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --line-height-body: 1.78;
-}
-
-html.dark {
-  --color-text-primary: #f3f4f6;
-  --color-text-secondary: #9ca3af;
-  --color-border: #374151;
-  --color-bg: #111827;
-  --color-bg-muted: #1f2937;
-  --color-code-bg: #111827;
 }
 </file>
 
@@ -3763,17 +3992,299 @@ export function slugifyTag(tag: string): string {
 }
 </file>
 
-<file path="tsconfig.json">
-{
-  "extends": "astro/tsconfigs/strict",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-  ],
-  "exclude": [
-    "dist"
-  ]
+<file path="src/utils/inlineAssistantClient.ts">
+export type AssistantAction = "simplify" | "exam-summary" | "example";
+
+interface RequestInput {
+  endpoint?: string;
+  action: AssistantAction;
+  topic: string;
+  contextText: string;
+  cacheKey?: string;
 }
+
+interface FallbackPayload {
+  simplify?: string[];
+  "exam-summary"?: string[];
+  example?: string[];
+}
+
+const FALLBACK_ENDPOINT = "/data/assistant-responses.json";
+let endpointUnavailableUntil = 0;
+const runtimeCache = new Map<string, string>();
+let staticPayloadPromise: Promise<FallbackPayload> | null = null;
+const RUNTIME_RETRY_COOLDOWN_MS = 60_000;
+
+function concise(text: string): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= 260) return normalized;
+  return `${normalized.slice(0, 257).trimEnd()}...`;
+}
+
+function hashKey(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function pickFallback(payload: FallbackPayload, action: AssistantAction, seed = ""): string {
+  const options = payload[action] ?? [];
+  if (!options.length) return "Focus on the core concept, then solve one question before moving forward.";
+  const index = hashKey(`${action}:${seed}`) % options.length;
+  return options[index];
+}
+
+async function getStaticPayload(): Promise<FallbackPayload> {
+  if (!staticPayloadPromise) {
+    staticPayloadPromise = fetch(`${FALLBACK_ENDPOINT}?t=${Date.now()}`, { cache: "no-store" }).then((response) => {
+      if (!response.ok) throw new Error("assistant_fallback_failed");
+      return response.json() as Promise<FallbackPayload>;
+    });
+  }
+  return staticPayloadPromise;
+}
+
+export function getCachedRuntimeResponse(cacheKey?: string): string | undefined {
+  if (!cacheKey) return undefined;
+  return runtimeCache.get(cacheKey);
+}
+
+export async function getStaticResponse(action: AssistantAction, seed = ""): Promise<string> {
+  const payload = await getStaticPayload();
+  return concise(pickFallback(payload, action, seed));
+}
+
+export async function requestRuntimeHint(input: RequestInput): Promise<string> {
+  const { endpoint, action, topic, contextText, cacheKey } = input;
+
+  if (endpoint && Date.now() >= endpointUnavailableUntil) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          topic: topic.slice(0, 160),
+          context: contextText.slice(0, 1200),
+          type: action
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("assistant_request_failed");
+      }
+
+      const data = await response.json();
+      if (!data || typeof data.output !== "string") {
+        throw new Error("assistant_invalid_payload");
+      }
+      const value = concise(data.output);
+      if (cacheKey) runtimeCache.set(cacheKey, value);
+      return value;
+    } catch {
+      // Keep static-first behavior while still allowing periodic runtime retry.
+      endpointUnavailableUntil = Date.now() + RUNTIME_RETRY_COOLDOWN_MS;
+      throw new Error("assistant_request_failed");
+    }
+  }
+
+  throw new Error("assistant_endpoint_unavailable");
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "cprep-blog",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "pnpm -s node scripts/generate-og.mjs",
+    "build": "astro build",
+    "postbuild": "pagefind --site dist",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
+    "@fontsource/inter": "^5.2.8",
+    "@resvg/resvg-js": "^2.6.2",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.17.2",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "pagefind": "^1.4.0",
+    "rehype-slug": "^6.0.0",
+    "satori": "^0.19.2",
+    "tailwindcss": "^4.1.18",
+    "vercel": "^50.17.1"
+  }
+}
+</file>
+
+<file path="src/layouts/BlogLayout.astro">
+---
+import '../styles/global.css';
+import '../styles/tokens.css';
+import '../styles/typography.css';
+import '../styles/print.css';
+
+type JsonLdValue = Record<string, unknown>;
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: string;
+  noindex?: boolean;
+  pagefindStyles?: boolean;
+  jsonLd?: JsonLdValue | JsonLdValue[];
+  gaContext?: Record<string, string>;
+}
+
+const {
+  title = "ChampionsPrep Blog",
+  description = "High-performance editorial content for exam preparation.",
+  canonical,
+  ogImage,
+  ogType = "website",
+  noindex = false,
+  pagefindStyles = false,
+  jsonLd = [],
+  gaContext = {}
+} = Astro.props as Props;
+
+const pageTitle = title.includes("ChampionsPrep") ? title : `${title} | ChampionsPrep Blog`;
+const normalizeCanonical = (value: string): string => {
+  const parsed = new URL(value);
+  if (!/\.[a-z0-9]+$/i.test(parsed.pathname) && !parsed.pathname.endsWith("/")) {
+    parsed.pathname = `${parsed.pathname}/`;
+  }
+  return parsed.toString();
+};
+const canonicalUrl = normalizeCanonical(canonical ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString());
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
+const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#6d5cf5" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    <script is:inline>
+      (() => {
+        const key = "theme";
+        let mode = "light";
+        try {
+          const saved = localStorage.getItem(key);
+          if (saved === "light" || saved === "dark") {
+            mode = saved;
+          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            mode = "dark";
+          }
+        } catch {}
+        if (mode === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    {pagefindStyles && <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />}
+    <link
+      rel="preload"
+      href="/fonts/inter-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {jsonLdBlocks.map((block) => (
+      <script type="application/ld+json" set:html={JSON.stringify(block)} />
+    ))}
+    {gaMeasurementId && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+        <script is:inline define:vars={{ gaMeasurementId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            window.dataLayer.push(arguments);
+          }
+          window.gtag = window.gtag || gtag;
+          window.gtag("js", new Date());
+          window.gtag("config", gaMeasurementId);
+        </script>
+      </>
+    )}
+    <script is:inline define:vars={{ gaContext }}>
+      window.__cpGaContext = gaContext;
+      window.cpTrack = function (eventName, eventParams) {
+        if (typeof window.gtag !== "function") return;
+        const merged = Object.assign({}, window.__cpGaContext || {}, eventParams || {});
+        window.gtag("event", eventName, merged);
+      };
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+      Toggle Theme
+    </button>
+    <main class="page-shell">
+      <article class="editorial" data-pagefind-body>
+        <slot />
+      </article>
+    </main>
+    <script is:inline>
+      (() => {
+        const key = "theme";
+        const button = document.querySelector("[data-theme-toggle]");
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        const syncLabel = () => {
+          const dark = document.documentElement.classList.contains("dark");
+          button.textContent = dark ? "Light Mode" : "Dark Mode";
+        };
+
+        syncLabel();
+        button.addEventListener("click", () => {
+          const isDark = document.documentElement.classList.toggle("dark");
+          try {
+            localStorage.setItem(key, isDark ? "dark" : "light");
+          } catch {}
+          syncLabel();
+        });
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js", { scope: "/blog/" }).catch(() => {});
+        });
+      })();
+    </script>
+  </body>
+</html>
 </file>
 
 </files>
