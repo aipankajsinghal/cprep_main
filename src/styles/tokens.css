@@ -30,8 +30,16 @@
 
   --reading-width: 720px;
   --shape-radius: 12px;
+  --shape-radius-lg: 16px;
   --font-editorial: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
   --line-height-body: 1.78;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
 
   /* Aliases for migration (remove after all components are updated). */
   --color-lavender-500: var(--color-purple-deep);

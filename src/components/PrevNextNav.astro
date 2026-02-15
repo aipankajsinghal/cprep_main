@@ -17,7 +17,7 @@ const { previous, next } = Astro.props as Props;
     {previous ? (
       <a href={previous.href}>{previous.title}</a>
     ) : (
-      <span class="prev-next-nav__empty">None</span>
+      <span class="prev-next-nav__empty">No previous post</span>
     )}
   </div>
   <div class="prev-next-nav__col prev-next-nav__col--right">
@@ -25,7 +25,7 @@ const { previous, next } = Astro.props as Props;
     {next ? (
       <a href={next.href}>{next.title}</a>
     ) : (
-      <span class="prev-next-nav__empty">None</span>
+      <span class="prev-next-nav__empty">No next post</span>
     )}
   </div>
 </nav>
@@ -54,7 +54,16 @@ const { previous, next } = Astro.props as Props;
   }
 
   .prev-next-nav__empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     color: var(--color-text-secondary);
+  }
+
+  .prev-next-nav__empty::before {
+    content: "◇";
+    color: var(--color-purple-deep);
+    opacity: 0.45;
   }
 
   @media (max-width: 640px) {

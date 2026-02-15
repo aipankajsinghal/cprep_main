@@ -25,6 +25,10 @@
     display: none !important;
   }
 
+  .scroll-top {
+    display: none !important;
+  }
+
   .page-shell {
     width: 100% !important;
     max-width: none !important;

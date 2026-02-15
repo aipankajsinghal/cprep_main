@@ -47,6 +47,7 @@
     } catch {
       const root = document.getElementById("search");
       if (root) {
+        root.classList.add("search-widget__empty");
         root.textContent = "Search will be available after production build.";
       }
     }
@@ -63,5 +64,13 @@
   .search-widget h2 {
     margin-bottom: 0.5rem;
     font-size: 1rem;
+  }
+
+  .search-widget__empty {
+    border: 1px dashed var(--color-border);
+    border-radius: var(--shape-radius);
+    padding: 0.75rem 0.9rem;
+    color: var(--color-text-secondary);
+    background: color-mix(in srgb, var(--color-bg), var(--color-bg-muted) 55%);
   }
 </style>
