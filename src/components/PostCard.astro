@@ -54,14 +54,22 @@ const dateLabel = date.toLocaleDateString("en-IN", {
       ))}
     </div>
   )}
+
+  <a class="post-card__cta" href={href} aria-label={`Read ${title}`}>
+    Continue reading
+    <span aria-hidden="true">→</span>
+  </a>
 </article>
 
 <style>
   .post-card {
     border: 1px solid var(--color-border);
     border-radius: var(--shape-radius);
-    background: var(--color-bg-muted);
-    padding: 1rem 1.05rem;
+    background: linear-gradient(165deg, var(--color-bg) 0%, var(--color-bg-muted) 100%);
+    padding: 1.1rem 1.15rem;
+    height: 100%;
+    display: grid;
+    align-content: start;
     transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   }
 
@@ -74,11 +82,11 @@ const dateLabel = date.toLocaleDateString("en-IN", {
   .post-card--featured {
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--color-cream), transparent 40%),
-      color-mix(in srgb, var(--color-lavender-light), transparent 25%)
+      color-mix(in srgb, var(--color-cream), transparent 20%),
+      color-mix(in srgb, var(--color-lavender-light), transparent 8%)
     );
     border-color: color-mix(in srgb, var(--color-purple-deep), transparent 72%);
-    padding: 1.35rem;
+    padding: 1.45rem;
   }
 
   .post-card__meta {
@@ -129,5 +137,25 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     color: var(--color-text-secondary);
     font-size: 0.76rem;
     text-decoration: none;
+  }
+
+  .post-card__cta {
+    margin-top: 1rem;
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: var(--color-purple-deep);
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+
+  .post-card__cta span {
+    transition: transform 180ms ease;
+  }
+
+  .post-card:hover .post-card__cta span {
+    transform: translateX(3px);
   }
 </style>

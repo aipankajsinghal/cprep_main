@@ -29,19 +29,44 @@ const jsonLd = {
   description: pageDescription,
   url: canonical
 };
+
+const spotlightPosts = gridPosts.slice(0, 3);
 ---
 <BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd} pagefindStyles={true}>
-  <header class="blog-index__head">
+  <header class="blog-index__hero">
+    <p class="blog-index__eyebrow">Editorial Desk</p>
     <h1>ChampionsPrep Commerce Blog</h1>
     <p>{pageDescription}</p>
+    <div class="blog-index__hero-meta" role="list" aria-label="Blog highlights">
+      <p role="listitem"><strong>{posts.length}</strong> Published guides</p>
+      <p role="listitem"><strong>{availableClusters.length}</strong> Learning clusters</p>
+      <p role="listitem"><strong>Static-first</strong> performance-focused reading experience</p>
+    </div>
   </header>
 
   <SearchWidget />
 
+  {spotlightPosts.length > 0 && (
+    <section class="blog-index__spotlight" aria-labelledby="spotlight-title">
+      <h2 id="spotlight-title">Start with these reads</h2>
+      <div class="blog-index__spotlight-grid">
+        {spotlightPosts.map((post) => (
+          <a href={`/blog/${post.slug}/`} class="blog-index__spotlight-link">
+            <span class="blog-index__spotlight-cluster">{clusterLabel(post.data.cluster)}</span>
+            <span class="blog-index__spotlight-title">{post.data.title}</span>
+            <span class="blog-index__spotlight-meta">{post.minutesRead} min read</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
   {featuredPost && (
     <section class="blog-index__featured" aria-labelledby="featured-post-title">
-      <p class="blog-index__eyebrow">Latest Article</p>
-      <h2 id="featured-post-title">Featured Post</h2>
+      <div class="blog-index__section-heading">
+        <p class="blog-index__eyebrow">Latest Article</p>
+        <h2 id="featured-post-title">Featured Post</h2>
+      </div>
       <PostCard
         href={`/blog/${featuredPost.slug}/`}
         title={featuredPost.data.title}
@@ -57,7 +82,10 @@ const jsonLd = {
 
   {availableClusters.length > 0 && (
     <section class="blog-index__filters" aria-label="Filter posts by cluster">
-      <h2>Clusters</h2>
+      <div class="blog-index__section-heading">
+        <p class="blog-index__eyebrow">Browse by Topic</p>
+        <h2>Clusters</h2>
+      </div>
       <div class="blog-index__filter-row">
         <button type="button" data-cluster-filter="all" class="is-active">All</button>
         {availableClusters.map((cluster) => (
@@ -120,35 +148,101 @@ const jsonLd = {
 </script>
 
 <style>
-  .blog-index__head p {
-    margin-top: 0.45rem;
-    color: var(--color-text-secondary);
+  .blog-index__hero {
+    padding: clamp(1rem, 3.5vw, 1.8rem);
+    border-radius: var(--shape-radius);
+    border: 1px solid var(--color-border);
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-lavender-light), white 20%),
+      color-mix(in srgb, var(--color-bg), var(--color-cream) 30%)
+    );
   }
 
-  .blog-index__featured {
-    margin-top: 1.25rem;
+  .blog-index__hero h1 {
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .blog-index__hero p {
+    margin: 0.55rem 0 0;
+    color: var(--color-text-secondary);
+    max-width: 65ch;
+  }
+
+  .blog-index__hero-meta {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .blog-index__hero-meta p {
+    margin: 0;
+    padding: 0.45rem 0.65rem;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--color-bg), transparent 10%);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 10%);
+    font-size: 0.9rem;
   }
 
   .blog-index__eyebrow {
-    margin: 0 0 0.25rem;
+    margin: 0 0 0.35rem;
     color: var(--color-purple-deep);
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
   }
 
-  .blog-index__featured h2,
-  .blog-index__filters h2 {
-    margin: 0 0 0.7rem;
-    font-size: 1.05rem;
-  }
-
+  .blog-index__spotlight,
+  .blog-index__featured,
   .blog-index__filters {
-    margin-top: 1.4rem;
+    margin-top: 1.3rem;
+  }
+
+  .blog-index__section-heading h2,
+  .blog-index__spotlight h2 {
+    margin: 0;
+    font-size: 1.12rem;
+  }
+
+  .blog-index__spotlight-grid {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .blog-index__spotlight-link {
+    display: grid;
+    gap: 0.12rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    text-decoration: none;
+    background: var(--color-bg);
+  }
+
+  .blog-index__spotlight-cluster {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-purple-deep);
+    font-weight: 700;
+  }
+
+  .blog-index__spotlight-title {
+    color: var(--color-text-heading);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .blog-index__spotlight-meta {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
   }
 
   .blog-index__filter-row {
+    margin-top: 0.65rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
@@ -176,12 +270,22 @@ const jsonLd = {
     margin-top: 1rem;
     display: grid;
     gap: 0.85rem;
+    align-items: stretch;
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 820px) {
+    .blog-index__hero-meta {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .blog-index__spotlight-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 960px) {
     .blog-index__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      align-items: start;
     }
   }
 </style>
