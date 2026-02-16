@@ -104,6 +104,8 @@ video {
 
 a {
   color: var(--color-link);
+  /* Fallback for browsers that don't support color-mix (Chrome <111) */
+  text-decoration-color: var(--color-link);
   text-decoration-color: color-mix(in srgb, var(--color-link), transparent 45%);
   text-underline-offset: 0.18em;
   transition: color 180ms ease, text-decoration-color 180ms ease, opacity 180ms ease;
@@ -124,6 +126,7 @@ a:hover {
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-bg), transparent 10%);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: var(--color-purple-deep);
   font: inherit;
