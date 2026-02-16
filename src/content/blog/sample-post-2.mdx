@@ -1,34 +1,205 @@
 ---
-title: "Sample Post Two"
-description: "Second sample post to validate related posts scoring."
+title: "CUET 2026 Matrices & Determinants: Shortcut Playbook (A1 + B1/B2)"
+description: CUET 2026 Mathematics Tips & Tricks
 date: 2026-02-13
-author: "ChampionsPrep"
+updatedDate: 2026-02-16T12:46:00.000+05:30
+author: ChampionsPrep
 tags:
-  - sample
-  - revision
-cluster: accountancy
+  - Tips
+cluster: tips-tricks
 draft: false
 ---
+Matrices/Determinants are among the **highest ROI** CUET topics because:
+- the syllabus is compact,
+- question-types repeat,
+- and many problems have **1–2 step shortcuts**.
 
-import InlineAssistant from "../../components/InlineAssistant.astro";
-import StudyTool from "../../components/StudyTool.astro";
+This post is written “MCQ-first”: fast methods, option-elimination, and the traps that cost marks.
 
-This is another sample post used for related content checks.
+---
 
-<StudyTool
-  type="mistakes"
-  title="Common Mistakes"
-  mistakes={[
-    "Posting debit and credit in reverse order.",
-    "Ignoring balancing checks before final answer.",
-    "Confusing adjustment entries with regular entries."
-  ]}
-/>
+## What CUET asks most (patterns you should expect)
 
-<StudyTool
-  type="check-understanding"
-  title="Concept Check"
-  insight="If two accounts mismatch, explain the likely source, then state how you would verify it in one pass."
-/>
+1. **Basic matrix operations** (addition, multiplication, transpose)
+2. **Types of matrices** (diagonal, scalar, symmetric, skew-symmetric)
+3. **Determinant evaluation** (2×2 and 3×3)
+4. **Determinant properties** (row/column operations)
+5. **Inverse of 2×2 / concept of inverse**
+6. **Solving 2-variable systems** (matrix method / Cramer’s rule style)
 
-<InlineAssistant type="example" context="article" />
+> ChampionsPrep Rule: If a determinant looks ugly, it’s **asking** for a row/column operation.
+
+---
+
+## Non-negotiable formulas (memorise these cold)
+
+### 1) Determinant of 2×2
+For \(\begin{bmatrix}a&b\\c&d\end{bmatrix}\),
+\[
+|A| = ad - bc
+\]
+
+### 2) Inverse of 2×2 (exists only if det ≠ 0)
+\[
+A^{-1} = \frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}
+\]
+
+### 3) Golden properties you’ll use daily
+- \( (AB)^T = B^T A^T \)
+- \( (AB)^{-1} = B^{-1}A^{-1} \) (when inverses exist)
+- \( |AB| = |A|\,|B| \)
+- \( |A^T| = |A| \)
+
+---
+
+## Determinant shortcuts (this is where the marks are)
+
+### Tip Card 1 — Create zeros fast
+**Trigger:** 3×3 determinant with messy numbers  
+**Do this:** use **Row/Column operation**:  
+\(R_2 \to R_2 - kR_1\) or \(C_3 \to C_3 + kC_1\)
+
+**Why it works:** adding a multiple of one row/column to another **does not change** determinant.
+
+**Watch out:** swapping two rows/columns flips the sign.
+
+---
+
+### Tip Card 2 — Expand along the “zero row/column”
+**Trigger:** one row/column has 2 zeros  
+**Do this:** cofactor expand there.
+
+**Why it works:** you instantly reduce to 2×2.
+
+---
+
+### Tip Card 3 — Spot determinant = 0 in 2 seconds
+det = 0 if:
+- two rows/columns are identical
+- two rows/columns are proportional
+- one row/column is a linear combination of others
+
+---
+
+### Tip Card 4 — Skew-symmetric “odd order” trick (high-value MCQ fact)
+If \(A\) is skew-symmetric and of **odd** order (3×3), then \(|A|=0\).
+
+(Useful because CUET loves “true/false style” MCQs.)
+
+---
+
+## Matrix multiplication: the only shortcut that matters
+
+### “Column scaling” trick
+If \(B\) is diagonal, \(AB\) scales columns of \(A\).
+
+Example:  
+\(B=\text{diag}(1,2)\) means: column 2 of \(A\) becomes **twice**.
+
+This avoids full multiplication in many MCQs.
+
+---
+
+## Solving 2-variable linear equations (fastest CUET route)
+
+For:
+\[
+a_1x + b_1y = c_1 \\
+a_2x + b_2y = c_2
+\]
+
+Use determinants:
+\[
+\Delta = \begin{vmatrix}a_1&b_1\\a_2&b_2\end{vmatrix} = a_1b_2-a_2b_1
+\]
+\[
+x = \frac{\begin{vmatrix}c_1&b_1\\c_2&b_2\end{vmatrix}}{\Delta},\quad
+y = \frac{\begin{vmatrix}a_1&c_1\\a_2&c_2\end{vmatrix}}{\Delta}
+\]
+
+**MCQ benefit:** often you only need \(\Delta\)’s sign/non-zero.
+
+---
+
+## Common traps (the 5 mistakes that repeat)
+
+1. Mixing up **row** operation vs **column** operation effects
+2. Forgetting sign change after swapping rows/cols
+3. Using inverse formula without checking det ≠ 0
+4. Multiplying matrices in wrong order (AB ≠ BA generally)
+5. Transpose of product order mistake: \((AB)^T \neq A^TB^T\)
+
+---
+
+## Mini Practice Set (CUET-style MCQs)
+
+### Q1
+If \(A=\begin{bmatrix}1&2\\3&4\end{bmatrix}\), then \(|A|\) equals:
+- A) 2
+- B) -2
+- C) 10
+- D) -10
+
+### Q2
+If \(|A|=3\) and \(|B|=-2\), then \(|AB|\) equals:
+- A) -6
+- B) 6
+- C) -1
+- D) 1
+
+### Q3
+\(|A^T|\) equals:
+- A) \(|A|\)
+- B) \(-|A|\)
+- C) \(|A|^T\)
+- D) depends on A
+
+### Q4
+For \(A=\begin{bmatrix}2&1\\5&3\end{bmatrix}\), \(A^{-1}\) equals:
+- A) \(\begin{bmatrix}3&-1\\-5&2\end{bmatrix}\)
+- B) \(\begin{bmatrix}3&1\\5&2\end{bmatrix}\)
+- C) \(\frac12\begin{bmatrix}3&-1\\-5&2\end{bmatrix}\)
+- D) Inverse does not exist
+
+### Q5
+If two rows of a 3×3 determinant are proportional, the determinant is:
+- A) 1
+- B) -1
+- C) 0
+- D) Cannot be determined
+
+### Q6
+If \(B=\text{diag}(1,2)\) and \(A=\begin{bmatrix}a&b\\c&d\end{bmatrix}\), then \(AB\) equals:
+- A) \(\begin{bmatrix}a&2b\\c&2d\end{bmatrix}\)
+- B) \(\begin{bmatrix}a&b\\2c&2d\end{bmatrix}\)
+- C) \(\begin{bmatrix}2a&b\\2c&d\end{bmatrix}\)
+- D) \(\begin{bmatrix}a&b\\c&d\end{bmatrix}\)
+
+### Q7
+Which statement is always true (when inverses exist)?
+- A) \((AB)^{-1}=A^{-1}B^{-1}\)
+- B) \((AB)^{-1}=B^{-1}A^{-1}\)
+- C) \((AB)^{-1}=(A+B)^{-1}\)
+- D) \((AB)^{-1}=A^{-1}+B^{-1}\)
+
+### Q8
+Solve: \(2x+y=5\), \(3x-2y=4\). Value of \(x+y\)?
+- A) 1
+- B) 2
+- C) 3
+- D) 4
+
+### Answer Key (with 1-line reasoning)
+- Q1: **B** (1·4 − 2·3 = −2)
+- Q2: **A** (|AB|=|A||B| = 3·(−2)=−6)
+- Q3: **A** (det unchanged by transpose)
+- Q4: **A** (det = 6−5=1)
+- Q5: **C** (linear dependence → det 0)
+- Q6: **A** (right-multiply by diag scales columns)
+- Q7: **B**
+- Q8: **C** (x=2, y=1 ⇒ x+y=3)
+
+---
+
+### Next in the series
+**Blog 3:** Derivatives — the fastest way to convert calculus into “free marks”.
