@@ -6,6 +6,7 @@ import '../styles/print.css';
 import { getCollection } from "astro:content";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import InlineQuiz from "../components/InlineQuiz.astro";
 import { slugifyTag } from "../utils/content";
 
 type JsonLdValue = Record<string, unknown>;
@@ -66,6 +67,11 @@ const navTags = (
       .map(({ slug, label }) => ({ slug, label }));
   })
 );
+// Quiz placement helpers
+const entryData = (Astro.props as any).entry?.data;
+const quizData = entryData?.quiz ? (entryData.quiz as import("../types/global").Quiz | undefined) : undefined;
+const hasInlineQuiz = Astro.slots?.has && Astro.slots.has("quiz");
+const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && quizData.questions.length > 0;
 ---
 <!doctype html>
 <html lang="en">
@@ -173,6 +179,13 @@ const navTags = (
     <main class="page-shell">
       <article class="editorial" data-pagefind-body>
         <slot />
+        <slot name="quiz" />
+
+        {shouldRenderQuiz && (
+          <section class="post-quiz-section">
+            <InlineQuiz quiz={quizData as import("../types/global").Quiz} />
+          </section>
+        )}
       </article>
     </main>
     <SiteFooter />

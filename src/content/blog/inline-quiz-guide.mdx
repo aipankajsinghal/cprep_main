@@ -1,0 +1,75 @@
+---
+title: "QuickStart: Using InlineQuiz"
+description: "Learn how to add quizzes to your blog posts."
+date: 2026-02-16
+author: "ChampionsPrep"
+tags: ["guide", "features"]
+cluster: "other"
+quiz:
+  title: "Quick Quiz"
+  mode: "practice"
+  questions:
+    - question: "What is the primary benefit of using static-first quiz systems?"
+      options:
+        - "Reduced complexity and no backend needed"
+        - "Better user engagement metrics"
+        - "Faster hosting costs"
+        - "More quiz customization options"
+      correctIndex: 0
+      explanation: "Static-first systems eliminate backend dependencies, making them lightweight and cost-effective."
+    - question: "In practice mode, when are quiz results revealed?"
+      options:
+        - "After form submission"
+        - "Immediately after each selection"
+        - "Never without JavaScript"
+        - "Only after a time delay"
+      correctIndex: 1
+      explanation: "Practice mode provides immediate feedback to help learners understand concepts in real-time."
+---
+
+## Auto-Rendered Quiz
+
+When you add a `quiz` block to your post frontmatter, it automatically renders before the signup CTA. No additional code needed.
+
+## Explicit Inline Placement
+
+If you want to place the quiz at a specific location in your post, use:
+
+```mdx
+<InlineQuiz slot="quiz" />
+```
+
+This allows you to control where the quiz appears, rather than relying on the auto-placement.
+
+## Quiz Modes
+
+**Practice Mode** (default)
+- Users get instant feedback on each answer
+- Score updates live
+- Explanations display automatically on correct answers
+- Ideal for learning and understanding concepts
+
+**Exam Mode**
+- Selections are stored silently
+- No feedback until submit
+- Shows "Submit Answers" button
+- Reveals all results and explanations at once
+- Best for testing knowledge
+
+## Timer
+
+Add a `timeLimit` (in seconds) to enable a countdown timer:
+
+```yaml
+quiz:
+  title: "Timed Quiz"
+  mode: "exam"
+  timeLimit: 300  # 5 minutes
+  questions: [...]
+```
+
+Timer starts on first user selection and auto-submits when time runs out.
+
+## No-JavaScript Fallback
+
+Even without JavaScript, readers can click "Answer Key (no JavaScript)" to see all correct answers and explanations. This ensures accessibility and usability for all users.

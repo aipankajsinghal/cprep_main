@@ -1,0 +1,708 @@
+---
+import type { Quiz } from "../types/global";
+
+interface Props {
+  quiz: Quiz;
+}
+
+const { quiz } = Astro.props;
+const mode = quiz.mode ?? "practice";
+const timeLimit = quiz.timeLimit;
+const questions = quiz.questions || [];
+
+// Validation
+if (!questions || questions.length === 0) {
+  throw new Error("InlineQuiz: No questions provided");
+}
+
+// Calculate quiz ID for analytics and DOM traversal
+const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="inline-quiz" data-quiz-id={quizId} data-mode={mode} data-time-limit={timeLimit}>
+  <form class="quiz-form" novalidate>
+    <div class="quiz-header">
+      {quiz.title && <h2 class="quiz-title">{quiz.title}</h2>}
+      <div class="quiz-instructions" role="status" aria-live="polite">
+        {mode === "practice" ? (
+          <p class="instruction-text">
+            💡 Select each answer to get instant feedback and learn as you go.
+          </p>
+        ) : (
+          <p class="instruction-text">
+            📝 Choose your answers carefully. You'll see results and explanations after you submit.
+          </p>
+        )}
+      </div>
+    </div>
+
+    {timeLimit && (
+      <div class="quiz-timer" role="timer" aria-live="polite" aria-label="Time remaining" title="You have this much time to complete the quiz. The timer starts when you select your first answer.">
+        <span class="timer-label">⏱ Time left:</span>
+        <span class="timer-display" data-timer-display>--:--</span>
+      </div>
+    )}
+
+    <div class="quiz-content">
+      {questions.map((q, idx) => (
+        <fieldset class="quiz-question" data-question-index={idx} data-correct-index={q.correctIndex}>
+          <legend class="question-text">{q.question}</legend>
+          <div class="options-group">
+            {q.options.map((option, optIdx) => (
+              <div class="option-container">
+                <input
+                  type="radio"
+                  name={`question-${idx}`}
+                  id={`q${idx}-opt${optIdx}`}
+                  value={optIdx.toString()}
+                  class="option-input"
+                  data-option-index={optIdx}
+                  title="Click to select this answer"
+                />
+                <label for={`q${idx}-opt${optIdx}`} class="option-label">
+                  {option}
+                </label>
+                <div class="option-feedback" aria-live="polite" aria-atomic="true"></div>
+              </div>
+            ))}
+          </div>
+          {q.explanation && (
+            <details class="explanation-toggle" data-explanation-for={idx} title={mode === "practice" ? "Click to see why this answer is correct" : "Click to read the explanation"}>
+              <summary>
+                <span class="explanation-icon">📖</span> Explanation
+              </summary>
+              <p class="explanation-text">{q.explanation}</p>
+            </details>
+          )}
+        </fieldset>
+      ))}
+    </div>
+
+    {/* No-JS Fallback: Show all answers */}
+    <details class="answers-reveal-no-js" hidden title="View the correct answers without JavaScript">
+      <summary>🔑 Answer Key (No JavaScript)</summary>
+      <div class="answer-key-content">
+        {questions.map((q, idx) => (
+          <div class="answer-item">
+            <strong>Q{idx + 1}:</strong> {q.question}
+            <br />
+            <span class="answer-indicator">➜ Answer: {q.options[q.correctIndex]}</span>
+            {q.explanation && (
+              <>
+                <br />
+                <em>Why:</em> {q.explanation}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </details>
+
+    <div class="quiz-actions">
+      {mode === "exam" ? (
+        <button type="button" class="btn-submit" data-action="submit" disabled title="Select all answers first, then click to see your results">
+          Submit Answers
+        </button>
+      ) : (
+        <div class="quiz-score" aria-live="polite" aria-atomic="true" title={`Your current score: select answers above to see how you're doing`}>
+          Your Score: <span class="score-value">0</span> / <span class="score-total">{questions.length}</span>
+        </div>
+      )}
+    </div>
+
+    <div class="quiz-feedback" aria-live="polite" aria-atomic="true" role="status"></div>
+  </form>
+</div>
+
+<style>
+  .inline-quiz {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 2px solid var(--color-accent-lavender, #6b5b95);
+    border-radius: var(--shape-radius, 8px);
+    background-color: var(--color-bg-subtle, rgba(107, 91, 149, 0.05));
+  }
+
+  .quiz-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+  }
+
+  .quiz-instructions {
+    padding: 0.75rem 1rem;
+    background-color: var(--color-bg-primary, #fff);
+    border-left: 3px solid var(--color-accent-lavender, #6b5b95);
+    border-radius: calc(var(--shape-radius, 8px) / 2);
+    font-size: 0.95rem;
+    color: var(--color-text-secondary, #666);
+  }
+
+  .instruction-text {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+
+  .quiz-timer {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-warning-bg, rgba(255, 193, 7, 0.1));
+    border-left: 4px solid var(--color-accent-lavender, #6b5b95);
+    border-radius: var(--shape-radius, 8px);
+    font-weight: 500;
+    color: var(--color-text-primary, #333);
+  }
+
+  .timer-label {
+    margin-right: 0.75rem;
+  }
+
+  .timer-display {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .quiz-content {
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-question {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: var(--shape-radius, 8px);
+    background-color: var(--color-bg-primary, #fff);
+  }
+
+  .question-text {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: block;
+    color: var(--color-text-primary, #333);
+  }
+
+  .options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .option-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .option-input {
+    margin-top: 0.25rem;
+    cursor: pointer;
+    accent-color: var(--color-accent-lavender, #6b5b95);
+  }
+
+  .option-input:focus-visible {
+    outline: 2px solid var(--color-accent-lavender, #6b5b95);
+    outline-offset: 2px;
+  }
+
+  .option-label {
+    flex: 1;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--color-text-primary, #333);
+  }
+
+  .option-feedback {
+    display: none;
+    margin-left: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .option-feedback.show {
+    display: block;
+  }
+
+  .option-feedback.correct {
+    color: #4caf50;
+  }
+
+  .option-feedback.incorrect {
+    color: #f44336;
+  }
+
+  .explanation-toggle {
+    position: relative;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border, #e0e0e0);
+  }
+
+  .explanation-toggle summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--color-accent-lavender, #6b5b95);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .explanation-toggle summary:hover {
+    text-decoration: underline;
+  }
+
+  .explanation-icon {
+    font-size: 1rem;
+    display: inline-block;
+  }
+
+  .explanation-text {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary, #666);
+  }
+
+  .answers-reveal-no-js {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--color-info-bg, rgba(33, 150, 243, 0.1));
+    border-radius: var(--shape-radius, 8px);
+    border: 1px solid var(--color-border, #e0e0e0);
+  }
+
+  .answers-reveal-no-js summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-accent-lavender, #6b5b95);
+    user-select: none;
+  }
+
+  .answers-reveal-no-js summary:hover {
+    text-decoration: underline;
+  }
+
+  .answer-key-content {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .answer-item {
+    padding: 0.75rem;
+    background-color: var(--color-bg-primary, #fff);
+    border-radius: var(--shape-radius, 8px);
+    border-left: 3px solid var(--color-accent-lavender, #6b5b95);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-primary, #333);
+  }
+
+  .answer-indicator {
+    display: block;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #4caf50;
+  }
+
+  .quiz-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  .btn-submit {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-accent-lavender, #6b5b95);
+    color: #fff;
+    border: none;
+    border-radius: var(--shape-radius, 8px);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-submit:enabled:hover {
+    background-color: var(--color-accent-lavender-dark, #5a4a7a);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .quiz-score {
+    position: relative;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-accent-lavender, #6b5b95);
+  }
+
+  .score-value,
+  .score-total {
+    font-weight: 700;
+  }
+
+  .quiz-feedback {
+    padding: 1rem;
+    background-color: var(--color-info-bg, rgba(33, 150, 243, 0.1));
+    border-radius: var(--shape-radius, 8px);
+    border-left: 4px solid var(--color-accent-lavender, #6b5b95);
+    display: none;
+    color: var(--color-text-primary, #333);
+    line-height: 1.6;
+  }
+
+  .quiz-feedback.show {
+    display: block;
+  }
+
+  /* Tooltip enhancements */
+  [title] {
+    cursor: help;
+  }
+
+  .btn-submit[title]:hover::after,
+  .explanation-toggle[title]:hover::after,
+  .quiz-timer[title]:hover::after,
+  .quiz-score[title]:hover::after,
+  .answers-reveal-no-js[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 0.75rem;
+    background-color: var(--color-text-primary, #333);
+    color: #fff;
+    border-radius: calc(var(--shape-radius, 8px) / 2);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: 640px) {
+    .inline-quiz {
+      padding: 1rem;
+    }
+
+    .quiz-question {
+      padding: 0.75rem;
+    }
+
+    .quiz-title {
+      font-size: 1.125rem;
+    }
+
+    .quiz-actions {
+      flex-direction: column;
+    }
+
+    .btn-submit {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Initialize an inline quiz with progressive enhancement.
+   * - No-JS fallback: shows answer key in details element
+   * - JS enhancement: adds interactivity, scoring, timer, feedback
+   */
+  function initQuiz(formElement: HTMLFormElement) {
+    const quizDiv = formElement.closest(".inline-quiz") as HTMLElement;
+    if (!quizDiv) return;
+
+    const mode = quizDiv.dataset.mode as "practice" | "exam";
+    const timeLimitStr = quizDiv.dataset.timeLimit;
+    const timeLimit = timeLimitStr ? parseInt(timeLimitStr, 10) : null;
+    const quizId = quizDiv.dataset.quizId;
+
+    // DOM references
+    const timerDisplay = formElement.querySelector("[data-timer-display]") as HTMLElement | null;
+    const submitBtn = formElement.querySelector("[data-action='submit']") as HTMLButtonElement | null;
+    const scoreValue = formElement.querySelector(".score-value") as HTMLElement | null;
+    const scoreFeedback = formElement.querySelector(".quiz-feedback") as HTMLElement | null;
+    const answerKeyNoJs = formElement.closest(".inline-quiz")?.querySelector(".answers-reveal-no-js") as HTMLDetailsElement | null;
+
+    // State
+    let timeRemaining = timeLimit;
+    let timerActive = false;
+    let submitted = false;
+    let userSelections: (number | null)[] = [];
+
+    const questions = Array.from(formElement.querySelectorAll(".quiz-question")) as HTMLElement[];
+    userSelections = new Array(questions.length).fill(null);
+
+    // Hide no-JS fallback once JS initializes
+    if (answerKeyNoJs) {
+      answerKeyNoJs.removeAttribute("hidden");
+    }
+
+    /**
+     * Initialize and start the timer
+     */
+    const initTimer = () => {
+      if (!timeLimit || !timerDisplay) return;
+
+      const updateDisplay = () => {
+        if (timeRemaining !== null) {
+          const mins = Math.floor(timeRemaining / 60);
+          const secs = timeRemaining % 60;
+          timerDisplay.textContent = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
+      };
+
+      updateDisplay();
+
+      let timerId: NodeJS.Timeout | null = null;
+
+      const startTimer = () => {
+        if (timerActive || submitted || timerId !== null) return;
+        timerActive = true;
+
+        timerId = setInterval(() => {
+          if (timeRemaining === null) return;
+          timeRemaining--;
+          updateDisplay();
+
+          if (timeRemaining <= 0) {
+            if (timerId !== null) {
+              clearInterval(timerId);
+              timerId = null;
+            }
+            timerActive = false;
+            if (mode === "exam") {
+              submitQuiz();
+            }
+          }
+        }, 1000);
+      };
+
+      // Cleanup on form removal or navigation
+      const cleanup = () => {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+      };
+
+      // Clean up timer when component is removed
+      const observer = new MutationObserver(() => {
+        if (!document.contains(formElement)) {
+          cleanup();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Start timer on first user selection
+      formElement.addEventListener(
+        "change",
+        () => {
+          if (!timerActive && !submitted) {
+            startTimer();
+          }
+        },
+        { once: false }
+      );
+    };
+
+    /**
+     * Show feedback for a single answer (practice mode only)
+     */
+    const showFeedback = (questionIndex: number, selectedIndex: number) => {
+      const fieldset = questions[questionIndex];
+      if (!fieldset) return;
+
+      const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+      const isCorrect = selectedIndex === correctIndex;
+
+      // Get the selected option's feedback element
+      const selectedInput = fieldset.querySelector(`input[value="${selectedIndex}"]`) as HTMLInputElement | null;
+      if (!selectedInput) return;
+
+      const container = selectedInput.parentElement;
+      const feedback = container?.querySelector(".option-feedback") as HTMLElement | null;
+
+      if (feedback) {
+        feedback.classList.add("show");
+        feedback.classList.toggle("correct", isCorrect);
+        feedback.classList.toggle("incorrect", !isCorrect);
+        feedback.textContent = isCorrect ? "✓ Correct!" : "✗ Incorrect";
+      }
+
+      // Auto-open explanation if correct (practice mode)
+      if (isCorrect) {
+        const explanation = fieldset.querySelector(".explanation-toggle") as HTMLDetailsElement | null;
+        if (explanation) {
+          explanation.open = true;
+        }
+      }
+    };
+
+    /**
+     * Update the score display (practice mode only)
+     */
+    const updateScore = () => {
+      if (!scoreValue || mode !== "practice") return;
+
+      let score = 0;
+      questions.forEach((fieldset, idx) => {
+        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+        if (userSelections[idx] === correctIndex) {
+          score++;
+        }
+      });
+
+      scoreValue.textContent = score.toString();
+    };
+
+    /**
+     * Submit quiz (exam mode only)
+     */
+    const submitQuiz = () => {
+      if (submitted) return;
+      submitted = true;
+
+      // Disable all inputs
+      formElement.querySelectorAll("input").forEach((input) => {
+        input.disabled = true;
+      });
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+
+      // Calculate score and show results for all questions
+      let score = 0;
+      questions.forEach((fieldset, idx) => {
+        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+        const selectedIndex = userSelections[idx];
+        const isCorrect = selectedIndex === correctIndex;
+
+        if (isCorrect) {
+          score++;
+        }
+
+        // Show feedback for each question
+        fieldset.querySelectorAll("input").forEach((input) => {
+          const optIndex = parseInt(input.value, 10);
+          const container = input.parentElement;
+          const feedback = container?.querySelector(".option-feedback") as HTMLElement | null;
+
+          if (feedback) {
+            feedback.classList.add("show");
+
+            if (optIndex === correctIndex) {
+              feedback.classList.add("correct");
+              feedback.textContent = "✓ Correct answer";
+              const label = container?.querySelector("label") as HTMLElement | null;
+              if (label) {
+                label.style.fontWeight = "600";
+              }
+            } else if (input.checked) {
+              feedback.classList.add("incorrect");
+              feedback.textContent = "✗ Your answer";
+            }
+          }
+        });
+
+        // Open all explanations
+        const explanation = fieldset.querySelector(".explanation-toggle") as HTMLDetailsElement | null;
+        if (explanation) {
+          explanation.open = true;
+        }
+      });
+
+      // Show score feedback
+      if (scoreFeedback) {
+        scoreFeedback.classList.add("show");
+        const percentage = Math.round((score / questions.length) * 100);
+        const resultDiv = document.createElement("div");
+        resultDiv.innerHTML = `<strong>Quiz Complete!</strong><br>You scored <strong>${score} out of ${questions.length}</strong> (${percentage}%)`;
+        scoreFeedback.replaceChildren(resultDiv);
+      }
+
+      // Send analytics
+      if (typeof window !== "undefined" && window.cpTrack) {
+        const timeTaken = timeLimit ? timeLimit - (timeRemaining || 0) : 0;
+        window.cpTrack("quiz_completed", {
+          quizId,
+          mode,
+          score,
+          total: questions.length,
+          timeTaken,
+        });
+      }
+    };
+
+    // Event listeners
+    formElement.addEventListener("change", (e) => {
+      const input = e.target as HTMLInputElement;
+      if (input.type === "radio" && input.classList.contains("option-input")) {
+        const questionIndex = parseInt(input.name.replace("question-", ""), 10);
+        const selectedIndex = parseInt(input.value, 10);
+
+        // Defensive: validate indices are in bounds
+        if (questionIndex < 0 || questionIndex >= questions.length) return;
+        const fieldset = questions[questionIndex];
+        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+        if (selectedIndex < 0 || selectedIndex >= (fieldset.querySelector(".options-group")?.children.length || 0)) return;
+
+        userSelections[questionIndex] = selectedIndex;
+
+        if (mode === "practice") {
+          showFeedback(questionIndex, selectedIndex);
+          updateScore();
+        } else if (mode === "exam" && submitBtn) {
+          // Enable submit button once at least one answer is given
+          submitBtn.disabled = false;
+        }
+      }
+    });
+
+    if (submitBtn && mode === "exam") {
+      submitBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        submitQuiz();
+      });
+    }
+
+    // Initialize timer if present
+    initTimer();
+  }
+
+  // Initialize all quizzes on page load
+  if (typeof document !== "undefined") {
+    const initializeQuizzes = () => {
+      document.querySelectorAll(".quiz-form").forEach((form) => {
+        if (form instanceof HTMLFormElement) {
+          initQuiz(form);
+        }
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initializeQuizzes);
+    } else {
+      initializeQuizzes();
+    }
+  }
+</script>
