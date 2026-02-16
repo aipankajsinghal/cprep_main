@@ -1,5 +1,5 @@
 Architecture is stable. Blog is Astro + MDX + Content Collections.
-CMS is Decap. Hosting is Netlify.
+CMS is Decap. Hosting is Netlify
 No backend expansion allowed.
 
 This document defines the v1 InlineQuiz enhancement with final, implementation-ready decisions.
