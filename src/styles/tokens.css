@@ -16,12 +16,14 @@
   --color-bg-muted: #f8f7f4;
   --color-bg-section-alt: var(--color-lavender-light);
 
-  --color-border: #e2dfd9;
+  --color-border: #949494; /* increased contrast (suggested) */
+  --color-border-strong: #6f6f6f; /* bolder alternative for stronger separation */
   --color-border-accent: color-mix(in srgb, var(--color-purple-deep), transparent 70%);
   --color-code-bg: #f6f5f2;
 
   --color-link: var(--color-purple-deep);
   --color-link-hover: var(--color-purple-hover);
+  --color-link-strong: #3f2b6b; /* bolder link alternative for accessibility */
   --color-cta-bg: var(--color-purple-deep);
   --color-cta-text: #ffffff;
   --color-cta-hover: var(--color-purple-hover);
@@ -55,10 +57,14 @@ html.dark {
   --color-bg-warm: #1e1c17;
   --color-bg-muted: #252219;
   --color-bg-section-alt: #1e1c17;
-  --color-border: #3d3830;
+  --color-border: #656565; /* increased contrast (suggested) */
+  --color-border-strong: #8a8a8a; /* bolder alternative for stronger separation */
   --color-code-bg: #1e1c17;
   --color-cream: #2a261f;
   --color-lavender: #2d2940;
   --color-lavender-light: #252238;
+  --color-lavender-soft: #252238;
+  --color-link: #877aa9; /* improved dark-mode link color (suggested) */
+  --color-link-strong: #b39ce0; /* bolder light-on-dark link sample */
   --color-border-accent: color-mix(in srgb, var(--color-lavender), transparent 55%);
 }

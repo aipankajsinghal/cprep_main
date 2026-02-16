@@ -26,14 +26,14 @@
 
 .editorial h1 {
   font-weight: 700;
-  font-size: clamp(2.15rem, 4.8vw, 2.8rem);
+  font-size: clamp(2.05rem, 4.6vw, 2.6rem);
   line-height: 1.12;
   letter-spacing: -0.03em;
 }
 
 .editorial h2 {
   font-weight: 600;
-  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-size: clamp(1.45rem, 2.8vw, 1.85rem);
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -57,7 +57,7 @@
 
 .editorial h3 {
   font-weight: 600;
-  font-size: clamp(1.24rem, 2.2vw, 1.5rem);
+  font-size: clamp(1.14rem, 2.0vw, 1.38rem);
   letter-spacing: -0.01em;
 }
 
