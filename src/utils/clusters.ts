@@ -1,4 +1,5 @@
 export const CLUSTERS = [
+  "maths",
   "taxation",
   "accountancy",
   "business-studies",
@@ -14,6 +15,7 @@ export const CLUSTERS = [
 export type Cluster = (typeof CLUSTERS)[number];
 
 export const CLUSTER_LABELS: Record<Cluster, string> = {
+  maths: "Mathematics"
   taxation: "Taxation",
   accountancy: "Accountancy",
   "business-studies": "Business Studies",
