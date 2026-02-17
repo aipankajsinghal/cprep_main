@@ -17,8 +17,8 @@ collections:
     editor:
       preview: false
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "string" }
+      - { label: "Title", name: "title", widget: "string", hint: "? Help available on content guidelines (click help icon)" }
+      - { label: "Description", name: "description", widget: "string", hint: "Brief summary for meta tags and previews" }
       - { label: "Date", name: "date", widget: "datetime" }
       - { label: "Updated Date", name: "updatedDate", widget: "datetime", required: false }
       - { label: "Author", name: "author", widget: "string", default: "ChampionsPrep" }
@@ -37,7 +37,14 @@ collections:
           - shortcuts
           - mindmaps
           - quick-quiz
-      - { label: "Draft", name: "draft", widget: "boolean", default: true }
+      - { label: "Draft", name: "draft", widget: "boolean", default: true, hint: "✓ Draft = Hidden | ✗ Published = Live" }
+      - label: "Help & Guides"
+        name: "_help"
+        widget: "object"
+        required: false
+        collapsed: true
+        fields:
+          - { label: "Publishing Workflow", name: "publishing", widget: "object", help: "Learn about draft vs published status" }
       - label: "FAQ Items"
         name: "faqItems"
         widget: "list"
@@ -45,7 +52,7 @@ collections:
         fields:
           - { label: "Question", name: "q", widget: "string" }
           - { label: "Answer", name: "a", widget: "text" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Body", name: "body", widget: "markdown", hint: "Use Markdown for formatting. See Content Guidelines for approved components." }
 
   - name: "settings"
     label: "Site Settings"

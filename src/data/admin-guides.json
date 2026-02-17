@@ -1,0 +1,74 @@
+{
+  "guides": {
+    "inline-quiz": {
+      "title": "Using InlineQuiz",
+      "icon": "quiz",
+      "sections": [
+        {
+          "heading": "Auto-Rendered Quiz",
+          "content": "When you add a `quiz` block to your post frontmatter, it automatically renders before the signup CTA. No additional code needed."
+        },
+        {
+          "heading": "Explicit Inline Placement",
+          "content": "If you want to place the quiz at a specific location in your post, use:\n\n```\n<InlineQuiz slot=\"quiz\" />\n```\n\nThis allows you to control where the quiz appears, rather than relying on the auto-placement."
+        },
+        {
+          "heading": "Quiz Modes",
+          "content": "**Practice Mode** (default)\n- Users get instant feedback on each answer\n- Score updates live\n- Explanations display automatically on correct answers\n- Ideal for learning and understanding concepts\n\n**Exam Mode**\n- Selections are stored silently\n- No feedback until submit\n- Shows \"Submit Answers\" button\n- Reveals all results and explanations at once\n- Best for testing knowledge"
+        },
+        {
+          "heading": "Timer",
+          "content": "Add a `timeLimit` (in seconds) to enable a countdown timer:\n\n```yaml\nquiz:\n  title: \"Timed Quiz\"\n  mode: \"exam\"\n  timeLimit: 300  # 5 minutes\n  questions: [...]\n```\n\nTimer starts on first user selection and auto-submits when time runs out."
+        },
+        {
+          "heading": "No-JavaScript Fallback",
+          "content": "Even without JavaScript, readers can click \"Answer Key (no JavaScript)\" to see all correct answers and explanations. This ensures accessibility and usability for all users."
+        }
+      ]
+    },
+    "publishing": {
+      "title": "Publishing Workflow",
+      "icon": "publish",
+      "sections": [
+        {
+          "heading": "Draft vs Publish",
+          "content": "- **Draft**: Article saved but NOT visible to readers. Use this while writing and editing.\n- **Published**: Article is live and visible on the blog."
+        },
+        {
+          "heading": "Check Before Publishing",
+          "content": "1. Verify title clearly describes the content\n2. Check description is concise (meta tags)\n3. Ensure correct cluster/category is selected\n4. Review tags for consistency\n5. Proofread body content\n6. Test any interactive elements (quiz, CTAs)"
+        },
+        {
+          "heading": "Publishing Steps",
+          "content": "1. Complete all article content\n2. Set Draft toggle to OFF\n3. Click Save\n4. Article goes live within minutes"
+        },
+        {
+          "heading": "Unpublishing",
+          "content": "To remove an article from the blog:\n1. Open the article\n2. Set Draft toggle to ON\n3. Click Save\n\nArticle will be hidden from readers but content is preserved."
+        }
+      ]
+    },
+    "content-rules": {
+      "title": "Content Guidelines",
+      "icon": "rules",
+      "sections": [
+        {
+          "heading": "Static-First Principle",
+          "content": "All blog posts are static MDX files. Content is code. This means:\n- No dynamic content fetching\n- All data computed at build time\n- Performance-optimized by default"
+        },
+        {
+          "heading": "Metadata Requirements",
+          "content": "**Title**: Clear, descriptive, SEO-friendly\n**Description**: 1-2 sentences for meta tags\n**Date**: Publication date\n**Author**: Default is \"ChampionsPrep\"\n**Tags**: Relevant keywords (comma-separated)\n**Cluster**: Select the appropriate category"
+        },
+        {
+          "heading": "Editorial Standards",
+          "content": "- Use clear, accessible language\n- Break content into digestible sections\n- Include examples where helpful\n- Maintain consistent tone (educational, friendly)\n- Proofread before publishing"
+        },
+        {
+          "heading": "Approved Components",
+          "content": "You can use these interactive elements:\n- InlineQuiz (for learning assessments)\n- ExamTip (callout boxes)\n- SignupCTA (newsletter signup)\n- TableOfContents (auto-generated)\n\nDo NOT add custom components without approval."
+        }
+      ]
+    }
+  }
+}
