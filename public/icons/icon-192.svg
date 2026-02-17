@@ -1,5 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="ChampionsPrep Blog icon">
-  <rect width="192" height="192" rx="36" fill="#f3f1ff"/>
-  <rect x="40" y="40" width="112" height="112" transform="rotate(45 96 96)" fill="#6d5cf5"/>
-  <circle cx="96" cy="96" r="26" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="Insights by ChampionsPrep icon">
+  <defs>
+    <linearGradient id="cpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B5B95"/>
+      <stop offset="100%" stop-color="#5a4a84"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="36" fill="url(#cpGradient)"/>
+  <g transform="translate(24, 24) scale(1.8)">
+    <path d="M50 25 L50 55 M35 40 L65 40" stroke="white" stroke-width="6" stroke-linecap="round" />
+    <path d="M30 30 Q20 30 20 40 Q20 50 30 50 L40 50 Q50 50 50 60 Q50 70 40 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" />
+  </g>
 </svg>

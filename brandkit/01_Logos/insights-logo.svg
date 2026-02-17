@@ -1,25 +1,15 @@
-<svg width="900" height="220" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="cpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#6B5B95"/>
-      <stop offset="100%" stop-color="#8A79C9"/>
+      <stop offset="100%" stop-color="#5a4a84"/>
     </linearGradient>
   </defs>
-
-  <!-- Monogram -->
-  <g transform="scale(0.35) translate(50,50)">
-    <rect width="512" height="512" fill="none"/>
-    <g fill="url(#cpGradient)">
-      <path d="M150 120 Q80 120 80 200 Q80 280 150 280 L220 280 L220 230 L150 230 Q120 230 120 200 Q120 170 150 170 L220 170 L220 120 Z" />
-      <path d="M260 120 L260 390 L310 390 L310 280 L360 280 Q430 280 430 200 Q430 120 360 120 Z M310 170 L360 170 Q390 170 390 200 Q390 230 360 230 L310 230 Z" />
-    </g>
+  <g transform="translate(10, 10)">
+    <rect width="80" height="80" rx="16" fill="url(#cpGradient)" />
+    <path d="M50 25 L50 55 M35 40 L65 40" stroke="white" stroke-width="6" stroke-linecap="round" />
+    <path d="M30 30 Q20 30 20 40 Q20 50 30 50 L40 50 Q50 50 50 60 Q50 70 40 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" />
   </g>
-
-  <!-- Text -->
-  <text x="220" y="110" font-family="Inter, sans-serif" font-size="64" font-weight="600" fill="#3A3F47">
-    Insights
-  </text>
-  <text x="220" y="160" font-family="Inter, sans-serif" font-size="28" font-weight="400" fill="#636C7A">
-    by ChampionsPrep
-  </text>
+  <text x="110" y="52" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" fill="#3A3F47">INSIGHTS</text>
+  <text x="110" y="78" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="500" fill="#636C7A" letter-spacing="1px">BY CHAMPIONSPREP</text>
 </svg>
