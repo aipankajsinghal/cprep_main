@@ -5,7 +5,12 @@ import PostCard from "../../../components/PostCard.astro";
 import { calculateMinutesRead, slugifyTag } from "../../../utils/content";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const now = new Date();
+  const posts = await getCollection("blog", ({ data }) => {
+    if (data.draft) return false;
+    if (data.publishDate && data.publishDate > now) return false;
+    return true;
+  });
   const tagMap = new Map<string, string>();
 
   for (const post of posts) {
@@ -22,7 +27,12 @@ export async function getStaticPaths() {
 }
 
 const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
-const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const now = new Date();
+const allPosts = await getCollection("blog", ({ data }) => {
+  if (data.draft) return false;
+  if (data.publishDate && data.publishDate > now) return false;
+  return true;
+});
 const posts = allPosts
   .filter((post) => post.data.tags.some((tag) => slugifyTag(tag) === tagSlug))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())

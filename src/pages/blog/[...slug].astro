@@ -15,7 +15,12 @@ import { calculateMinutesRead, slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const now = new Date();
+  const posts = await getCollection("blog", ({ data }) => {
+    if (data.draft) return false;
+    if (data.publishDate && data.publishDate > now) return false;
+    return true;
+  });
   return posts.map((entry) => ({
     params: { slug: entry.slug },
     props: { entry }
@@ -41,7 +46,12 @@ const updatedLabel = (entry.data.updatedDate ?? entry.data.date).toLocaleDateStr
   month: "short",
   day: "numeric"
 });
-const allPosts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+const now = new Date();
+const allPosts = (await getCollection("blog", ({ data }) => {
+  if (data.draft) return false;
+  if (data.publishDate && data.publishDate > now) return false;
+  return true;
+})).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);

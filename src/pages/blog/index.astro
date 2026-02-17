@@ -6,7 +6,14 @@ import PostCard from "../../components/PostCard.astro";
 import { calculateMinutesRead } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft))
+const now = new Date();
+const posts = (await getCollection("blog", ({ data }) => {
+  // Filter out draft posts
+  if (data.draft) return false;
+  // Filter out posts with future publishDate
+  if (data.publishDate && data.publishDate > now) return false;
+  return true;
+}))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .map((post) => ({
     ...post,
