@@ -1,0 +1,25 @@
+<svg width="900" height="220" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B5B95"/>
+      <stop offset="100%" stop-color="#8A79C9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Monogram -->
+  <g transform="scale(0.35) translate(50,50)">
+    <rect width="512" height="512" fill="none"/>
+    <g fill="url(#cpGradient)">
+      <path d="M150 120 Q80 120 80 200 Q80 280 150 280 L220 280 L220 230 L150 230 Q120 230 120 200 Q120 170 150 170 L220 170 L220 120 Z" />
+      <path d="M260 120 L260 390 L310 390 L310 280 L360 280 Q430 280 430 200 Q430 120 360 120 Z M310 170 L360 170 Q390 170 390 200 Q390 230 360 230 L310 230 Z" />
+    </g>
+  </g>
+
+  <!-- Text -->
+  <text x="220" y="110" font-family="Inter, sans-serif" font-size="64" font-weight="600" fill="#3A3F47">
+    Insights
+  </text>
+  <text x="220" y="160" font-family="Inter, sans-serif" font-size="28" font-weight="400" fill="#636C7A">
+    by ChampionsPrep
+  </text>
+</svg>

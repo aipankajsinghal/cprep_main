@@ -17,8 +17,7 @@ const isMainSiteExternal = /^https?:\/\//i.test(mainSiteUrl);
 <header class="site-header">
   <div class="site-header__inner">
     <a href="/blog/" class="site-header__brand">
-      <span class="site-header__brand-mark" aria-hidden="true"></span>
-      <span>ChampionsPrep Blog</span>
+      <img src="/icons/insights-logo.svg" alt="Insights by ChampionsPrep" class="site-header__logo" width="180" height="44" />
     </a>
 
     <button
@@ -232,6 +231,14 @@ const isMainSiteExternal = /^https?:\/\//i.test(mainSiteUrl);
     border-radius: 2px;
     background: var(--color-purple-deep);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-purple-deep), white 45%);
+  }
+
+  .site-header__logo {
+    display: inline-block;
+    width: auto;
+    height: 44px;
+    max-width: 220px;
+    object-fit: contain;
   }
 
   .site-header__menu-toggle {

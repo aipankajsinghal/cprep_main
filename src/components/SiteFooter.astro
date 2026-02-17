@@ -14,7 +14,10 @@ const isXExternal = /^https?:\/\//i.test(xUrl);
 ---
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <p class="site-footer__tagline">{footerTagline}</p>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <img src="/icons/insights-logo.svg" alt="Insights by ChampionsPrep" class="site-footer__logo" width="140" height="34" />
+      <p class="site-footer__tagline">{footerTagline}</p>
+    </div>
     <nav class="site-footer__links" aria-label="Footer navigation">
       <a href="/blog/">Blog</a>
       <a href={aboutUrl} target={isAboutExternal ? "_blank" : undefined} rel={isAboutExternal ? "noopener noreferrer" : undefined}>
@@ -73,6 +76,13 @@ const isXExternal = /^https?:\/\//i.test(xUrl);
     margin: 0;
     color: var(--color-text-secondary);
     font-size: 0.9rem;
+  }
+
+  .site-footer__logo {
+    display: inline-block;
+    height: 34px;
+    width: auto;
+    object-fit: contain;
   }
 
   .site-footer__links,
