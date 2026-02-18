@@ -33,13 +33,37 @@ const pageTitle = "ChampionsPrep Blog";
 const pageDescription =
   "Editorial explainers, revision strategies, and exam-focused insights for Class 11-12 Commerce students.";
 const canonical = new URL("/blog/", Astro.site ?? Astro.url).toString();
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Blog",
-  name: "ChampionsPrep Blog",
-  description: pageDescription,
-  url: canonical
-};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "ChampionsPrep Blog",
+    description: pageDescription,
+    url: canonical
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "ChampionsPrep",
+    url: "https://www.championsprep.in",
+    logo: "https://www.championsprep.in/icons/icon-512.svg",
+    sameAs: [
+      "https://www.instagram.com/champions.prep/",
+      "https://x.com/championsprep"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ChampionsPrep Blog",
+    url: canonical,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${canonical}?search={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  }
+];
 
 const spotlightPosts = gridPosts.slice(0, 3);
 ---

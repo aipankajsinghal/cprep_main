@@ -139,6 +139,11 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   ogType="article"
   jsonLd={jsonLd}
   gaContext={{ post_slug: slug, cluster: post.cluster }}
+  author={post.author}
+  publishedDate={postDate.toISOString()}
+  updatedDate={updatedDate.toISOString()}
+  articleTags={post.tags}
+  articleSection={post.cluster}
 >
   <ReadingProgress />
   <Breadcrumbs title={post.title} />

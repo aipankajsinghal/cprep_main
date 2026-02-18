@@ -7,6 +7,9 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6b5b95",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["education", "reference"],
   "icons": [
     {
       "src": "/icons/icon-192.svg",

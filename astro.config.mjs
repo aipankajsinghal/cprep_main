@@ -16,7 +16,12 @@ export default defineConfig({
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeSlug, rehypeKatex]
     }),
-    sitemap()
+    sitemap({
+      filter: (page) => !page.includes("/api/"),
+      changefreq: "weekly",
+      priority: 0.7,
+      lastmod: new Date(),
+    })
   ],
   vite: {
     plugins: [tailwindcss()]

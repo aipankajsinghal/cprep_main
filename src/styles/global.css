@@ -49,6 +49,37 @@
   font-display: swap;
 }
 
+/* Skip-to-main link for keyboard accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-purple-deep);
+  color: #ffffff;
+  border-radius: 0 0 8px 8px;
+  z-index: 9999;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: top 150ms ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Enhanced focus-visible styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-purple-deep);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 *,
 *::before,
 *::after {

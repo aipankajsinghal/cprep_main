@@ -3,11 +3,13 @@ import '../styles/global.css';
 import '../styles/tokens.css';
 import '../styles/typography.css';
 import '../styles/print.css';
-import { getCollection } from "astro:content";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import InlineQuiz from "../components/InlineQuiz.astro";
+import Toast from "../components/Toast.astro";
 import { slugifyTag } from "../utils/content";
+import { sanityClient } from "../lib/sanity";
+import { ALL_POSTS_QUERY } from "../lib/queries";
 
 type JsonLdValue = Record<string, unknown>;
 
@@ -21,6 +23,11 @@ interface Props {
   pagefindStyles?: boolean;
   jsonLd?: JsonLdValue | JsonLdValue[];
   gaContext?: Record<string, string>;
+  author?: string;
+  publishedDate?: string;
+  updatedDate?: string;
+  articleTags?: string[];
+  articleSection?: string;
 }
 
 const {
@@ -32,7 +39,12 @@ const {
   noindex = false,
   pagefindStyles = false,
   jsonLd = [],
-  gaContext = {}
+  gaContext = {},
+  author,
+  publishedDate,
+  updatedDate,
+  articleTags,
+  articleSection,
 } = Astro.props as Props;
 
 const pageTitle = title.includes("ChampionsPrep") ? title : `${title} | ChampionsPrep Blog`;
@@ -47,26 +59,24 @@ const canonicalUrl = normalizeCanonical(canonical ?? new URL(Astro.url.pathname,
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
 const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-const navTags = (
-  await getCollection("blog", ({ data }) => !data.draft).then((posts) => {
-    const counter = new Map<string, { slug: string; label: string; count: number }>();
-    for (const post of posts) {
-      for (const tag of post.data.tags) {
-        const slug = slugifyTag(tag);
-        const existing = counter.get(slug);
-        if (existing) {
-          existing.count += 1;
-        } else {
-          counter.set(slug, { slug, label: tag, count: 1 });
-        }
+const navTags = await sanityClient.fetch(ALL_POSTS_QUERY).then((posts: any[]) => {
+  const counter = new Map<string, { slug: string; label: string; count: number }>();
+  for (const post of posts) {
+    for (const tag of post.tags ?? []) {
+      const slug = slugifyTag(tag);
+      const existing = counter.get(slug);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counter.set(slug, { slug, label: tag, count: 1 });
       }
     }
-    return Array.from(counter.values())
-      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
-      .slice(0, 12)
-      .map(({ slug, label }) => ({ slug, label }));
-  })
-);
+  }
+  return Array.from(counter.values())
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .slice(0, 12)
+    .map(({ slug, label }) => ({ slug, label }));
+});
 // Quiz placement helpers
 const entryData = (Astro.props as any).entry?.data;
 const quizData = entryData?.quiz ? (entryData.quiz as import("../types/global").Quiz | undefined) : undefined;
@@ -86,10 +96,25 @@ const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && qui
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    {ogImageUrl && <meta property="og:image:width" content="1200" />}
+    {ogImageUrl && <meta property="og:image:height" content="630" />}
+    {ogImageUrl && <meta property="og:image:type" content="image/png" />}
+    <meta property="og:site_name" content="ChampionsPrep Blog" />
+    {ogType === "article" && author && <meta property="article:author" content={author} />}
+    {ogType === "article" && publishedDate && <meta property="article:published_time" content={publishedDate} />}
+    {ogType === "article" && updatedDate && <meta property="article:modified_time" content={updatedDate} />}
+    {ogType === "article" && articleSection && <meta property="article:section" content={articleSection} />}
+    {ogType === "article" && articleTags && articleTags.map((tag) => <meta property="article:tag" content={tag} />)}
+    {ogType === "article" && author && <meta name="author" content={author} />}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@championsprep" />
+    {ogType === "article" && <meta name="twitter:creator" content="@championsprep" />}
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="CPrep Blog" />
     <script is:inline>
       (() => {
         const key = "theme";
@@ -108,6 +133,12 @@ const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && qui
       })();
     </script>
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en-IN" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={canonicalUrl} />
+    <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title="ChampionsPrep Blog" href="/rss.xml" />
+    <link rel="preconnect" href="https://cdn.sanity.io" />
+    <link rel="dns-prefetch" href="https://cdn.sanity.io" />
     <link rel="manifest" href="/manifest.webmanifest" />
     {pagefindStyles && <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />}
     <link
@@ -175,8 +206,9 @@ const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && qui
     </script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <SiteHeader tags={navTags} />
-    <main class="page-shell">
+    <main id="main-content" class="page-shell">
       <article class="editorial" data-pagefind-body>
         <slot />
         <slot name="quiz" />
@@ -189,6 +221,7 @@ const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && qui
       </article>
     </main>
     <SiteFooter />
+    <Toast />
     <button class="scroll-top" type="button" aria-label="Scroll to top" data-scroll-top hidden>
       ↑
     </button>

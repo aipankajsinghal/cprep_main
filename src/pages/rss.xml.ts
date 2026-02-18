@@ -18,7 +18,12 @@ export async function GET(context: { site: URL | undefined }) {
       title: post.title,
       description: post.description,
       pubDate: new Date(post.date),
-      link: `/blog/${post.slug}/`
+      link: `/blog/${post.slug}/`,
+      customData: [
+        post.author ? `<author>${post.author}</author>` : "",
+        post.cluster ? `<category>${post.cluster}</category>` : "",
+        ...(post.tags ?? []).map((t: string) => `<category>${t}</category>`),
+      ].filter(Boolean).join("\n"),
     }))
   });
 }
