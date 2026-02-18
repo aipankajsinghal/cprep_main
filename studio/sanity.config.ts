@@ -4,6 +4,7 @@ import { visionTool } from '@sanity/vision'
 import { markdownSchema } from 'sanity-plugin-markdown'
 import { schemaTypes } from './schemaTypes'
 import { structure } from './structure'
+import { trendsPlugin } from './plugins/TrendsTool'
 
 export default defineConfig({
   name: 'cprep-blog',
@@ -16,6 +17,7 @@ export default defineConfig({
     structureTool({ structure }),
     visionTool(),
     markdownSchema(),
+    trendsPlugin(),
   ],
 
   schema: {
