@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "module": "preserve",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "strict": true,
     "noEmit": true,
