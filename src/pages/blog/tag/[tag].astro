@@ -1,20 +1,19 @@
 ---
-import { getCollection } from "astro:content";
 import BlogLayout from '../../../layouts/BlogLayout.astro';
 import PostCard from "../../../components/PostCard.astro";
-import { calculateMinutesRead, slugifyTag } from "../../../utils/content";
+import { sanityClient } from "../../../lib/sanity";
+import { ALL_POSTS_QUERY } from "../../../lib/queries";
+import { calculateMinutesRead } from "../../../lib/markdown";
+import { slugifyTag } from "../../../utils/content";
 
 export async function getStaticPaths() {
   const now = new Date();
-  const posts = await getCollection("blog", ({ data }) => {
-    if (data.draft) return false;
-    if (data.publishDate && data.publishDate > now) return false;
-    return true;
-  });
-  const tagMap = new Map<string, string>();
+  const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+  const posts = rawPosts.filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now);
 
+  const tagMap = new Map<string, string>();
   for (const post of posts) {
-    for (const tag of post.data.tags) {
+    for (const tag of (post.tags as string[])) {
       const slug = slugifyTag(tag);
       if (!tagMap.has(slug)) tagMap.set(slug, tag);
     }
@@ -28,17 +27,16 @@ export async function getStaticPaths() {
 
 const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
 const now = new Date();
-const allPosts = await getCollection("blog", ({ data }) => {
-  if (data.draft) return false;
-  if (data.publishDate && data.publishDate > now) return false;
-  return true;
-});
-const posts = allPosts
-  .filter((post) => post.data.tags.some((tag) => slugifyTag(tag) === tagSlug))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .map((post) => ({
-    ...post,
-    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+
+const posts = rawPosts
+  .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
+  .filter((p: any) => (p.tags as string[]).some((tag) => slugifyTag(tag) === tagSlug))
+  .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .map((p: any) => ({
+    ...p,
+    date: new Date(p.date),
+    minutesRead: p.minutesRead ?? calculateMinutesRead(p.body ?? ''),
   }));
 
 const pageTitle = `Tag: ${tagLabel}`;
@@ -58,15 +56,15 @@ const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toSt
     <p class="tag-page__empty">No posts found for this tag.</p>
   ) : (
     <section class="tag-page__grid">
-      {posts.map((post) => (
+      {posts.map((post: any) => (
         <PostCard
           href={`/blog/${post.slug}/`}
-          title={post.data.title}
-          description={post.data.description}
-          date={post.data.date}
+          title={post.title}
+          description={post.description}
+          date={post.date}
           minutesRead={post.minutesRead}
-          cluster={post.data.cluster}
-          tags={post.data.tags}
+          cluster={post.cluster}
+          tags={post.tags}
         />
       ))}
     </section>

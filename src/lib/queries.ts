@@ -1,0 +1,41 @@
+/**
+ * GROQ queries for fetching content from Sanity.
+ * All queries filter out drafts and future-dated posts by default.
+ */
+
+/** Fields returned for list views (no body – keeps payloads small) */
+const POST_LIST_FIELDS = `
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  date,
+  publishDate,
+  updatedDate,
+  author,
+  tags,
+  cluster,
+  draft,
+  minutesRead,
+  ogImage,
+  faqItems,
+  quiz
+`
+
+/** Shared filter: published, non-draft, not future-dated */
+const PUBLISHED_FILTER = `_type == "post" && draft != true && (!defined(publishDate) || publishDate <= now())`
+
+/** All published posts sorted newest-first (no body) */
+export const ALL_POSTS_QUERY = `*[${PUBLISHED_FILTER}] | order(date desc) {${POST_LIST_FIELDS}}`
+
+/** Slugs of all published posts (for getStaticPaths) */
+export const ALL_SLUGS_QUERY = `*[${PUBLISHED_FILTER}] { "slug": slug.current }`
+
+/** Single post by slug including body */
+export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug && draft != true][0] {
+  ${POST_LIST_FIELDS},
+  body
+}`
+
+/** Site settings singleton */
+export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]`

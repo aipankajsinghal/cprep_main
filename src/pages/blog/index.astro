@@ -1,27 +1,31 @@
 ---
-import { getCollection } from "astro:content";
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import SearchWidget from "../../components/SearchWidget.astro";
 import PostCard from "../../components/PostCard.astro";
-import { calculateMinutesRead } from "../../utils/content";
+import { sanityClient } from "../../lib/sanity";
+import { ALL_POSTS_QUERY } from "../../lib/queries";
+import { calculateMinutesRead } from "../../lib/markdown";
 import { clusterLabel } from "../../utils/clusters";
 
 const now = new Date();
-const posts = (await getCollection("blog", ({ data }) => {
-  // Filter out draft posts
-  if (data.draft) return false;
-  // Filter out posts with future publishDate
-  if (data.publishDate && data.publishDate > now) return false;
-  return true;
-}))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .map((post) => ({
+const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+
+const posts = rawPosts
+  .filter((post: any) => {
+    if (post.publishDate && new Date(post.publishDate) > now) return false;
+    return true;
+  })
+  .map((post: any) => ({
     ...post,
-    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+    date: new Date(post.date),
+    publishDate: post.publishDate ? new Date(post.publishDate) : undefined,
+    updatedDate: post.updatedDate ? new Date(post.updatedDate) : undefined,
+    minutesRead: post.minutesRead ?? calculateMinutesRead(post.body ?? ''),
   }));
+
 const featuredPost = posts[0];
 const gridPosts = featuredPost ? posts.slice(1) : posts;
-const availableClusters = Array.from(new Set(posts.map((post) => post.data.cluster))).sort((a, b) =>
+const availableClusters = Array.from(new Set(posts.map((post: any) => post.cluster))).sort((a: any, b: any) =>
   clusterLabel(a).localeCompare(clusterLabel(b))
 );
 
@@ -57,10 +61,10 @@ const spotlightPosts = gridPosts.slice(0, 3);
     <section class="blog-index__spotlight" aria-labelledby="spotlight-title">
       <h2 id="spotlight-title">Start with these reads</h2>
       <div class="blog-index__spotlight-grid">
-        {spotlightPosts.map((post) => (
+        {spotlightPosts.map((post: any) => (
           <a href={`/blog/${post.slug}/`} class="blog-index__spotlight-link">
-            <span class="blog-index__spotlight-cluster">{clusterLabel(post.data.cluster)}</span>
-            <span class="blog-index__spotlight-title">{post.data.title}</span>
+            <span class="blog-index__spotlight-cluster">{clusterLabel(post.cluster)}</span>
+            <span class="blog-index__spotlight-title">{post.title}</span>
             <span class="blog-index__spotlight-meta">{post.minutesRead} min read</span>
           </a>
         ))}
@@ -76,12 +80,12 @@ const spotlightPosts = gridPosts.slice(0, 3);
       </div>
       <PostCard
         href={`/blog/${featuredPost.slug}/`}
-        title={featuredPost.data.title}
-        description={featuredPost.data.description}
-        date={featuredPost.data.date}
+        title={featuredPost.title}
+        description={featuredPost.description}
+        date={featuredPost.date}
         minutesRead={featuredPost.minutesRead}
-        cluster={featuredPost.data.cluster}
-        tags={featuredPost.data.tags}
+        cluster={featuredPost.cluster}
+        tags={featuredPost.tags}
         featured={true}
       />
     </section>
@@ -95,7 +99,7 @@ const spotlightPosts = gridPosts.slice(0, 3);
       </div>
       <div class="blog-index__filter-row">
         <button type="button" data-cluster-filter="all" class="is-active">All</button>
-        {availableClusters.map((cluster) => (
+        {availableClusters.map((cluster: any) => (
           <button type="button" data-cluster-filter={cluster}>
             {clusterLabel(cluster)}
           </button>
@@ -105,16 +109,16 @@ const spotlightPosts = gridPosts.slice(0, 3);
   )}
 
   <section class="blog-index__grid" data-cluster-grid>
-    {gridPosts.map((post) => (
-      <div data-cluster-card={post.data.cluster}>
+    {gridPosts.map((post: any) => (
+      <div data-cluster-card={post.cluster}>
         <PostCard
           href={`/blog/${post.slug}/`}
-          title={post.data.title}
-          description={post.data.description}
-          date={post.data.date}
+          title={post.title}
+          description={post.description}
+          date={post.date}
           minutesRead={post.minutesRead}
-          cluster={post.data.cluster}
-          tags={post.data.tags}
+          cluster={post.cluster}
+          tags={post.tags}
           featured={false}
         />
       </div>

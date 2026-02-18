@@ -1,5 +1,4 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import ExamTip from "../../components/ExamTip.astro";
 import RelatedPosts from "../../components/RelatedPosts.astro";
@@ -11,72 +10,77 @@ import ReadingProgress from "../../components/ReadingProgress.astro";
 import ShareButtons from "../../components/ShareButtons.astro";
 import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
-import { calculateMinutesRead, slugifyTag } from "../../utils/content";
+import { sanityClient } from "../../lib/sanity";
+import { ALL_POSTS_QUERY, ALL_SLUGS_QUERY, POST_BY_SLUG_QUERY } from "../../lib/queries";
+import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
+import { slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
 export async function getStaticPaths() {
-  const now = new Date();
-  const posts = await getCollection("blog", ({ data }) => {
-    if (data.draft) return false;
-    if (data.publishDate && data.publishDate > now) return false;
-    return true;
-  });
-  return posts.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry }
+  const slugs = await sanityClient.fetch(ALL_SLUGS_QUERY);
+  return slugs.map((item: { slug: string }) => ({
+    params: { slug: item.slug },
   }));
 }
 
-const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
-const { Content, headings } = await entry.render();
+const { slug } = Astro.params as { slug: string };
+const post = await sanityClient.fetch(POST_BY_SLUG_QUERY, { slug });
+
+if (!post) {
+  return Astro.redirect('/blog/');
+}
+
+const { html: bodyHtml, headings } = await markdownToHtml(post.body ?? '');
 const tocHeadings = headings.filter((item) => item.depth === 2 || item.depth === 3);
-const canonical = new URL(`/blog/${entry.slug}/`, Astro.site ?? Astro.url).toString();
-const ogImagePath = entry.data.ogImage ?? `/blog/og/${entry.slug}.png`;
+
+const postDate = new Date(post.date);
+const updatedDate = post.updatedDate ? new Date(post.updatedDate) : postDate;
+const minutesRead = post.minutesRead ?? calculateMinutesRead(post.body ?? '');
+
+const canonical = new URL(`/blog/${slug}/`, Astro.site ?? Astro.url).toString();
+const ogImagePath = post.ogImage ?? `/blog/og/${slug}.png`;
 const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
-const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
-const pageTitle = entry.data.title;
-const pageDescription = entry.data.description;
-const publishedLabel = entry.data.date.toLocaleDateString("en-IN", {
+
+const publishedLabel = postDate.toLocaleDateString("en-IN", {
   year: "numeric",
   month: "short",
   day: "numeric"
 });
-const updatedLabel = (entry.data.updatedDate ?? entry.data.date).toLocaleDateString("en-IN", {
+const updatedLabel = updatedDate.toLocaleDateString("en-IN", {
   year: "numeric",
   month: "short",
   day: "numeric"
 });
+
+// Related / prev-next navigation from full post list
 const now = new Date();
-const allPosts = (await getCollection("blog", ({ data }) => {
-  if (data.draft) return false;
-  if (data.publishDate && data.publishDate > now) return false;
-  return true;
-})).sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
-);
-const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);
-const clusterPostsAscending = [...clusterPosts].sort((a, b) => {
-  const byDate = a.data.date.getTime() - b.data.date.getTime();
-  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
-});
-const currentIndex = clusterPosts.findIndex((post) => post.slug === entry.slug);
+const allPosts = (await sanityClient.fetch(ALL_POSTS_QUERY))
+  .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
+  .map((p: any) => ({ ...p, date: new Date(p.date) }))
+  .sort((a: any, b: any) => b.date.getTime() - a.date.getTime());
+
+const clusterPosts = allPosts.filter((p: any) => p.cluster === post.cluster);
+const currentIndex = clusterPosts.findIndex((p: any) => p.slug === slug);
 const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
 const nextPost =
   currentIndex >= 0 && currentIndex < clusterPosts.length - 1
     ? clusterPosts[currentIndex + 1]
     : undefined;
+const clusterPostsAscending = [...clusterPosts].sort((a: any, b: any) => {
+  const byDate = a.date.getTime() - b.date.getTime();
+  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
+});
+
+// JSON-LD
 const blogPostingJsonLd = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  headline: entry.data.title,
-  description: entry.data.description,
-  datePublished: entry.data.date.toISOString(),
-  dateModified: (entry.data.updatedDate ?? entry.data.date).toISOString(),
+  headline: post.title,
+  description: post.description,
+  datePublished: postDate.toISOString(),
+  dateModified: updatedDate.toISOString(),
   image: ogImageUrl,
-  author: {
-    "@type": "Person",
-    name: entry.data.author
-  },
+  author: { "@type": "Person", name: post.author },
   mainEntityOfPage: canonical,
   url: canonical
 };
@@ -85,56 +89,41 @@ const learningResourceJsonLd = {
   "@type": "LearningResource",
   learningResourceType: "Lesson",
   educationalLevel: "Class 11-12",
-  teaches: entry.data.cluster,
-  name: entry.data.title,
-  description: entry.data.description,
+  teaches: post.cluster,
+  name: post.title,
+  description: post.description,
   url: canonical
 };
 const learningPathJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: `${entry.data.cluster} Learning Path`,
+  name: `${post.cluster} Learning Path`,
   itemListOrder: "https://schema.org/ItemListOrderAscending",
-  itemListElement: clusterPostsAscending.map((post, index) => ({
+  itemListElement: clusterPostsAscending.map((p: any, index: number) => ({
     "@type": "ListItem",
     position: index + 1,
-    name: post.data.title,
-    url: new URL(`/blog/${post.slug}/`, Astro.site ?? Astro.url).toString()
+    name: p.title,
+    url: new URL(`/blog/${p.slug}/`, Astro.site ?? Astro.url).toString()
   }))
 };
-
 const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      name: "Blog",
-      item: new URL("/blog/", Astro.site ?? Astro.url).toString()
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: entry.data.title,
-      item: canonical
-    }
+    { "@type": "ListItem", position: 1, name: "Blog", item: new URL("/blog/", Astro.site ?? Astro.url).toString() },
+    { "@type": "ListItem", position: 2, name: post.title, item: canonical }
   ]
 };
-
-const faqItems = entry.data.faqItems ?? [];
+const faqItems = post.faqItems ?? [];
 const faqJsonLd =
   faqItems.length > 0
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: faqItems.map((item) => ({
+        mainEntity: faqItems.map((item: any) => ({
           "@type": "Question",
           name: item.q,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.a
-          }
+          acceptedAnswer: { "@type": "Answer", text: item.a }
         }))
       }
     : undefined;
@@ -143,31 +132,31 @@ const baseJsonLd = [blogPostingJsonLd, learningResourceJsonLd, breadcrumbJsonLd,
 const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 ---
 <BlogLayout
-  title={pageTitle}
-  description={pageDescription}
+  title={post.title}
+  description={post.description}
   canonical={canonical}
   ogImage={ogImagePath}
   ogType="article"
   jsonLd={jsonLd}
-  gaContext={{ post_slug: entry.slug, cluster: entry.data.cluster }}
+  gaContext={{ post_slug: slug, cluster: post.cluster }}
 >
   <ReadingProgress />
-  <Breadcrumbs title={entry.data.title} />
+  <Breadcrumbs title={post.title} />
   <section class="post-shell">
     <div class="post-main">
       <header class="post-head">
-        <p class="post-head__eyebrow">{clusterLabel(entry.data.cluster)}</p>
-        <h1>{entry.data.title}</h1>
-        <p class="post-head__dek">{entry.data.description}</p>
+        <p class="post-head__eyebrow">{clusterLabel(post.cluster)}</p>
+        <h1>{post.title}</h1>
+        <p class="post-head__dek">{post.description}</p>
         <div class="post-head__meta" aria-label="Article metadata">
           <span>Published {publishedLabel}</span>
           <span>Updated {updatedLabel}</span>
           <span>{minutesRead} min read</span>
-          <span>By {entry.data.author}</span>
+          <span>By {post.author}</span>
         </div>
-        {entry.data.tags.length > 0 && (
+        {post.tags.length > 0 && (
           <div class="post-head__tags" aria-label="Post tags">
-            {entry.data.tags.map((tag) => (
+            {post.tags.map((tag: string) => (
               <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
             ))}
           </div>
@@ -178,25 +167,23 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
         <p>Summarize each section in one sentence before moving to the next chapter.</p>
       </ExamTip>
 
-      <div class="post-body">
-        <Content />
-      </div>
+      <div class="post-body" set:html={bodyHtml} />
 
       <PrevNextNav
-        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.data.title } : undefined}
-        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.data.title } : undefined}
+        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.title } : undefined}
+        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.title } : undefined}
       />
       <ShareButtons
         url={canonical}
-        title={entry.data.title}
-        postSlug={entry.slug}
-        cluster={entry.data.cluster}
+        title={post.title}
+        postSlug={slug}
+        cluster={post.cluster}
         instagramId="champions.prep"
       />
-      <MicroFeedback postSlug={entry.slug} cluster={entry.data.cluster} />
-      <RelatedPosts currentSlug={entry.slug} cluster={entry.data.cluster} tags={entry.data.tags} />
-      <SmartCTA postSlug={entry.slug} cluster={entry.data.cluster} />
-      <AuthorCard name={entry.data.author} />
+      <MicroFeedback postSlug={slug} cluster={post.cluster} />
+      <RelatedPosts currentSlug={slug} cluster={post.cluster} tags={post.tags} />
+      <SmartCTA postSlug={slug} cluster={post.cluster} />
+      <AuthorCard name={post.author} />
     </div>
 
     <aside class="post-toc">
