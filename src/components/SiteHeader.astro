@@ -14,6 +14,12 @@ const { tags = [] } = Astro.props as Props;
 const mainSiteUrl = String(siteSettings.mainSiteUrl ?? "https://www.championsprep.in/");
 const isMainSiteExternal = /^https?:\/\//i.test(mainSiteUrl);
 ---
+<div class="site-masthead" aria-label="Publication information">
+  <div class="site-masthead__inner">
+    <span class="site-masthead__topics">Commerce · Strategy · Revision</span>
+    <span class="site-masthead__tagline">Insights for Class 11-12</span>
+  </div>
+</div>
 <header class="site-header">
   <div class="site-header__inner">
     <a href="/blog/" class="site-header__brand">
@@ -193,6 +199,38 @@ const isMainSiteExternal = /^https?:\/\//i.test(mainSiteUrl);
 </script>
 
 <style>
+  /* Publication masthead strip */
+  .site-masthead {
+    background: var(--color-purple-deep);
+    color: #ffffff;
+  }
+
+  .site-masthead__inner {
+    width: min(100% - 2rem, 1120px);
+    margin-inline: auto;
+    padding: 0.28rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .site-masthead__topics {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+
+  .site-masthead__tagline {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    opacity: 0.72;
+    font-style: italic;
+    font-family: var(--font-display);
+  }
+
   .site-header {
     position: sticky;
     top: 0;
