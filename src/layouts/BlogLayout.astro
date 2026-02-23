@@ -8,6 +8,7 @@ import SiteFooter from "../components/SiteFooter.astro";
 import InlineQuiz from "../components/InlineQuiz.astro";
 import Toast from "../components/Toast.astro";
 import SpeedInsights from '@vercel/speed-insights/astro';
+import Analytics from '@vercel/analytics/astro';
 import { slugifyTag } from "../utils/content";
 import { getClient } from "../lib/sanity";
 import { ALL_POSTS_QUERY } from "../lib/queries";
@@ -118,6 +119,7 @@ const shouldRenderQuiz = !hasInlineQuiz && quizData && quizData.questions && qui
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="CPrep Blog" />
+    <Analytics />
     <script is:inline>
       (() => {
         const key = "theme";
