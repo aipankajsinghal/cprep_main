@@ -31,6 +31,11 @@ function AIAssistantTool() {
   // We need to resolve the document ID correctly for patching drafts
   const resolvedDocId = documentId?.replace('drafts.', '')
 
+  // The assistant depends on a frontend API hosted on the public site.
+  // If `SANITY_STUDIO_SITE_URL` is not set, generation requests will fail
+  // because the generative API key is expected to live on the frontend deployment.
+  const SITE_URL_CONFIGURED = SITE_URL && SITE_URL.length > 0
+
   if (docType !== 'post') return null
 
   const handleGenerateSEO = async () => {
@@ -41,6 +46,14 @@ function AIAssistantTool() {
 
     setLoadingSeo(true)
     try {
+      if (!SITE_URL_CONFIGURED) {
+        toast.push({
+          status: 'error',
+          title: 'Site URL not configured',
+          description: 'Set SANITY_STUDIO_SITE_URL to your public site URL so the Studio can call the /api/ai endpoints.'
+        })
+        return
+      }
       const res = await fetch(`${SITE_URL}/api/ai/seo-description`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,6 +91,14 @@ function AIAssistantTool() {
 
     setLoadingQuiz(true)
     try {
+      if (!SITE_URL_CONFIGURED) {
+        toast.push({
+          status: 'error',
+          title: 'Site URL not configured',
+          description: 'Set SANITY_STUDIO_SITE_URL to your public site URL so the Studio can call the /api/ai endpoints.'
+        })
+        return
+      }
       const res = await fetch(`${SITE_URL}/api/ai/generate-quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
