@@ -2,7 +2,7 @@
 
 ## Core Principles
 
-- Static-first
+- Static first
 - Content-driven
 - Editorial-focused
 - Performance-first
