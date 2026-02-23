@@ -9,8 +9,7 @@
 
 ## Hard Constraints
 
-- No database
-- No CMS dashboard
+- No database (relational)
 - No SSR conversion
 - No route redesign
 - No heavy UI/runtime frameworks
@@ -18,19 +17,20 @@
 ## Runtime Model
 
 - Astro output mode is static.
-- Content is compiled from MDX at build time.
+- Content is fetched from Sanity CMS and compiled at build time.
 - Dynamic behavior is limited to lightweight client-side enhancement.
 
 ## Build Pipeline
 
-1. `prebuild`: generate OG images (`scripts/generate-og.mjs`)
-2. `build`: Astro static build
-3. `postbuild`: Pagefind index generation
+1. `prebuild`: generate OG images (`scripts/generate-og.mjs`) and Instagram briefs (`scripts/generate-ig-briefs.mjs`) – both fetch from Sanity.
+2. `build`: Astro static build (fetches from Sanity via `sanityClient`).
+3. `postbuild`: Pagefind index generation.
 
 ## Content + Rendering
 
-- Source: `src/content/blog/*.mdx`
-- Schema: `src/content/config.ts`
+- Primary Source: Sanity CMS (Post documents)
+- Schema: Managed in `studio/schemaTypes`
+- Rendering logic: `src/pages/blog/[...slug].astro` fetches from Sanity via GROQ queries.
 - Routes:
   - `src/pages/blog/index.astro`
   - `src/pages/blog/[...slug].astro`

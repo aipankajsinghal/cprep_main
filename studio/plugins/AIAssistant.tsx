@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from 'react'
+import { definePlugin, useFormValue, useClient, setIfMissing, insert, set } from 'sanity'
+import { SparklesIcon, DocumentTextIcon } from '@sanity/icons'
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  Stack,
+  Text,
+  useToast
+} from '@sanity/ui'
+
+// Env var must be set in studio/.env as SANITY_STUDIO_SITE_URL=http://localhost:4321
+const SITE_URL = (process.env.SANITY_STUDIO_SITE_URL ?? '').replace(/\/$/, '')
+
+function AIAssistantTool() {
+  const documentId = useFormValue(['_id']) as string | undefined
+  const docType = useFormValue(['_type']) as string | undefined
+  const title = useFormValue(['title']) as string | undefined
+  const body = useFormValue(['body']) as string | undefined
+  const currentQuiz = useFormValue(['quiz', 'questions']) as any[] | undefined
+
+  const client = useClient({ apiVersion: '2024-01-01' })
+  const toast = useToast()
+
+  const [loadingSeo, setLoadingSeo] = useState(false)
+  const [loadingQuiz, setLoadingQuiz] = useState(false)
+
+  // We need to resolve the document ID correctly for patching drafts
+  const resolvedDocId = documentId?.replace('drafts.', '')
+
+  if (docType !== 'post') return null
+
+  const handleGenerateSEO = async () => {
+    if (!title && !body) {
+      toast.push({ status: 'warning', title: 'Need text', description: 'Please provide at least a title or body text.' })
+      return
+    }
+
+    setLoadingSeo(true)
+    try {
+      const res = await fetch(`${SITE_URL}/api/ai/seo-description`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body }),
+      })
+
+      if (!res.ok) throw new Error('API request failed')
+      
+      const data = await res.json()
+      if (data.description && resolvedDocId) {
+        // Patch the current document
+        await client
+          .patch(`drafts.${resolvedDocId}`)
+          .setIfMissing({ description: '' })
+          .set({ description: data.description })
+          .commit()
+
+        toast.push({ status: 'success', title: 'SEO Description Generated!' })
+      } else {
+         throw new Error('No description returned')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.push({ status: 'error', title: 'Generation failed' })
+    } finally {
+      setLoadingSeo(false)
+    }
+  }
+
+  const handleGenerateQuiz = async () => {
+    if (!title && !body) {
+      toast.push({ status: 'warning', title: 'Need text', description: 'Please provide at least a title or body text.' })
+      return
+    }
+
+    setLoadingQuiz(true)
+    try {
+      const res = await fetch(`${SITE_URL}/api/ai/generate-quiz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body }),
+      })
+
+      if (!res.ok) throw new Error('API request failed')
+      
+      const data = await res.json()
+      if (data.questions && data.questions.length > 0 && resolvedDocId) {
+        
+        // Let's add Sanity keys to the questions format
+        const formattedQuestions = data.questions.map((q: any) => ({
+          ...q,
+          _key: crypto.randomUUID(),
+          _type: 'quizQuestion'
+        }))
+
+        // Patch the current document
+        await client
+          .patch(`drafts.${resolvedDocId}`)
+          .setIfMissing({ quiz: { title: 'AI Generated Quiz', mode: 'practice', questions: [] } })
+          .set({ 'quiz.questions': formattedQuestions })
+          .commit()
+
+        toast.push({ status: 'success', title: 'Quiz Generated!', description: `Added ${formattedQuestions.length} questions.` })
+      } else {
+         throw new Error('No questions returned or invalid format')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.push({ status: 'error', title: 'Generation failed' })
+    } finally {
+      setLoadingQuiz(false)
+    }
+  }
+
+  return (
+    <Card padding={4} radius={2} shadow={1} tone="primary">
+      <Stack space={4}>
+        <Flex gap={2} align="center">
+          <Text size={2}><SparklesIcon /></Text>
+          <Heading size={1}>AI Content Assistant</Heading>
+        </Flex>
+        <Text size={1} muted>
+          Use Gemini AI to analyze your post and generate metadata or quizzes instantly.
+        </Text>
+        <Flex gap={3} wrap="wrap">
+          <Button
+            fontSize={1}
+            padding={3}
+            mode="ghost"
+            icon={DocumentTextIcon}
+            text="Generate SEO Description"
+            onClick={handleGenerateSEO}
+            disabled={loadingSeo || !resolvedDocId}
+            loading={loadingSeo}
+          />
+          <Button
+            fontSize={1}
+            padding={3}
+            mode="ghost"
+            icon={SparklesIcon}
+            text="Generate 5-Q Quiz"
+            onClick={handleGenerateQuiz}
+            disabled={loadingQuiz || !resolvedDocId}
+            loading={loadingQuiz}
+          />
+        </Flex>
+      </Stack>
+    </Card>
+  )
+}
+
+// We'll expose this as a document action, or just a component that can be added to the structure
+// For simplicity in Sanity Studio v3, a cleaner way is to add it to the document inspector or form components.
+// Here we are creating a raw plugin that injects a form component wrapper.
+
+export const aiAssistantPlugin = definePlugin({
+  name: 'ai-assistant',
+  form: {
+    components: {
+      input: (props) => {
+        // If it's the root document object for a post, render the assistant above it
+        if (props.id === 'root' && props.schemaType.name === 'post') {
+          return (
+            <Stack space={4}>
+              <AIAssistantTool />
+              {props.renderDefault(props)}
+            </Stack>
+          )
+        }
+        return props.renderDefault(props)
+      },
+    },
+  },
+})

@@ -16,7 +16,7 @@ Constraints:
 - Use resvg (@resvg/resvg-js) to convert SVG → PNG
 - Save generated images to `/public/og/{slug}.png`
 - Update blog templates to set correct OG image URLs
-- Works on Netlify build
+- Works on Vercel build
 
 ## What to Implement
 

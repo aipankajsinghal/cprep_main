@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node scripts/generate-og.mjs && node scripts/generate-ig-briefs.mjs",
+    "prebuild": "node --env-file=.env scripts/generate-og.mjs && node --env-file=.env scripts/generate-ig-briefs.mjs",
     "generate-brandkit": "node scripts/generate-brandkit.js",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
@@ -14,7 +14,8 @@
     "studio": "cd studio && sanity dev",
     "studio:build": "cd studio && sanity build",
     "studio:deploy": "cd studio && sanity deploy",
-    "migrate:sanity": "node scripts/migrate-to-sanity.mjs"
+    "migrate:sanity": "node scripts/migrate-to-sanity.mjs",
+    "typegen": "cd studio && npx sanity schema extract && npx sanity typegen generate"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

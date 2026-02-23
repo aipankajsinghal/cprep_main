@@ -619,7 +619,24 @@ Added lightweight app shell support without framework-heavy PWA stack:
 * `manifest.webmanifest`
 * static service worker (`public/sw.js`)
 * icon assets (`public/icons/*`)
-* registration in layout
+* Registration in layout
 
 Design remains aligned to lavender + geometric motif.
+
+## 22. Migration to Sanity CMS (Implemented)
+
+The blog has migrated from local MDX content collections to Sanity CMS.
+
+### 22.1 Architecture Shift
+- **Primary Content Source**: Sanity.io.
+- **Rendering**: Astro still outputs static HTML, but fetches content during the build phase via GROQ.
+- **CMS Interface**: Sanity Studio located in `/studio` directory.
+
+### 22.2 Schema Mapping
+- The Sanity `post` type mirrors the Astro Content Collection schema defined in `src/content/config.ts`.
+- Additional fields for SEO and Quiz management are handled directly in the Sanity document.
+
+### 22.3 Build Pipeline Updates
+- Build scripts (`generate-og.mjs`, `generate-ig-briefs.mjs`) were updated to fetch data directly from the Sanity Content Lake.
+- Legacy MDX files in `src/content/blog` are deprecated.
 

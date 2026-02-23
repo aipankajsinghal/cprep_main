@@ -1,22 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import fg from "fast-glob";
-import matter from "gray-matter";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 
 const cwd = process.cwd();
-const postsPattern = "src/content/blog/**/*.{md,mdx}";
 const ogOutDir = path.join(cwd, "public", "blog", "og");
 
 // Font now stored locally in the repo
 const fontPath = path.join(cwd, "public", "fonts", "inter-600-normal.woff");
-
-function toSlug(filePath) {
-  const rel = path.relative(path.join(cwd, "src", "content", "blog"), filePath);
-  return rel.replace(/\\/g, "/").replace(/\.(md|mdx)$/i, "");
-}
 
 function cleanTitle(title) {
   return String(title || "ChampionsPrep Blog").trim().slice(0, 120);
@@ -170,53 +162,69 @@ async function main() {
       // logo optional
       logoDataUri = null;
     }
-    const files = await fg(postsPattern, { cwd, absolute: true });
+
+    // Initialize Sanity Client
+    const { createClient } = await import('@sanity/client');
+    const client = createClient({
+      projectId: process.env.SANITY_PROJECT_ID,
+      dataset: process.env.SANITY_DATASET || 'production',
+      apiVersion: process.env.SANITY_API_VERSION || '2024-01-01',
+      useCdn: false, // Need fresh data for build
+      token: process.env.SANITY_API_TOKEN,
+    });
+
+    const query = `*[_type == "post" && draft != true && (!defined(publishDate) || publishDate <= now())] {
+      title,
+      "slug": slug.current,
+      publishDate,
+      ogImage
+    }`;
+
+    const posts = await client.fetch(query);
 
     await fs.mkdir(ogOutDir, { recursive: true });
 
     let generated = 0;
     let skipped = 0;
     let failed = 0;
-    const now = new Date();
 
-    for (const file of files) {
-      const base = path.basename(file);
-      if (base.startsWith("_")) {
+    const force = process.argv.includes("--force");
+
+    for (const post of posts) {
+      if (!post.slug) {
         skipped++;
         continue;
       }
 
+      const outFile = path.join(ogOutDir, `${post.slug}.png`);
+      
+      // Cache check: skip if file exists and NOT in force mode
+      if (!force) {
+        try {
+          await fs.access(outFile);
+          // console.log(`⏭️  Skipping existing OG for ${post.slug}`);
+          skipped++;
+          continue;
+        } catch (e) {
+          // File doesn't exist, proceed to generate
+        }
+      }
+
       try {
-        const raw = await fs.readFile(file, "utf8");
-        const parsed = matter(raw);
-        
-        // Skip draft posts
-        if (parsed.data.draft) {
-          skipped++;
-          continue;
-        }
-
-        // Skip posts with future publishDate
-        if (parsed.data.publishDate && new Date(parsed.data.publishDate) > now) {
-          skipped++;
-          continue;
-        }
-
-        const slug = toSlug(file);
         await generateOne({
-          title: parsed.data.title,
-          slug,
+          title: post.title,
+          slug: post.slug,
           fontData,
           logoDataUri
         });
         generated++;
       } catch (error) {
-        console.warn(`⚠️  Failed to generate OG for ${file}: ${error.message}`);
+        console.warn(`⚠️  Failed to generate OG for ${post.slug}: ${error.message}`);
         failed++;
       }
     }
 
-    console.log(`✅ Generated ${generated} OG images (${skipped} skipped${failed > 0 ? `, ${failed} failed` : ''})`);
+    console.log(`✅ OG Generation: ${generated} new, ${skipped} skipped/cached${failed > 0 ? `, ${failed} failed` : ''}`);
   } catch (error) {
     console.error(`❌ Build error:`, error.message);
     process.exit(1);

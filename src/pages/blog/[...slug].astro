@@ -1,5 +1,5 @@
 ---
-import BlogLayout from '../../layouts/BlogLayout.astro';
+import BlogLayout from "../../layouts/BlogLayout.astro";
 import ExamTip from "../../components/ExamTip.astro";
 import RelatedPosts from "../../components/RelatedPosts.astro";
 import AuthorCard from "../../components/AuthorCard.astro";
@@ -10,32 +10,42 @@ import ReadingProgress from "../../components/ReadingProgress.astro";
 import ShareButtons from "../../components/ShareButtons.astro";
 import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
-import { sanityClient } from "../../lib/sanity";
-import { ALL_POSTS_QUERY, ALL_SLUGS_QUERY, POST_BY_SLUG_QUERY } from "../../lib/queries";
+import { getClient } from "../../lib/sanity";
+import {
+  ALL_POSTS_QUERY,
+  ALL_SLUGS_QUERY,
+  POST_BY_SLUG_QUERY,
+} from "../../lib/queries";
+import type { Post } from "../../../studio/sanity.types";
 import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
 import { slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
 export async function getStaticPaths() {
-  const slugs = await sanityClient.fetch(ALL_SLUGS_QUERY);
+  const client = getClient();
+  const slugs = await client.fetch(ALL_SLUGS_QUERY);
   return slugs.map((item: { slug: string }) => ({
     params: { slug: item.slug },
   }));
 }
 
 const { slug } = Astro.params as { slug: string };
-const post = await sanityClient.fetch(POST_BY_SLUG_QUERY, { slug });
+const isPreview = Astro.cookies.has("sanity-preview");
+const client = getClient(isPreview);
+const post = await client.fetch<Post>(POST_BY_SLUG_QUERY, { slug });
 
 if (!post) {
-  return Astro.redirect('/blog/');
+  return Astro.redirect("/blog/");
 }
 
-const { html: bodyHtml, headings } = await markdownToHtml(post.body ?? '');
-const tocHeadings = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const { html: bodyHtml, headings } = await markdownToHtml(post.body ?? "");
+const tocHeadings = headings.filter(
+  (item) => item.depth === 2 || item.depth === 3,
+);
 
-const postDate = new Date(post.date);
+const postDate = new Date(post.date ?? "");
 const updatedDate = post.updatedDate ? new Date(post.updatedDate) : postDate;
-const minutesRead = post.minutesRead ?? calculateMinutesRead(post.body ?? '');
+const minutesRead = post.minutesRead ?? calculateMinutesRead(post.body ?? "");
 
 const canonical = new URL(`/blog/${slug}/`, Astro.site ?? Astro.url).toString();
 const ogImagePath = post.ogImage ?? `/blog/og/${slug}.png`;
@@ -44,24 +54,27 @@ const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
 const publishedLabel = postDate.toLocaleDateString("en-IN", {
   year: "numeric",
   month: "short",
-  day: "numeric"
+  day: "numeric",
 });
 const updatedLabel = updatedDate.toLocaleDateString("en-IN", {
   year: "numeric",
   month: "short",
-  day: "numeric"
+  day: "numeric",
 });
 
 // Related / prev-next navigation from full post list
 const now = new Date();
-const allPosts = (await sanityClient.fetch(ALL_POSTS_QUERY))
+const allPosts = (await client.fetch<Post[]>(ALL_POSTS_QUERY))
   .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
-  .map((p: any) => ({ ...p, date: new Date(p.date) }))
+  .map((p: any) => ({ ...p, date: new Date(p.date ?? "") }))
   .sort((a: any, b: any) => b.date.getTime() - a.date.getTime());
 
-const clusterPosts = allPosts.filter((p: any) => p.cluster === post.cluster);
+const clusterPosts = allPosts.filter(
+  (p: any) => p.cluster === (post.cluster ?? ""),
+);
 const currentIndex = clusterPosts.findIndex((p: any) => p.slug === slug);
-const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
+const previousPost =
+  currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
 const nextPost =
   currentIndex >= 0 && currentIndex < clusterPosts.length - 1
     ? clusterPosts[currentIndex + 1]
@@ -82,7 +95,7 @@ const blogPostingJsonLd = {
   image: ogImageUrl,
   author: { "@type": "Person", name: post.author },
   mainEntityOfPage: canonical,
-  url: canonical
+  url: canonical,
 };
 const learningResourceJsonLd = {
   "@context": "https://schema.org",
@@ -92,7 +105,7 @@ const learningResourceJsonLd = {
   teaches: post.cluster,
   name: post.title,
   description: post.description,
-  url: canonical
+  url: canonical,
 };
 const learningPathJsonLd = {
   "@context": "https://schema.org",
@@ -103,16 +116,21 @@ const learningPathJsonLd = {
     "@type": "ListItem",
     position: index + 1,
     name: p.title,
-    url: new URL(`/blog/${p.slug}/`, Astro.site ?? Astro.url).toString()
-  }))
+    url: new URL(`/blog/${p.slug}/`, Astro.site ?? Astro.url).toString(),
+  })),
 };
 const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Blog", item: new URL("/blog/", Astro.site ?? Astro.url).toString() },
-    { "@type": "ListItem", position: 2, name: post.title, item: canonical }
-  ]
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Blog",
+      item: new URL("/blog/", Astro.site ?? Astro.url).toString(),
+    },
+    { "@type": "ListItem", position: 2, name: post.title, item: canonical },
+  ],
 };
 const faqItems = post.faqItems ?? [];
 const faqJsonLd =
@@ -123,27 +141,33 @@ const faqJsonLd =
         mainEntity: faqItems.map((item: any) => ({
           "@type": "Question",
           name: item.q,
-          acceptedAnswer: { "@type": "Answer", text: item.a }
-        }))
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
       }
     : undefined;
 
-const baseJsonLd = [blogPostingJsonLd, learningResourceJsonLd, breadcrumbJsonLd, learningPathJsonLd];
+const baseJsonLd = [
+  blogPostingJsonLd,
+  learningResourceJsonLd,
+  breadcrumbJsonLd,
+  learningPathJsonLd,
+];
 const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 ---
+
 <BlogLayout
-  title={post.title}
-  description={post.description}
+  title={post.title ?? "ChampionsPrep"}
+  description={post.description ?? ""}
   canonical={canonical}
   ogImage={ogImagePath}
   ogType="article"
   jsonLd={jsonLd}
-  gaContext={{ post_slug: slug, cluster: post.cluster }}
-  author={post.author}
+  gaContext={{ post_slug: slug, cluster: post.cluster ?? "" }}
+  author={post.author ?? "ChampionsPrep"}
   publishedDate={postDate.toISOString()}
   updatedDate={updatedDate.toISOString()}
-  articleTags={post.tags}
-  articleSection={post.cluster}
+  articleTags={(post.tags as string[]) ?? []}
+  articleSection={post.cluster ?? ""}
 >
   <ReadingProgress />
   <Breadcrumbs title={post.title} />
@@ -161,24 +185,33 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
           <span class="post-head__sep" aria-hidden="true">·</span>
           <span>{minutesRead} min read</span>
         </p>
-        {post.tags.length > 0 && (
-          <div class="post-head__tags" aria-label="Post tags">
-            {post.tags.map((tag: string) => (
-              <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
-            ))}
-          </div>
-        )}
+        {
+          (post.tags ?? []).length > 0 && (
+            <div class="post-head__tags" aria-label="Post tags">
+              {(post.tags ?? []).map((tag: string) => (
+                <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
+              ))}
+            </div>
+          )
+        }
       </header>
 
       <ExamTip title="Quick Revision Tip">
-        <p>Summarize each section in one sentence before moving to the next chapter.</p>
+        <p>
+          Summarize each section in one sentence before moving to the next
+          chapter.
+        </p>
       </ExamTip>
 
       <div class="post-body" set:html={bodyHtml} />
 
       <PrevNextNav
-        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.title } : undefined}
-        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.title } : undefined}
+        previous={previousPost
+          ? { href: `/blog/${previousPost.slug}/`, title: previousPost.title }
+          : undefined}
+        next={nextPost
+          ? { href: `/blog/${nextPost.slug}/`, title: nextPost.title }
+          : undefined}
       />
       <ShareButtons
         url={canonical}
@@ -188,7 +221,11 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
         instagramId="champions.prep"
       />
       <MicroFeedback postSlug={slug} cluster={post.cluster} />
-      <RelatedPosts currentSlug={slug} cluster={post.cluster} tags={post.tags} />
+      <RelatedPosts
+        currentSlug={slug}
+        cluster={post.cluster}
+        tags={post.tags}
+      />
       <SmartCTA postSlug={slug} cluster={post.cluster} />
       <AuthorCard name={post.author} />
     </div>
@@ -202,7 +239,9 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 </BlogLayout>
 
 <script>
-  const headings = Array.from(document.querySelectorAll(".post-body h2[id], .post-body h3[id]"));
+  const headings = Array.from(
+    document.querySelectorAll(".post-body h2[id], .post-body h3[id]"),
+  );
   for (const heading of headings) {
     if (heading.querySelector(".heading-anchor")) continue;
     const id = heading.getAttribute("id");
@@ -210,7 +249,10 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     const anchor = document.createElement("a");
     anchor.className = "heading-anchor";
     anchor.href = `#${id}`;
-    anchor.setAttribute("aria-label", `Link to ${heading.textContent ?? "section"}`);
+    anchor.setAttribute(
+      "aria-label",
+      `Link to ${heading.textContent ?? "section"}`,
+    );
     anchor.textContent = "#";
     heading.append(anchor);
   }
@@ -248,15 +290,33 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     width: 3rem;
   }
 
-  .post-head[data-cluster="taxation"] .post-head__cluster-rule { background: #e07c3e; }
-  .post-head[data-cluster="accountancy"] .post-head__cluster-rule { background: #4a90d9; }
-  .post-head[data-cluster="business-studies"] .post-head__cluster-rule { background: #5da55d; }
-  .post-head[data-cluster="economics"] .post-head__cluster-rule { background: #d4af37; }
-  .post-head[data-cluster="corporate-law"] .post-head__cluster-rule { background: #c0392b; }
-  .post-head[data-cluster="tips-tricks"] .post-head__cluster-rule { background: #16a085; }
-  .post-head[data-cluster="shortcuts"] .post-head__cluster-rule { background: #f39c12; }
-  .post-head[data-cluster="mindmaps"] .post-head__cluster-rule { background: #8e44ad; }
-  .post-head[data-cluster="quick-quiz"] .post-head__cluster-rule { background: #2980b9; }
+  .post-head[data-cluster="taxation"] .post-head__cluster-rule {
+    background: #e07c3e;
+  }
+  .post-head[data-cluster="accountancy"] .post-head__cluster-rule {
+    background: #4a90d9;
+  }
+  .post-head[data-cluster="business-studies"] .post-head__cluster-rule {
+    background: #5da55d;
+  }
+  .post-head[data-cluster="economics"] .post-head__cluster-rule {
+    background: #d4af37;
+  }
+  .post-head[data-cluster="corporate-law"] .post-head__cluster-rule {
+    background: #c0392b;
+  }
+  .post-head[data-cluster="tips-tricks"] .post-head__cluster-rule {
+    background: #16a085;
+  }
+  .post-head[data-cluster="shortcuts"] .post-head__cluster-rule {
+    background: #f39c12;
+  }
+  .post-head[data-cluster="mindmaps"] .post-head__cluster-rule {
+    background: #8e44ad;
+  }
+  .post-head[data-cluster="quick-quiz"] .post-head__cluster-rule {
+    background: #2980b9;
+  }
 
   .post-head__eyebrow {
     margin: 0 0 0.7rem;
@@ -321,7 +381,9 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     font-size: 0.78rem;
     text-decoration: none;
     color: var(--color-text-secondary);
-    transition: border-color var(--transition-base), color var(--transition-base);
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base);
   }
 
   .post-head__tags a:hover {
