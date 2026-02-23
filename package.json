@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node --env-file=.env scripts/generate-og.mjs && node --env-file=.env scripts/generate-ig-briefs.mjs",
+    "prebuild": "node $([ -f .env ] && echo --env-file=.env) scripts/generate-og.mjs && node $([ -f .env ] && echo --env-file=.env) scripts/generate-ig-briefs.mjs",
     "generate-brandkit": "node scripts/generate-brandkit.js",
     "build": "astro build",
     "postbuild": "pagefind --site dist",
@@ -44,6 +44,7 @@
     "vercel": "^50.17.1"
   },
   "devDependencies": {
+    "@astrojs/vercel": "^9.0.4",
     "@types/hast": "^3.0.4",
     "@types/node": "^20.0.0",
     "archiver": "^5.3.2",

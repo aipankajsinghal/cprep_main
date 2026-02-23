@@ -11,21 +11,34 @@ import { createClient } from '@sanity/client'
  */
 const isDev = import.meta.env.DEV
 const previewToken = import.meta.env.SANITY_API_TOKEN
+const projectId = import.meta.env.SANITY_PROJECT_ID
 
-export const sanityClient = createClient({
-  projectId: import.meta.env.SANITY_PROJECT_ID,
-  dataset: import.meta.env.SANITY_DATASET ?? 'production',
-  apiVersion: import.meta.env.SANITY_API_VERSION ?? '2024-01-01',
-  useCdn: !isDev && !previewToken,
-  token: previewToken,
-  perspective: 'published', // Default to published
-  stega: {
-    enabled: isDev || !!previewToken,
-    studioUrl: '/studio',
-  },
-})
+// Check if Sanity is properly configured
+const isSanityConfigured = projectId && !projectId.includes('your_project_id')
+
+let sanityClient: ReturnType<typeof createClient> | null = null
+
+if (isSanityConfigured) {
+  sanityClient = createClient({
+    projectId,
+    dataset: import.meta.env.SANITY_DATASET ?? 'production',
+    apiVersion: import.meta.env.SANITY_API_VERSION ?? '2024-01-01',
+    useCdn: !isDev && !previewToken,
+    token: previewToken,
+    perspective: 'published', // Default to published
+    stega: {
+      enabled: isDev || !!previewToken,
+      studioUrl: '/studio',
+    },
+  })
+}
+
+export { sanityClient }
 
 export const getClient = (preview = false) => {
+  if (!sanityClient) {
+    throw new Error('Sanity is not configured. Please set SANITY_PROJECT_ID environment variable.')
+  }
   if (preview && previewToken) {
     return sanityClient.withConfig({
       perspective: 'previewDrafts',

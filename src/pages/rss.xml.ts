@@ -3,6 +3,16 @@ import { sanityClient } from "../lib/sanity";
 import { ALL_POSTS_QUERY } from "../lib/queries";
 
 export async function GET(context: { site: URL | undefined }) {
+  // Return empty RSS feed if Sanity is not configured
+  if (!sanityClient) {
+    return rss({
+      title: "ChampionsPrep Blog",
+      description: "Editorial posts and exam-prep insights from ChampionsPrep.",
+      site: context.site ?? new URL("https://www.championsprep.in"),
+      items: [],
+    });
+  }
+
   const now = new Date();
   const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
 

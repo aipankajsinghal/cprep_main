@@ -1,6 +1,13 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request, redirect, cookies }) => {
+  // Skip if Sanity is not configured
+  if (!import.meta.env.SANITY_PROJECT_ID || import.meta.env.SANITY_PROJECT_ID.includes('your_project_id')) {
+    return new Response('Sanity not configured', { status: 503 });
+  }
+
   const url = new URL(request.url);
   const secret = url.searchParams.get('secret');
   const slug = url.searchParams.get('slug');

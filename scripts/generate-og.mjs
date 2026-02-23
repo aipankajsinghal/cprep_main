@@ -142,6 +142,13 @@ async function generateOne({ title, slug, fontData, logoDataUri = null }) {
 
 async function main() {
   try {
+    // Check if required Sanity environment variables are set
+    if (!process.env.SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID.includes('your_project_id')) {
+      console.log('⏭️  Skipping OG generation: SANITY_PROJECT_ID not configured');
+      console.log('   Configure Sanity environment variables in Vercel to enable OG generation');
+      return;
+    }
+
     // Verify font file exists
     try {
       await fs.access(fontPath);

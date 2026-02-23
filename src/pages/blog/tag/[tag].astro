@@ -6,7 +6,13 @@ import { ALL_POSTS_QUERY } from "../../../lib/queries";
 import { calculateMinutesRead } from "../../../lib/markdown";
 import { slugifyTag } from "../../../utils/content";
 
+export const prerender = false;
+
 export async function getStaticPaths() {
+  if (!sanityClient) {
+    return [];
+  }
+
   const now = new Date();
   const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
   const posts = rawPosts.filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now);
@@ -27,7 +33,7 @@ export async function getStaticPaths() {
 
 const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
 const now = new Date();
-const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+const rawPosts = sanityClient ? await sanityClient.fetch(ALL_POSTS_QUERY) : [];
 
 const posts = rawPosts
   .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)

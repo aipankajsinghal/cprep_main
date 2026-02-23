@@ -21,20 +21,30 @@ import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
 import { slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
+export const prerender = false;
+
 export async function getStaticPaths() {
-  const client = getClient();
-  const slugs = await client.fetch(ALL_SLUGS_QUERY);
-  return slugs.map((item: { slug: string }) => ({
-    params: { slug: item.slug },
-  }));
+  try {
+    const client = getClient();
+    const slugs = await client.fetch(ALL_SLUGS_QUERY);
+    return slugs.map((item: { slug: string }) => ({
+      params: { slug: item.slug },
+    }));
+  } catch {
+    return [];
+  }
 }
 
 const { slug } = Astro.params as { slug: string };
 const isPreview = Astro.cookies.has("sanity-preview");
-const client = getClient(isPreview);
-const post = await client.fetch<Post>(POST_BY_SLUG_QUERY, { slug });
+try {
+  const client = getClient(isPreview);
+  const post = await client.fetch<Post>(POST_BY_SLUG_QUERY, { slug });
 
-if (!post) {
+  if (!post) {
+    return Astro.redirect("/blog/");
+  }
+} catch (e) {
   return Astro.redirect("/blog/");
 }
 
