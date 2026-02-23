@@ -41,7 +41,7 @@ Article Content:
 ${body?.substring(0, 4000) || ''}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,8 +57,8 @@ ${body?.substring(0, 4000) || ''}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API Error:', errorText);
-      return new Response(JSON.stringify({ error: 'Failed to generate content' }), {
+      console.error('Gemini API Error:', response.status, errorText);
+      return new Response(JSON.stringify({ error: `Gemini API failed with status ${response.status}: ${errorText}` }), {
         status: 500,
       });
     }
@@ -67,25 +67,30 @@ ${body?.substring(0, 4000) || ''}`;
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!generatedText) {
-      return new Response(JSON.stringify({ error: 'No content generated' }), { status: 500 });
+      console.error('Gemini response missing text:', JSON.stringify(data));
+      return new Response(JSON.stringify({ error: 'No content generated - response format invalid' }), { status: 500 });
     }
 
     try {
       // Sometimes the model might include markdown fences despite instructions
       const cleanText = generatedText.replace(/^```json/m, '').replace(/```$/m, '').trim();
       const parsed = JSON.parse(cleanText);
-      
+
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        throw new Error('Response missing questions array');
+      }
+
       return new Response(JSON.stringify({ questions: parsed.questions }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
       console.error('Failed to parse Gemini JSON:', generatedText);
-      return new Response(JSON.stringify({ error: 'Invalid JSON from AI' }), { status: 500 });
+      return new Response(JSON.stringify({ error: `Invalid JSON from AI: ${parseError instanceof Error ? parseError.message : String(parseError)}` }), { status: 500 });
     }
     
   } catch (error) {
-    console.error('API Route Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    console.error('API Route Error:', error instanceof Error ? error.message : String(error));
+    return new Response(JSON.stringify({ error: `Internal server error: ${error instanceof Error ? error.message : String(error)}` }), { status: 500 });
   }
 };

@@ -31,7 +31,7 @@ Content:
 ${body?.substring(0, 2000) || ''}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,8 +47,8 @@ ${body?.substring(0, 2000) || ''}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API Error:', errorText);
-      return new Response(JSON.stringify({ error: 'Failed to generate content' }), {
+      console.error('Gemini API Error:', response.status, errorText);
+      return new Response(JSON.stringify({ error: `Gemini API failed with status ${response.status}: ${errorText}` }), {
         status: 500,
       });
     }
@@ -57,7 +57,8 @@ ${body?.substring(0, 2000) || ''}`;
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!generatedText) {
-      return new Response(JSON.stringify({ error: 'No content generated' }), { status: 500 });
+      console.error('Gemini response missing text:', JSON.stringify(data));
+      return new Response(JSON.stringify({ error: 'No content generated - response format invalid' }), { status: 500 });
     }
 
     return new Response(JSON.stringify({ description: generatedText }), {
@@ -65,7 +66,7 @@ ${body?.substring(0, 2000) || ''}`;
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('API Route Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    console.error('API Route Error:', error instanceof Error ? error.message : String(error));
+    return new Response(JSON.stringify({ error: `Internal server error: ${error instanceof Error ? error.message : String(error)}` }), { status: 500 });
   }
 };

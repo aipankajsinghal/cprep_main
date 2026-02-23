@@ -35,7 +35,7 @@ Article Content:
 ${(body || '').substring(0, 4000)}`
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,28 +51,36 @@ ${(body || '').substring(0, 4000)}`
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Gemini API Error:', errorText)
-      return res.status(500).json({ error: 'Failed to generate content' })
+      console.error('Gemini API Error:', response.status, errorText)
+      return res.status(500).json({ error: `Gemini API failed with status ${response.status}: ${errorText}` })
     }
 
     const data = await response.json()
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
     if (!generatedText) {
-      return res.status(500).json({ error: 'No content generated' })
+      console.error('Gemini response missing text:', JSON.stringify(data))
+      return res.status(500).json({ error: 'No content generated - response format invalid' })
     }
 
     try {
       const cleanText = generatedText.replace(/^```json/m, '').replace(/```$/m, '').trim()
       const parsed = JSON.parse(cleanText)
+
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        throw new Error('Response missing questions array')
+      }
+
       return res.status(200).json({ questions: parsed.questions })
     } catch (parseError) {
-      console.error('Failed to parse Gemini JSON:', generatedText)
-      return res.status(500).json({ error: 'Invalid JSON from AI' })
+      console.error('Failed to parse Gemini JSON:', generatedText, parseError)
+      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError)
+      return res.status(500).json({ error: `Invalid JSON from AI: ${errorMessage}` })
     }
 
   } catch (error) {
-    console.error('API Error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('API Error:', errorMessage)
+    return res.status(500).json({ error: `Internal server error: ${errorMessage}` })
   }
 }

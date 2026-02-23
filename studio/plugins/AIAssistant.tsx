@@ -60,8 +60,11 @@ function AIAssistantTool() {
         body: JSON.stringify({ title, body }),
       })
 
-      if (!res.ok) throw new Error('API request failed')
-      
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || `API error: ${res.status}`)
+      }
+
       const data = await res.json()
       if (data.description && resolvedDocId) {
         // Patch the current document
@@ -73,11 +76,12 @@ function AIAssistantTool() {
 
         toast.push({ status: 'success', title: 'SEO Description Generated!' })
       } else {
-         throw new Error('No description returned')
+         throw new Error(data.error || 'No description returned')
       }
     } catch (err) {
-      console.error(err)
-      toast.push({ status: 'error', title: 'Generation failed' })
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error('SEO Generation Error:', errorMessage)
+      toast.push({ status: 'error', title: 'Generation failed', description: errorMessage })
     } finally {
       setLoadingSeo(false)
     }
@@ -105,11 +109,14 @@ function AIAssistantTool() {
         body: JSON.stringify({ title, body }),
       })
 
-      if (!res.ok) throw new Error('API request failed')
-      
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || `API error: ${res.status}`)
+      }
+
       const data = await res.json()
       if (data.questions && data.questions.length > 0 && resolvedDocId) {
-        
+
         // Let's add Sanity keys to the questions format
         const formattedQuestions = data.questions.map((q: any) => ({
           ...q,
@@ -126,11 +133,12 @@ function AIAssistantTool() {
 
         toast.push({ status: 'success', title: 'Quiz Generated!', description: `Added ${formattedQuestions.length} questions.` })
       } else {
-         throw new Error('No questions returned or invalid format')
+         throw new Error(data.error || 'No questions returned or invalid format')
       }
     } catch (err) {
-      console.error(err)
-      toast.push({ status: 'error', title: 'Generation failed' })
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error('Quiz Generation Error:', errorMessage)
+      toast.push({ status: 'error', title: 'Generation failed', description: errorMessage })
     } finally {
       setLoadingQuiz(false)
     }
