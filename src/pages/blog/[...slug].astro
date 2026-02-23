@@ -1,6 +1,5 @@
 ---
-import { getCollection, type CollectionEntry } from "astro:content";
-import BlogLayout from '../../layouts/BlogLayout.astro';
+import BlogLayout from "../../layouts/BlogLayout.astro";
 import ExamTip from "../../components/ExamTip.astro";
 import RelatedPosts from "../../components/RelatedPosts.astro";
 import AuthorCard from "../../components/AuthorCard.astro";
@@ -11,98 +10,115 @@ import ReadingProgress from "../../components/ReadingProgress.astro";
 import ShareButtons from "../../components/ShareButtons.astro";
 import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
-import { calculateMinutesRead, slugifyTag } from "../../utils/content";
+import { getClient } from "../../lib/sanity";
+import {
+  ALL_POSTS_QUERY,
+  ALL_SLUGS_QUERY,
+  POST_BY_SLUG_QUERY,
+} from "../../lib/queries";
+import type { Post } from "../../../studio/sanity.types";
+import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
+import { slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
 export async function getStaticPaths() {
-  const now = new Date();
-  const posts = await getCollection("blog", ({ data }) => {
-    if (data.draft) return false;
-    if (data.publishDate && data.publishDate > now) return false;
-    return true;
-  });
-  return posts.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry }
+  const client = getClient();
+  const slugs = await client.fetch(ALL_SLUGS_QUERY);
+  return slugs.map((item: { slug: string }) => ({
+    params: { slug: item.slug },
   }));
 }
 
-const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
-const { Content, headings } = await entry.render();
-const tocHeadings = headings.filter((item) => item.depth === 2 || item.depth === 3);
-const canonical = new URL(`/blog/${entry.slug}/`, Astro.site ?? Astro.url).toString();
-const ogImagePath = entry.data.ogImage ?? `/blog/og/${entry.slug}.png`;
-const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
-const minutesRead = entry.data.minutesRead ?? calculateMinutesRead(entry.body);
-const pageTitle = entry.data.title;
-const pageDescription = entry.data.description;
-const publishedLabel = entry.data.date.toLocaleDateString("en-IN", {
-  year: "numeric",
-  month: "short",
-  day: "numeric"
-});
-const updatedLabel = (entry.data.updatedDate ?? entry.data.date).toLocaleDateString("en-IN", {
-  year: "numeric",
-  month: "short",
-  day: "numeric"
-});
-const now = new Date();
-const allPosts = (await getCollection("blog", ({ data }) => {
-  if (data.draft) return false;
-  if (data.publishDate && data.publishDate > now) return false;
-  return true;
-})).sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+const { slug } = Astro.params as { slug: string };
+const isPreview = Astro.cookies.has("sanity-preview");
+const client = getClient(isPreview);
+const post = await client.fetch<Post>(POST_BY_SLUG_QUERY, { slug });
+
+if (!post) {
+  return Astro.redirect("/blog/");
+}
+
+const { html: bodyHtml, headings } = await markdownToHtml(post.body ?? "");
+const tocHeadings = headings.filter(
+  (item) => item.depth === 2 || item.depth === 3,
 );
-const clusterPosts = allPosts.filter((post) => post.data.cluster === entry.data.cluster);
-const clusterPostsAscending = [...clusterPosts].sort((a, b) => {
-  const byDate = a.data.date.getTime() - b.data.date.getTime();
-  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
+
+const postDate = new Date(post.date ?? "");
+const updatedDate = post.updatedDate ? new Date(post.updatedDate) : postDate;
+const minutesRead = post.minutesRead ?? calculateMinutesRead(post.body ?? "");
+
+const canonical = new URL(`/blog/${slug}/`, Astro.site ?? Astro.url).toString();
+const ogImagePath = post.ogImage ?? `/blog/og/${slug}.png`;
+const ogImageUrl = new URL(ogImagePath, Astro.site ?? Astro.url).toString();
+
+const publishedLabel = postDate.toLocaleDateString("en-IN", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
 });
-const currentIndex = clusterPosts.findIndex((post) => post.slug === entry.slug);
-const previousPost = currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
+const updatedLabel = updatedDate.toLocaleDateString("en-IN", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
+// Related / prev-next navigation from full post list
+const now = new Date();
+const allPosts = (await client.fetch<Post[]>(ALL_POSTS_QUERY))
+  .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
+  .map((p: any) => ({ ...p, date: new Date(p.date ?? "") }))
+  .sort((a: any, b: any) => b.date.getTime() - a.date.getTime());
+
+const clusterPosts = allPosts.filter(
+  (p: any) => p.cluster === (post.cluster ?? ""),
+);
+const currentIndex = clusterPosts.findIndex((p: any) => p.slug === slug);
+const previousPost =
+  currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;
 const nextPost =
   currentIndex >= 0 && currentIndex < clusterPosts.length - 1
     ? clusterPosts[currentIndex + 1]
     : undefined;
+const clusterPostsAscending = [...clusterPosts].sort((a: any, b: any) => {
+  const byDate = a.date.getTime() - b.date.getTime();
+  return byDate !== 0 ? byDate : a.slug.localeCompare(b.slug);
+});
+
+// JSON-LD
 const blogPostingJsonLd = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  headline: entry.data.title,
-  description: entry.data.description,
-  datePublished: entry.data.date.toISOString(),
-  dateModified: (entry.data.updatedDate ?? entry.data.date).toISOString(),
+  headline: post.title,
+  description: post.description,
+  datePublished: postDate.toISOString(),
+  dateModified: updatedDate.toISOString(),
   image: ogImageUrl,
-  author: {
-    "@type": "Person",
-    name: entry.data.author
-  },
+  author: { "@type": "Person", name: post.author },
   mainEntityOfPage: canonical,
-  url: canonical
+  url: canonical,
 };
 const learningResourceJsonLd = {
   "@context": "https://schema.org",
   "@type": "LearningResource",
   learningResourceType: "Lesson",
   educationalLevel: "Class 11-12",
-  teaches: entry.data.cluster,
-  name: entry.data.title,
-  description: entry.data.description,
-  url: canonical
+  teaches: post.cluster,
+  name: post.title,
+  description: post.description,
+  url: canonical,
 };
 const learningPathJsonLd = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: `${entry.data.cluster} Learning Path`,
+  name: `${post.cluster} Learning Path`,
   itemListOrder: "https://schema.org/ItemListOrderAscending",
-  itemListElement: clusterPostsAscending.map((post, index) => ({
+  itemListElement: clusterPostsAscending.map((p: any, index: number) => ({
     "@type": "ListItem",
     position: index + 1,
-    name: post.data.title,
-    url: new URL(`/blog/${post.slug}/`, Astro.site ?? Astro.url).toString()
-  }))
+    name: p.title,
+    url: new URL(`/blog/${p.slug}/`, Astro.site ?? Astro.url).toString(),
+  })),
 };
-
 const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -111,92 +127,107 @@ const breadcrumbJsonLd = {
       "@type": "ListItem",
       position: 1,
       name: "Blog",
-      item: new URL("/blog/", Astro.site ?? Astro.url).toString()
+      item: new URL("/blog/", Astro.site ?? Astro.url).toString(),
     },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: entry.data.title,
-      item: canonical
-    }
-  ]
+    { "@type": "ListItem", position: 2, name: post.title, item: canonical },
+  ],
 };
-
-const faqItems = entry.data.faqItems ?? [];
+const faqItems = post.faqItems ?? [];
 const faqJsonLd =
   faqItems.length > 0
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: faqItems.map((item) => ({
+        mainEntity: faqItems.map((item: any) => ({
           "@type": "Question",
           name: item.q,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.a
-          }
-        }))
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
       }
     : undefined;
 
-const baseJsonLd = [blogPostingJsonLd, learningResourceJsonLd, breadcrumbJsonLd, learningPathJsonLd];
+const baseJsonLd = [
+  blogPostingJsonLd,
+  learningResourceJsonLd,
+  breadcrumbJsonLd,
+  learningPathJsonLd,
+];
 const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 ---
+
 <BlogLayout
-  title={pageTitle}
-  description={pageDescription}
+  title={post.title ?? "ChampionsPrep"}
+  description={post.description ?? ""}
   canonical={canonical}
   ogImage={ogImagePath}
   ogType="article"
   jsonLd={jsonLd}
-  gaContext={{ post_slug: entry.slug, cluster: entry.data.cluster }}
+  gaContext={{ post_slug: slug, cluster: post.cluster ?? "" }}
+  author={post.author ?? "ChampionsPrep"}
+  publishedDate={postDate.toISOString()}
+  updatedDate={updatedDate.toISOString()}
+  articleTags={(post.tags as string[]) ?? []}
+  articleSection={post.cluster ?? ""}
 >
   <ReadingProgress />
-  <Breadcrumbs title={entry.data.title} />
+  <Breadcrumbs title={post.title} />
   <section class="post-shell">
     <div class="post-main">
-      <header class="post-head">
-        <p class="post-head__eyebrow">{clusterLabel(entry.data.cluster)}</p>
-        <h1>{entry.data.title}</h1>
-        <p class="post-head__dek">{entry.data.description}</p>
-        <div class="post-head__meta" aria-label="Article metadata">
-          <span>Published {publishedLabel}</span>
-          <span>Updated {updatedLabel}</span>
+      <header class="post-head" data-cluster={post.cluster}>
+        <div class="post-head__cluster-rule" aria-hidden="true"></div>
+        <p class="post-head__eyebrow">{clusterLabel(post.cluster)}</p>
+        <h1 class="post-head__title">{post.title}</h1>
+        <p class="post-head__dek">{post.description}</p>
+        <p class="post-head__byline" aria-label="Article metadata">
+          <span class="post-head__author">{post.author}</span>
+          <span class="post-head__sep" aria-hidden="true">·</span>
+          <time datetime={postDate.toISOString()}>{publishedLabel}</time>
+          <span class="post-head__sep" aria-hidden="true">·</span>
           <span>{minutesRead} min read</span>
-          <span>By {entry.data.author}</span>
-        </div>
-        {entry.data.tags.length > 0 && (
-          <div class="post-head__tags" aria-label="Post tags">
-            {entry.data.tags.map((tag) => (
-              <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
-            ))}
-          </div>
-        )}
+        </p>
+        {
+          (post.tags ?? []).length > 0 && (
+            <div class="post-head__tags" aria-label="Post tags">
+              {(post.tags ?? []).map((tag: string) => (
+                <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
+              ))}
+            </div>
+          )
+        }
       </header>
 
       <ExamTip title="Quick Revision Tip">
-        <p>Summarize each section in one sentence before moving to the next chapter.</p>
+        <p>
+          Summarize each section in one sentence before moving to the next
+          chapter.
+        </p>
       </ExamTip>
 
-      <div class="post-body">
-        <Content />
-      </div>
+      <div class="post-body" set:html={bodyHtml} />
 
       <PrevNextNav
-        previous={previousPost ? { href: `/blog/${previousPost.slug}/`, title: previousPost.data.title } : undefined}
-        next={nextPost ? { href: `/blog/${nextPost.slug}/`, title: nextPost.data.title } : undefined}
+        previous={previousPost
+          ? { href: `/blog/${previousPost.slug}/`, title: previousPost.title }
+          : undefined}
+        next={nextPost
+          ? { href: `/blog/${nextPost.slug}/`, title: nextPost.title }
+          : undefined}
       />
       <ShareButtons
         url={canonical}
-        title={entry.data.title}
-        postSlug={entry.slug}
-        cluster={entry.data.cluster}
+        title={post.title}
+        postSlug={slug}
+        cluster={post.cluster}
         instagramId="champions.prep"
       />
-      <MicroFeedback postSlug={entry.slug} cluster={entry.data.cluster} />
-      <RelatedPosts currentSlug={entry.slug} cluster={entry.data.cluster} tags={entry.data.tags} />
-      <SmartCTA postSlug={entry.slug} cluster={entry.data.cluster} />
-      <AuthorCard name={entry.data.author} />
+      <MicroFeedback postSlug={slug} cluster={post.cluster} />
+      <RelatedPosts
+        currentSlug={slug}
+        cluster={post.cluster}
+        tags={post.tags}
+      />
+      <SmartCTA postSlug={slug} cluster={post.cluster} />
+      <AuthorCard name={post.author} />
     </div>
 
     <aside class="post-toc">
@@ -208,7 +239,9 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
 </BlogLayout>
 
 <script>
-  const headings = Array.from(document.querySelectorAll(".post-body h2[id], .post-body h3[id]"));
+  const headings = Array.from(
+    document.querySelectorAll(".post-body h2[id], .post-body h3[id]"),
+  );
   for (const heading of headings) {
     if (heading.querySelector(".heading-anchor")) continue;
     const id = heading.getAttribute("id");
@@ -216,7 +249,10 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     const anchor = document.createElement("a");
     anchor.className = "heading-anchor";
     anchor.href = `#${id}`;
-    anchor.setAttribute("aria-label", `Link to ${heading.textContent ?? "section"}`);
+    anchor.setAttribute(
+      "aria-label",
+      `Link to ${heading.textContent ?? "section"}`,
+    );
     anchor.textContent = "#";
     heading.append(anchor);
   }
@@ -239,92 +275,120 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
     gap: var(--space-md);
   }
 
+  /* Post header – magazine opener */
   .post-head {
-    position: relative;
+    padding: clamp(1.4rem, 3.5vw, 2.4rem) 0 clamp(1.2rem, 2.5vw, 1.8rem);
     overflow: hidden;
-    padding: clamp(1.2rem, 2.8vw, 2rem);
-    border-radius: var(--shape-radius-lg);
-    border: 1px solid color-mix(in srgb, var(--color-border), transparent 15%);
-    background:
-      radial-gradient(
-        ellipse 80% 62% at 20% 100%,
-        color-mix(in srgb, var(--color-lavender-light), transparent 45%),
-        transparent
-      ),
-      radial-gradient(
-        ellipse 58% 46% at 92% 16%,
-        color-mix(in srgb, var(--color-cream), transparent 50%),
-        transparent
-      ),
-      var(--color-bg-warm);
   }
 
-  .post-head::before {
-    content: "";
-    position: absolute;
-    top: -2.4rem;
-    right: -2.4rem;
-    width: 7rem;
-    height: 7rem;
-    border-radius: 8px;
-    transform: rotate(45deg);
-    background: color-mix(in srgb, var(--color-purple-deep), transparent 92%);
-    pointer-events: none;
+  /* Cluster-coloured rule at top */
+  .post-head__cluster-rule {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-purple-deep);
+    margin-bottom: 1.4rem;
+    width: 3rem;
   }
 
-  .post-head h1 {
-    margin: 0.25rem 0 0;
-    line-height: 1.1;
-    max-width: 20ch;
+  .post-head[data-cluster="taxation"] .post-head__cluster-rule {
+    background: #e07c3e;
+  }
+  .post-head[data-cluster="accountancy"] .post-head__cluster-rule {
+    background: #4a90d9;
+  }
+  .post-head[data-cluster="business-studies"] .post-head__cluster-rule {
+    background: #5da55d;
+  }
+  .post-head[data-cluster="economics"] .post-head__cluster-rule {
+    background: #d4af37;
+  }
+  .post-head[data-cluster="corporate-law"] .post-head__cluster-rule {
+    background: #c0392b;
+  }
+  .post-head[data-cluster="tips-tricks"] .post-head__cluster-rule {
+    background: #16a085;
+  }
+  .post-head[data-cluster="shortcuts"] .post-head__cluster-rule {
+    background: #f39c12;
+  }
+  .post-head[data-cluster="mindmaps"] .post-head__cluster-rule {
+    background: #8e44ad;
+  }
+  .post-head[data-cluster="quick-quiz"] .post-head__cluster-rule {
+    background: #2980b9;
   }
 
   .post-head__eyebrow {
-    margin: 0;
+    margin: 0 0 0.7rem;
     color: var(--color-purple-deep);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
     font-weight: 700;
   }
 
-  .post-head__dek {
-    margin: 0.85rem 0 0;
-    color: var(--color-text-secondary);
-    max-width: 56ch;
-    font-size: 1.08rem;
-    line-height: 1.65;
+  .post-head__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--color-text-heading);
+    max-width: 22ch;
   }
 
-  .post-head__meta {
-    margin-top: 1.2rem;
+  .post-head__dek {
+    margin: 1rem 0 0;
+    color: var(--color-text-secondary);
+    max-width: 58ch;
+    font-size: clamp(1rem, 1.3vw, 1.12rem);
+    line-height: 1.68;
+    font-weight: 400;
+  }
+
+  .post-head__byline {
+    margin: 1.1rem 0 0;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
+    font-size: 0.86rem;
+    color: var(--color-text-secondary);
   }
 
-  .post-head__meta span {
-    border: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
-    background: color-mix(in srgb, var(--color-bg), transparent 42%);
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.82rem;
-    color: var(--color-text-secondary);
+  .post-head__author {
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .post-head__sep {
+    opacity: 0.45;
+    font-size: 0.7em;
   }
 
   .post-head__tags {
-    margin-top: 0.95rem;
+    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
   }
 
   .post-head__tags a {
-    border: 1px solid var(--color-border);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 20%);
     border-radius: 999px;
-    background: var(--color-bg);
-    padding: 0.25rem 0.68rem;
-    font-size: 0.82rem;
+    background: transparent;
+    padding: 0.22rem 0.65rem;
+    font-size: 0.78rem;
     text-decoration: none;
+    color: var(--color-text-secondary);
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base);
+  }
+
+  .post-head__tags a:hover {
+    border-color: var(--color-purple-deep);
+    color: var(--color-purple-deep);
   }
 
   .post-body {

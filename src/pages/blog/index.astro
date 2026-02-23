@@ -1,27 +1,31 @@
 ---
-import { getCollection } from "astro:content";
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import SearchWidget from "../../components/SearchWidget.astro";
 import PostCard from "../../components/PostCard.astro";
-import { calculateMinutesRead } from "../../utils/content";
+import { sanityClient } from "../../lib/sanity";
+import { ALL_POSTS_QUERY } from "../../lib/queries";
+import { calculateMinutesRead } from "../../lib/markdown";
 import { clusterLabel } from "../../utils/clusters";
 
 const now = new Date();
-const posts = (await getCollection("blog", ({ data }) => {
-  // Filter out draft posts
-  if (data.draft) return false;
-  // Filter out posts with future publishDate
-  if (data.publishDate && data.publishDate > now) return false;
-  return true;
-}))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .map((post) => ({
+const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+
+const posts = rawPosts
+  .filter((post: any) => {
+    if (post.publishDate && new Date(post.publishDate) > now) return false;
+    return true;
+  })
+  .map((post: any) => ({
     ...post,
-    minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+    date: new Date(post.date),
+    publishDate: post.publishDate ? new Date(post.publishDate) : undefined,
+    updatedDate: post.updatedDate ? new Date(post.updatedDate) : undefined,
+    minutesRead: post.minutesRead ?? calculateMinutesRead(post.body ?? ''),
   }));
+
 const featuredPost = posts[0];
 const gridPosts = featuredPost ? posts.slice(1) : posts;
-const availableClusters = Array.from(new Set(posts.map((post) => post.data.cluster))).sort((a, b) =>
+const availableClusters = Array.from(new Set(posts.map((post: any) => post.cluster))).sort((a: any, b: any) =>
   clusterLabel(a).localeCompare(clusterLabel(b))
 );
 
@@ -29,26 +33,51 @@ const pageTitle = "ChampionsPrep Blog";
 const pageDescription =
   "Editorial explainers, revision strategies, and exam-focused insights for Class 11-12 Commerce students.";
 const canonical = new URL("/blog/", Astro.site ?? Astro.url).toString();
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Blog",
-  name: "ChampionsPrep Blog",
-  description: pageDescription,
-  url: canonical
-};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "ChampionsPrep Blog",
+    description: pageDescription,
+    url: canonical
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "ChampionsPrep",
+    url: "https://www.championsprep.in",
+    logo: "https://www.championsprep.in/icons/icon-512.svg",
+    sameAs: [
+      "https://www.instagram.com/champions.prep/",
+      "https://x.com/championsprep"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ChampionsPrep Blog",
+    url: canonical,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${canonical}?search={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  }
+];
 
 const spotlightPosts = gridPosts.slice(0, 3);
 ---
 <BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd} pagefindStyles={true}>
   <header class="blog-index__hero">
-    <p class="blog-index__eyebrow">Editorial Desk</p>
-    <h1>ChampionsPrep Commerce Blog</h1>
-    <p>{pageDescription}</p>
-    <div class="blog-index__hero-meta" role="list" aria-label="Blog highlights">
-      <p role="listitem"><strong>{posts.length}</strong> Published guides</p>
-      <p role="listitem"><strong>{availableClusters.length}</strong> Learning clusters</p>
-      <p role="listitem"><strong>Static-first</strong> performance-focused reading experience</p>
-    </div>
+    <div class="blog-index__masthead-rule" aria-hidden="true"></div>
+    <p class="blog-index__eyebrow">
+      <span>Insights</span>
+      <span aria-hidden="true">·</span>
+      <span>{posts.length} articles · {availableClusters.length} topics</span>
+    </p>
+    <h1 class="blog-index__headline">ChampionsPrep<br class="blog-index__br" />Commerce Blog</h1>
+    <p class="blog-index__dek">{pageDescription}</p>
+    <div class="blog-index__masthead-rule blog-index__masthead-rule--bottom" aria-hidden="true"></div>
   </header>
 
   <SearchWidget />
@@ -57,10 +86,10 @@ const spotlightPosts = gridPosts.slice(0, 3);
     <section class="blog-index__spotlight" aria-labelledby="spotlight-title">
       <h2 id="spotlight-title">Start with these reads</h2>
       <div class="blog-index__spotlight-grid">
-        {spotlightPosts.map((post) => (
+        {spotlightPosts.map((post: any) => (
           <a href={`/blog/${post.slug}/`} class="blog-index__spotlight-link">
-            <span class="blog-index__spotlight-cluster">{clusterLabel(post.data.cluster)}</span>
-            <span class="blog-index__spotlight-title">{post.data.title}</span>
+            <span class="blog-index__spotlight-cluster">{clusterLabel(post.cluster)}</span>
+            <span class="blog-index__spotlight-title">{post.title}</span>
             <span class="blog-index__spotlight-meta">{post.minutesRead} min read</span>
           </a>
         ))}
@@ -76,12 +105,12 @@ const spotlightPosts = gridPosts.slice(0, 3);
       </div>
       <PostCard
         href={`/blog/${featuredPost.slug}/`}
-        title={featuredPost.data.title}
-        description={featuredPost.data.description}
-        date={featuredPost.data.date}
+        title={featuredPost.title}
+        description={featuredPost.description}
+        date={featuredPost.date}
         minutesRead={featuredPost.minutesRead}
-        cluster={featuredPost.data.cluster}
-        tags={featuredPost.data.tags}
+        cluster={featuredPost.cluster}
+        tags={featuredPost.tags}
         featured={true}
       />
     </section>
@@ -95,7 +124,7 @@ const spotlightPosts = gridPosts.slice(0, 3);
       </div>
       <div class="blog-index__filter-row">
         <button type="button" data-cluster-filter="all" class="is-active">All</button>
-        {availableClusters.map((cluster) => (
+        {availableClusters.map((cluster: any) => (
           <button type="button" data-cluster-filter={cluster}>
             {clusterLabel(cluster)}
           </button>
@@ -105,16 +134,16 @@ const spotlightPosts = gridPosts.slice(0, 3);
   )}
 
   <section class="blog-index__grid" data-cluster-grid>
-    {gridPosts.map((post) => (
-      <div data-cluster-card={post.data.cluster}>
+    {gridPosts.map((post: any) => (
+      <div data-cluster-card={post.cluster}>
         <PostCard
           href={`/blog/${post.slug}/`}
-          title={post.data.title}
-          description={post.data.description}
-          date={post.data.date}
+          title={post.title}
+          description={post.description}
+          date={post.date}
           minutesRead={post.minutesRead}
-          cluster={post.data.cluster}
-          tags={post.data.tags}
+          cluster={post.cluster}
+          tags={post.tags}
           featured={false}
         />
       </div>
@@ -169,40 +198,48 @@ const spotlightPosts = gridPosts.slice(0, 3);
 
 <style>
   .blog-index__hero {
-    padding: clamp(1rem, 3.5vw, 1.8rem);
-    border-radius: var(--shape-radius);
-    border: 1px solid var(--color-border);
+    padding: clamp(1.5rem, 4vw, 2.8rem) 0;
+    text-align: center;
+    border-bottom: 0;
+  }
+
+  .blog-index__masthead-rule {
+    height: 1px;
     background: linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--color-lavender-light), white 20%),
-      color-mix(in srgb, var(--color-bg), var(--color-cream) 30%)
+      90deg,
+      transparent 0%,
+      var(--color-border) 20%,
+      var(--color-purple-deep) 50%,
+      var(--color-border) 80%,
+      transparent 100%
     );
+    margin-bottom: 1.4rem;
   }
 
-  .blog-index__hero h1 {
-    margin: 0;
-    line-height: 1.2;
+  .blog-index__masthead-rule--bottom {
+    margin-top: 1.8rem;
+    margin-bottom: 0;
   }
 
-  .blog-index__hero p {
+  .blog-index__headline {
     margin: 0.55rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 7vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--color-text-heading);
+  }
+
+  .blog-index__br {
+    display: none;
+  }
+
+  .blog-index__dek {
+    margin: 0.9rem auto 0;
     color: var(--color-text-secondary);
-    max-width: 65ch;
-  }
-
-  .blog-index__hero-meta {
-    margin-top: 1rem;
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  .blog-index__hero-meta p {
-    margin: 0;
-    padding: 0.45rem 0.65rem;
-    border-radius: 9px;
-    background: color-mix(in srgb, var(--color-bg), transparent 10%);
-    border: 1px solid color-mix(in srgb, var(--color-border), transparent 10%);
-    font-size: 0.9rem;
+    max-width: 58ch;
+    font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+    line-height: 1.7;
   }
 
   .blog-index__eyebrow {

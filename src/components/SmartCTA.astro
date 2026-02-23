@@ -11,19 +11,34 @@ const {
   href = "https://www.championsprep.in/",
   cluster = "",
   postSlug = "",
-  midLabel = "Need guided strategy for this topic?",
-  endLabel = "Ready for structured prep? Explore full study resources."
+  midLabel = "Want structured guidance for this topic?",
+  endLabel = "Liked this insight? Explore full study resources built for Class 11-12 Commerce.",
 } = Astro.props as Props;
 ---
-<section class="smart-cta smart-cta--mid" data-smart-cta-mid hidden aria-label="Mid article call to action">
-  <p>{midLabel}</p>
-  <a href={href} data-smart-cta-link data-position="mid">Get prep plan</a>
-</section>
 
-<section class="smart-cta smart-cta--end" aria-label="End of article call to action">
-  <p>{endLabel}</p>
-  <a href={href} data-smart-cta-link data-position="end">Explore ChampionsPrep</a>
-</section>
+<!-- Mid-article CTA: inline, revealed at scroll 40% -->
+<aside class="smart-cta smart-cta--mid" data-smart-cta-mid hidden aria-label="Mid-article call to action">
+  <div class="smart-cta__rule" aria-hidden="true"></div>
+  <div class="smart-cta__inner">
+    <p class="smart-cta__eyebrow">ChampionsPrep</p>
+    <p class="smart-cta__text">{midLabel}</p>
+    <a href={href} data-smart-cta-link data-position="mid" class="smart-cta__link">
+      Get a prep plan <span aria-hidden="true">→</span>
+    </a>
+  </div>
+  <div class="smart-cta__rule" aria-hidden="true"></div>
+</aside>
+
+<!-- End-of-article CTA -->
+<aside class="smart-cta smart-cta--end" aria-label="End of article call to action">
+  <div class="smart-cta__inner">
+    <p class="smart-cta__eyebrow">ChampionsPrep</p>
+    <p class="smart-cta__headline">{endLabel}</p>
+    <a href={href} data-smart-cta-link data-position="end" class="smart-cta__link smart-cta__link--end">
+      Explore study resources <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</aside>
 
 <script is:inline define:vars={{ postSlug, cluster }}>
   const mid = document.querySelector("[data-smart-cta-mid]");
@@ -67,7 +82,7 @@ const {
         window.cpTrack("cta_click", {
           post_slug: postSlug,
           cluster,
-          position
+          position,
         });
       }
     });
@@ -76,70 +91,91 @@ const {
 
 <style>
   .smart-cta {
-    border: 1px solid var(--color-border);
-    border-radius: var(--shape-radius);
-    background: var(--color-bg-muted);
+    margin: var(--space-xl) 0;
   }
 
-  .smart-cta p {
-    margin: 0;
+  .smart-cta__rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-border) 25%,
+      var(--color-purple-deep) 50%,
+      var(--color-border) 75%,
+      transparent
+    );
+    margin: 1.4rem 0;
   }
 
-  .smart-cta a {
-    margin-top: 0.55rem;
+  .smart-cta__inner {
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  .smart-cta__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-purple-deep);
+  }
+
+  .smart-cta__text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+    color: var(--color-text-heading);
+    line-height: 1.5;
+    max-width: 52ch;
+    margin: 0 auto 0.9rem;
+  }
+
+  .smart-cta__headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    color: var(--color-text-heading);
+    line-height: 1.45;
+    max-width: 56ch;
+    margin: 0 auto 1rem;
+  }
+
+  .smart-cta__link {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-height: 2.55rem;
-    padding: 0.5rem 0.95rem;
-    border: 1px solid var(--color-lavender-600);
+    gap: 0.4rem;
+    padding: 0.55rem 1.3rem;
+    border: 1.5px solid var(--color-purple-deep);
     border-radius: 999px;
-    background: var(--color-lavender-600);
-    color: #fff;
+    background: transparent;
+    color: var(--color-purple-deep);
     text-decoration: none;
-    font-weight: 600;
-    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    transition: background var(--transition-base), color var(--transition-base), transform var(--transition-base);
   }
 
-  .smart-cta a:hover {
-    background: var(--color-lavender-500);
-    border-color: var(--color-lavender-500);
-    transform: scale(1.02);
+  .smart-cta__link:hover {
+    background: var(--color-purple-deep);
+    color: #ffffff;
+    transform: var(--transform-lift-sm);
   }
 
-  .smart-cta--mid {
-    position: fixed;
-    right: 1rem;
-    bottom: 1rem;
-    z-index: 40;
-    max-width: min(26rem, calc(100vw - 2rem));
-    padding: 0.85rem;
-    box-shadow: 0 8px 22px color-mix(in srgb, var(--color-lavender-500), transparent 84%);
+  .smart-cta__link--end {
+    padding: 0.6rem 1.6rem;
+    font-size: 0.92rem;
   }
 
-  .smart-cta--mid::before,
-  .smart-cta--end::before {
-    content: "";
-    display: inline-block;
-    width: 0.48rem;
-    height: 0.48rem;
-    margin-right: 0.45rem;
-    background: var(--color-lavender-500);
-    transform: rotate(45deg);
-    vertical-align: middle;
+  /* End CTA: contained editorial box */
+  .smart-cta--end .smart-cta__inner {
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 20%);
+    border-radius: var(--shape-radius);
+    padding: 1.8rem 1.5rem;
+    background: color-mix(in srgb, var(--color-purple-soft), transparent 60%);
   }
 
-  .smart-cta--end {
-    margin-top: 2rem;
-    padding: 1rem;
-    border-left: 4px solid var(--color-lavender-500);
-  }
-
-  @media (max-width: 768px) {
-    .smart-cta--mid {
-      left: 1rem;
-      right: 1rem;
-      bottom: 0.75rem;
-    }
+  html.dark .smart-cta--end .smart-cta__inner {
+    background: color-mix(in srgb, var(--color-lavender-light), transparent 50%);
   }
 </style>

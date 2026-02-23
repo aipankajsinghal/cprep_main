@@ -10,11 +10,13 @@ Static-first editorial blog for ChampionsPrep, built with Astro + MDX.
 - Search: Pagefind static index
 - SEO: build-time metadata + JSON-LD + sitemap + RSS
 - Design: editorial, academic, lavender + diamond motif
+- CMS: Sanity.io (Content Lake + Sanity Studio)
 
 ## Tech Stack
 
 - Astro
-- `@astrojs/mdx`
+- Sanity.io
+- `@astrojs/mdx` (for local documentation/templates)
 - `@astrojs/sitemap`
 - `@astrojs/rss`
 - Tailwind CSS v4 (`@tailwindcss/vite`)
@@ -35,7 +37,7 @@ public/
 src/
   components/
   content/
-    blog/
+    blog/ (Astro Content Collections - legacy/templates)
     config.ts
   layouts/
   pages/
@@ -44,11 +46,20 @@ src/
   utils/
 scripts/
   generate-og.mjs
+studio/ (Sanity Studio project)
 ```
 
 ## Local Development (PowerShell)
 
+### Blog Site
 ```powershell
+npm install
+npm run dev
+```
+
+### Sanity Studio
+```powershell
+cd studio
 npm install
 npm run dev
 ```
@@ -61,9 +72,14 @@ npm run build
 
 ## Content Workflow
 
+1. Open Sanity Studio (`cd studio && npm run dev`) or access via Sanity.io.
+2. Create or edit "Post" documents.
+3. Publish changes in Sanity.
+4. Trigger a new build/deploy (Vercel) to pull fresh content.
+
+Legacy MDX workflow (for developer notes or templates):
 1. Copy `src/content/blog/_template.mdx`
 2. Fill frontmatter and content
-3. Commit and deploy
 
 ## Required Frontmatter
 

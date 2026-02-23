@@ -1,7 +1,7 @@
 ---
-import { getCollection } from "astro:content";
+import { sanityClient } from "../lib/sanity";
+import { ALL_POSTS_QUERY } from "../lib/queries";
 import { clusterLabel } from "../utils/clusters";
-import { calculateMinutesRead } from "../utils/content";
 
 interface Props {
   currentSlug: string;
@@ -13,22 +13,24 @@ interface Props {
 const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
 const tagSet = new Set(tags);
 
-const candidates = (await getCollection("blog", ({ data }) => !data.draft)).filter(
-  (post) => post.slug !== currentSlug
-);
+const now = new Date();
+const allPosts = (await sanityClient.fetch(ALL_POSTS_QUERY))
+  .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now);
+
+const candidates = allPosts.filter((p: any) => p.slug !== currentSlug);
 
 const scored = candidates
-  .map((post) => {
+  .map((post: any) => {
     let score = 0;
-    if (post.data.cluster === cluster) score += 3;
-    for (const tag of post.data.tags) {
+    if (post.cluster === cluster) score += 3;
+    for (const tag of post.tags ?? []) {
       if (tagSet.has(tag)) score += 1;
     }
     return { post, score };
   })
-  .sort((a, b) => {
+  .sort((a: any, b: any) => {
     if (b.score !== a.score) return b.score - a.score;
-    return b.post.data.date.getTime() - a.post.data.date.getTime();
+    return new Date(b.post.date).getTime() - new Date(a.post.date).getTime();
   });
 
 const selected: typeof scored = [];
@@ -39,31 +41,38 @@ for (const item of scored) {
 if (selected.length < limit) {
   for (const item of scored) {
     if (selected.length >= limit) break;
-    if (!selected.some((picked) => picked.post.slug === item.post.slug)) {
+    if (!selected.some((picked: any) => picked.post.slug === item.post.slug)) {
       selected.push(item);
     }
   }
 }
 
-const relatedItems = selected.map(({ post }) => ({
+const relatedItems = selected.map(({ post }: any) => ({
   slug: post.slug,
-  title: post.data.title,
-  cluster: clusterLabel(post.data.cluster),
-  dateLabel: post.data.date.toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
-  minutesRead: post.data.minutesRead ?? calculateMinutesRead(post.body)
+  title: post.title,
+  cluster: post.cluster,
+  clusterDisplay: clusterLabel(post.cluster),
+  dateLabel: new Date(post.date).toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
+  minutesRead: post.minutesRead ?? 5,
 }));
 ---
 <section class="related-posts" aria-label="Related posts">
-  <h2>Continue Reading</h2>
+  <div class="related-posts__header">
+    <span class="related-posts__rule" aria-hidden="true"></span>
+    <h2 class="related-posts__heading">From the Desk</h2>
+    <span class="related-posts__rule" aria-hidden="true"></span>
+  </div>
+
   {relatedItems.length === 0 ? (
     <p class="related-posts__empty">No related posts yet.</p>
   ) : (
     <div class="related-posts__grid">
       {relatedItems.map((item) => (
-        <a href={`/blog/${item.slug}/`} class="related-posts__card">
-          <span class="related-posts__cluster">{item.cluster}</span>
+        <a href={`/blog/${item.slug}/`} class="related-posts__card" data-cluster={item.cluster}>
+          <div class="related-posts__accent" aria-hidden="true"></div>
+          <span class="related-posts__cluster">{item.clusterDisplay}</span>
           <span class="related-posts__title">{item.title}</span>
-          <span class="related-posts__meta">{item.dateLabel} · {item.minutesRead} min read</span>
+          <span class="related-posts__meta">{item.dateLabel} · {item.minutesRead} min</span>
         </a>
       ))}
     </div>
@@ -75,46 +84,92 @@ const relatedItems = selected.map(({ post }) => ({
     margin-top: var(--space-xl);
   }
 
-  .related-posts__grid {
-    margin-top: 1rem;
-    display: grid;
-    gap: 0.75rem;
+  .related-posts__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .related-posts__rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-border) 30%,
+      var(--color-border) 70%,
+      transparent
+    );
+  }
+
+  .related-posts__heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
   }
 
   .related-posts__empty {
-    margin: 0.75rem 0 0;
+    margin: 0;
     color: var(--color-text-secondary);
+    text-align: center;
+    padding: 2rem 0;
   }
 
-  .related-posts__empty::before {
-    content: "◇";
-    margin-right: 0.45rem;
-    color: var(--color-purple-deep);
-    opacity: 0.45;
+  .related-posts__grid {
+    display: grid;
+    gap: 1rem;
   }
 
   .related-posts__card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    padding: 0.95rem;
-    border: 1px solid var(--color-border);
+    padding: 1.1rem 1rem 1rem;
     border-radius: var(--shape-radius);
     background: var(--color-bg);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
     text-decoration: none;
-    transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    overflow: hidden;
+    transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
   }
 
   .related-posts__card:hover {
     border-color: var(--color-border-accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-purple-deep), transparent 92%);
+    transform: var(--transform-lift);
+    background: var(--color-bg-muted);
   }
 
+  /* Cluster-coloured top accent line */
+  .related-posts__accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--color-purple-deep);
+  }
+
+  .related-posts__card[data-cluster="taxation"] .related-posts__accent { background: #e07c3e; }
+  .related-posts__card[data-cluster="accountancy"] .related-posts__accent { background: #4a90d9; }
+  .related-posts__card[data-cluster="business-studies"] .related-posts__accent { background: #5da55d; }
+  .related-posts__card[data-cluster="economics"] .related-posts__accent { background: #d4af37; }
+  .related-posts__card[data-cluster="corporate-law"] .related-posts__accent { background: #c0392b; }
+  .related-posts__card[data-cluster="tips-tricks"] .related-posts__accent { background: #16a085; }
+  .related-posts__card[data-cluster="shortcuts"] .related-posts__accent { background: #f39c12; }
+  .related-posts__card[data-cluster="mindmaps"] .related-posts__accent { background: #8e44ad; }
+  .related-posts__card[data-cluster="quick-quiz"] .related-posts__accent { background: #2980b9; }
+
   .related-posts__cluster {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: var(--color-purple-deep);
     font-weight: 700;
   }
@@ -122,12 +177,15 @@ const relatedItems = selected.map(({ post }) => ({
   .related-posts__title {
     color: var(--color-text-heading);
     font-weight: 600;
-    line-height: 1.3;
+    font-size: 0.96rem;
+    line-height: 1.35;
+    font-family: var(--font-display);
   }
 
   .related-posts__meta {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--color-text-secondary);
+    margin-top: 0.1rem;
   }
 
   @media (min-width: 640px) {

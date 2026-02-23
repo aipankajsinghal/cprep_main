@@ -1,25 +1,29 @@
 import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
+import { sanityClient } from "../lib/sanity";
+import { ALL_POSTS_QUERY } from "../lib/queries";
 
 export async function GET(context: { site: URL | undefined }) {
   const now = new Date();
-  const posts = (await getCollection("blog", ({ data }) => {
-    if (data.draft) return false;
-    if (data.publishDate && data.publishDate > now) return false;
-    return true;
-  })).sort(
-    (a, b) => b.data.date.getTime() - a.data.date.getTime()
-  );
+  const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+
+  const posts = rawPosts
+    .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
+    .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return rss({
     title: "ChampionsPrep Blog",
     description: "Editorial posts and exam-prep insights from ChampionsPrep.",
     site: context.site ?? new URL("https://www.championsprep.in"),
-    items: posts.map((post) => ({
-      title: post.data.title,
-      description: post.data.description,
-      pubDate: post.data.date,
-      link: `/blog/${post.slug}/`
+    items: posts.map((post: any) => ({
+      title: post.title,
+      description: post.description,
+      pubDate: new Date(post.date),
+      link: `/blog/${post.slug}/`,
+      customData: [
+        post.author ? `<author>${post.author}</author>` : "",
+        post.cluster ? `<category>${post.cluster}</category>` : "",
+        ...(post.tags ?? []).map((t: string) => `<category>${t}</category>`),
+      ].filter(Boolean).join("\n"),
     }))
   });
 }

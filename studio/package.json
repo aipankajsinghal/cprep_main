@@ -1,0 +1,23 @@
+{
+  "name": "cprep-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "manage": "sanity manage"
+  },
+  "dependencies": {
+    "@sanity/icons": "^3.7.0",
+    "@sanity/presentation": "^2.0.0",
+    "@sanity/ui": "^2.16.22",
+    "@sanity/vision": "^3.75.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.75.1",
+    "sanity-plugin-markdown": "3.0.0-v3-studio.7",
+    "styled-components": "^6.1.15"
+  }
+}

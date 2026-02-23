@@ -119,6 +119,11 @@ const instagramHref = `https://www.instagram.com/${instagramId}/`;
           knownPlatforms.includes(item),
         ) ?? "unknown";
 
+      // Show toast confirmation when the user copies the link
+      if (platform === "copy-url" && typeof window.cpToast === "function") {
+        setTimeout(() => window.cpToast("Link copied!"), 120);
+      }
+
       if (typeof window.cpTrack === "function") {
         window.cpTrack("share_click", {
           platform,

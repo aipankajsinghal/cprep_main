@@ -1,0 +1,56 @@
+---
+// Toast notification component.
+// Usage: window.cpToast('Message here') to show a 2-second toast.
+// Rendered once in the layout; triggered programmatically.
+---
+
+<div id="cp-toast" class="cp-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+  <span id="cp-toast-msg"></span>
+</div>
+
+<script is:inline>
+  (() => {
+    let timer = null;
+
+    window.cpToast = function (message) {
+      const toast = document.getElementById("cp-toast");
+      const msg = document.getElementById("cp-toast-msg");
+      if (!toast || !msg) return;
+
+      msg.textContent = message;
+      toast.hidden = false;
+      toast.classList.add("is-visible");
+
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        toast.classList.remove("is-visible");
+        setTimeout(() => { toast.hidden = true; }, 300);
+      }, 2000);
+    };
+  })();
+</script>
+
+<style>
+  .cp-toast {
+    position: fixed;
+    bottom: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(0.5rem);
+    z-index: 200;
+    padding: 0.45rem 1rem;
+    background: var(--color-purple-deep);
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .cp-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>

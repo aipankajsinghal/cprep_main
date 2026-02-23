@@ -19,8 +19,8 @@
   color: var(--color-text-heading);
   line-height: 1.2;
   letter-spacing: -0.02em;
-  margin-top: 2.2rem;
-  margin-bottom: 0.9rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
   scroll-margin-top: 5.4rem;
 }
 
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding-top: 1.65rem;
+  padding-top: 2rem;
   border-top: 1px solid color-mix(in srgb, var(--color-border), transparent 45%);
 }
 
@@ -85,7 +85,7 @@
 .editorial pre,
 .editorial table {
   margin-top: 0;
-  margin-bottom: 1.05rem;
+  margin-bottom: 1.25rem;
 }
 
 .editorial p,
@@ -156,6 +156,12 @@
   font-size: 2.8rem;
   line-height: 1;
   color: color-mix(in srgb, var(--color-purple-deep), transparent 72%);
+}
+
+.post-body > p:first-of-type {
+  font-size: clamp(1.08rem, 1.3vw, 1.22rem);
+  line-height: 1.85;
+  color: var(--color-text-secondary);
 }
 
 .post-body > p:first-of-type::first-letter {

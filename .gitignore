@@ -3,3 +3,13 @@ dist/
 .astro/
 .DS_Store
 *.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Sanity Studio build output
+studio/dist/
+studio/node_modules/
+

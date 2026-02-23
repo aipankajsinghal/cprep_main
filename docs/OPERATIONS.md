@@ -32,6 +32,13 @@ Build includes:
 
 ## Environment Variables
 
+Required:
+
+- `SANITY_PROJECT_ID`
+- `SANITY_DATASET` (defaults to "production")
+- `SANITY_API_VERSION` (defaults to "2024-01-01")
+- `SANITY_API_TOKEN` (Required for build-time fetching and previews)
+
 Optional:
 
 - `PUBLIC_GA_MEASUREMENT_ID`
@@ -41,7 +48,9 @@ Optional:
 
 ## Deployment Notes
 
-- Primary target: static hosting/CDN.
+- Primary target: static hosting/CDN (Vercel).
+- Content is pulled from Sanity during build.
+- Deployment must be triggered manually or via Sanity Webhook when content is published.
 - Runtime proxy `/api/inline-ai` is optional enhancement.
 - Site behavior remains functional without runtime proxy because InlineAssistant has static fallback.
 

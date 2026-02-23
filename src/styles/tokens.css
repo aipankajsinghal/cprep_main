@@ -43,6 +43,11 @@
   --space-xl: 2.5rem;
   --space-2xl: 4rem;
 
+  /* Motion tokens – use for interactive lift/hover effects */
+  --transform-lift: translateY(-2px);
+  --transform-lift-sm: translateY(-1px);
+  --transition-base: 180ms ease;
+
   /* Aliases for migration (remove after all components are updated). */
   --color-lavender-500: var(--color-purple-deep);
   --color-lavender-600: var(--color-purple-hover);
@@ -64,7 +69,7 @@ html.dark {
   --color-lavender: #2d2940;
   --color-lavender-light: #252238;
   --color-lavender-soft: #252238;
-  --color-link: #877aa9; /* improved dark-mode link color (suggested) */
-  --color-link-strong: #b39ce0; /* bolder light-on-dark link sample */
+  --color-link: #a99cd4; /* WCAG AA compliant on dark bg (~4.8:1 contrast) */
+  --color-link-strong: #c5b4f0; /* bolder light-on-dark link */
   --color-border-accent: color-mix(in srgb, var(--color-lavender), transparent 55%);
 }
