@@ -1,0 +1,12 @@
+# Ignore the old Express-style API handlers since Astro's Vercel adapter
+# handles API routes from src/pages/api/ and builds them into the output.
+# Having both can cause routing conflicts and confusion.
+api/
+
+# Standard ignores
+node_modules/
+.git/
+dist/
+.env
+.env.local
+.env.*.local
