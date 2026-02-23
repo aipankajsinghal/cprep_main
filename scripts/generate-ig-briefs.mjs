@@ -7,8 +7,15 @@ const outputFile = path.join(__dirname, '../public/data/instagram-briefs.json');
 
 async function generateBriefs() {
   try {
+    // Check if required Sanity environment variables are set
+    if (!process.env.SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID.includes('your_project_id')) {
+      console.log('⏭️  Skipping Instagram briefs generation: SANITY_PROJECT_ID not configured');
+      console.log('   Configure Sanity environment variables in Vercel to enable briefs generation');
+      return;
+    }
+
     const briefs = [];
-    
+
     // Initialize Sanity Client
     const { createClient } = await import('@sanity/client');
     const client = createClient({
