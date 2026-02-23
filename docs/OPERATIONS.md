@@ -71,5 +71,3 @@ Optional:
   - Static fallback should still render responses.
 - FAQ rich results not appearing:
   - Ensure `faqItems` exists in post frontmatter.
-
-Test
