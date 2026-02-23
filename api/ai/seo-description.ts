@@ -41,20 +41,22 @@ ${(body || '').substring(0, 2000)}`
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Gemini API Error:', errorText)
-      return res.status(500).json({ error: 'Failed to generate content' })
+      console.error('Gemini API Error:', response.status, errorText)
+      return res.status(500).json({ error: `Gemini API failed with status ${response.status}: ${errorText}` })
     }
 
     const data = await response.json()
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
     if (!generatedText) {
-      return res.status(500).json({ error: 'No content generated' })
+      console.error('Gemini response missing text:', JSON.stringify(data))
+      return res.status(500).json({ error: 'No content generated - response format invalid' })
     }
 
     return res.status(200).json({ description: generatedText })
   } catch (error) {
-    console.error('API Error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('API Error:', errorMessage)
+    return res.status(500).json({ error: `Internal server error: ${errorMessage}` })
   }
 }

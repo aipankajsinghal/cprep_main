@@ -15,6 +15,31 @@ import {
 // Env var must be set in studio/.env as SANITY_STUDIO_SITE_URL=http://localhost:4321
 const SITE_URL = (process.env.SANITY_STUDIO_SITE_URL ?? '').replace(/\/$/, '')
 
+/**
+ * Formats error messages for display
+ */
+function formatErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
+/**
+ * Handles API calls with error extraction
+ */
+async function callAIEndpoint(endpoint: string, payload: any): Promise<any> {
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.error || `API error: ${res.status}`)
+  }
+
+  return await res.json()
+}
+
 function AIAssistantTool() {
   const documentId = useFormValue(['_id']) as string | undefined
   const docType = useFormValue(['_type']) as string | undefined
@@ -54,15 +79,9 @@ function AIAssistantTool() {
         })
         return
       }
-      const res = await fetch(`${SITE_URL}/api/ai/seo-description`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body }),
-      })
 
-      if (!res.ok) throw new Error('API request failed')
-      
-      const data = await res.json()
+      const data = await callAIEndpoint(`${SITE_URL}/api/ai/seo-description`, { title, body })
+
       if (data.description && resolvedDocId) {
         // Patch the current document
         await client
@@ -73,11 +92,12 @@ function AIAssistantTool() {
 
         toast.push({ status: 'success', title: 'SEO Description Generated!' })
       } else {
-         throw new Error('No description returned')
+        throw new Error(data.error || 'No description returned')
       }
     } catch (err) {
-      console.error(err)
-      toast.push({ status: 'error', title: 'Generation failed' })
+      const errorMessage = formatErrorMessage(err)
+      console.error('SEO Generation Error:', errorMessage)
+      toast.push({ status: 'error', title: 'Generation failed', description: errorMessage })
     } finally {
       setLoadingSeo(false)
     }
@@ -99,17 +119,10 @@ function AIAssistantTool() {
         })
         return
       }
-      const res = await fetch(`${SITE_URL}/api/ai/generate-quiz`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body }),
-      })
 
-      if (!res.ok) throw new Error('API request failed')
-      
-      const data = await res.json()
+      const data = await callAIEndpoint(`${SITE_URL}/api/ai/generate-quiz`, { title, body })
+
       if (data.questions && data.questions.length > 0 && resolvedDocId) {
-        
         // Let's add Sanity keys to the questions format
         const formattedQuestions = data.questions.map((q: any) => ({
           ...q,
@@ -126,11 +139,12 @@ function AIAssistantTool() {
 
         toast.push({ status: 'success', title: 'Quiz Generated!', description: `Added ${formattedQuestions.length} questions.` })
       } else {
-         throw new Error('No questions returned or invalid format')
+        throw new Error(data.error || 'No questions returned or invalid format')
       }
     } catch (err) {
-      console.error(err)
-      toast.push({ status: 'error', title: 'Generation failed' })
+      const errorMessage = formatErrorMessage(err)
+      console.error('Quiz Generation Error:', errorMessage)
+      toast.push({ status: 'error', title: 'Generation failed', description: errorMessage })
     } finally {
       setLoadingQuiz(false)
     }

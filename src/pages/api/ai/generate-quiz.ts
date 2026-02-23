@@ -1,23 +1,20 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { formatErrorMessage, createErrorResponse, extractGeminiText } from './utils';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { title, body } = await request.json();
 
     if (!title || !body) {
-      return new Response(JSON.stringify({ error: 'Title and body are required' }), {
-        status: 400,
-      });
+      return createErrorResponse('Title and body are required', 400);
     }
 
     const apiKey = import.meta.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Gemini API key is not configured' }), {
-        status: 500,
-      });
+      return createErrorResponse('Gemini API key is not configured', 500);
     }
 
     const prompt = `You are an expert educator. Based on the following article, create a 5-question multiple-choice quiz.
@@ -57,35 +54,38 @@ ${body?.substring(0, 4000) || ''}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API Error:', errorText);
-      return new Response(JSON.stringify({ error: 'Failed to generate content' }), {
-        status: 500,
-      });
+      console.error('Gemini API Error:', response.status, errorText);
+      return createErrorResponse(`Gemini API failed with status ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const generatedText = extractGeminiText(data);
 
     if (!generatedText) {
-      return new Response(JSON.stringify({ error: 'No content generated' }), { status: 500 });
+      console.error('Gemini response missing text:', JSON.stringify(data));
+      return createErrorResponse('No content generated - response format invalid');
     }
 
     try {
       // Sometimes the model might include markdown fences despite instructions
       const cleanText = generatedText.replace(/^```json/m, '').replace(/```$/m, '').trim();
       const parsed = JSON.parse(cleanText);
-      
+
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        throw new Error('Response missing questions array');
+      }
+
       return new Response(JSON.stringify({ questions: parsed.questions }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
       console.error('Failed to parse Gemini JSON:', generatedText);
-      return new Response(JSON.stringify({ error: 'Invalid JSON from AI' }), { status: 500 });
+      return createErrorResponse(`Invalid JSON from AI: ${formatErrorMessage(parseError)}`);
     }
-    
+
   } catch (error) {
-    console.error('API Route Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    console.error('API Route Error:', formatErrorMessage(error));
+    return createErrorResponse(`Internal server error: ${formatErrorMessage(error)}`);
   }
 };

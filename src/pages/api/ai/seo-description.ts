@@ -1,23 +1,20 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { formatErrorMessage, createErrorResponse, extractGeminiText } from './utils';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { title, body } = await request.json();
 
     if (!title && !body) {
-      return new Response(JSON.stringify({ error: 'Title or body is required' }), {
-        status: 400,
-      });
+      return createErrorResponse('Title or body is required', 400);
     }
 
     const apiKey = import.meta.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Gemini API key is not configured' }), {
-        status: 500,
-      });
+      return createErrorResponse('Gemini API key is not configured', 500);
     }
 
     const prompt = `You are an expert SEO copywriter.
@@ -47,17 +44,16 @@ ${body?.substring(0, 2000) || ''}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API Error:', errorText);
-      return new Response(JSON.stringify({ error: 'Failed to generate content' }), {
-        status: 500,
-      });
+      console.error('Gemini API Error:', response.status, errorText);
+      return createErrorResponse(`Gemini API failed with status ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const generatedText = extractGeminiText(data);
 
     if (!generatedText) {
-      return new Response(JSON.stringify({ error: 'No content generated' }), { status: 500 });
+      console.error('Gemini response missing text:', JSON.stringify(data));
+      return createErrorResponse('No content generated - response format invalid');
     }
 
     return new Response(JSON.stringify({ description: generatedText }), {
@@ -65,7 +61,7 @@ ${body?.substring(0, 2000) || ''}`;
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('API Route Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    console.error('API Route Error:', formatErrorMessage(error));
+    return createErrorResponse(`Internal server error: ${formatErrorMessage(error)}`);
   }
 };
