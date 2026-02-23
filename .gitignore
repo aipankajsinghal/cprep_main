@@ -13,3 +13,5 @@ dist/
 studio/dist/
 studio/node_modules/
 
+# Vercel build output
+.vercel/
