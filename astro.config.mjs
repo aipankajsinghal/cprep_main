@@ -10,9 +10,9 @@ import rehypeKatex from "rehype-katex";
 
 export default defineConfig({
   site: "https://www.championsprep.in",
-  // Use 'hybrid' so static pages are prerendered while server-side API routes
-  // and server-rendered pages are available on the Vercel adapter.
-  output: "hybrid",
+  // Astro 5: 'static' is the default and 'hybrid' has been removed.
+  // SSR/API routes are supported via 'export const prerender = false' in those files.
+  output: "static",
   adapter: vercel(),
   trailingSlash: "always",
   integrations: [
