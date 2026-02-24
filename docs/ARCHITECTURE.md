@@ -5,7 +5,7 @@
 - Static first
 - Content-driven
 - Editorial-focused
-- Performance-first
+- Performance-first always
 
 ## Hard Constraints
 
