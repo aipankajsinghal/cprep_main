@@ -139,6 +139,14 @@ const { data = [] } = Astro.props as Props;
   }
 
   @media (max-width: 768px) {
+    .faq-section {
+      padding: 40px 16px;
+    }
+
+    .section-header {
+      margin-bottom: 30px;
+    }
+
     .section-header h2 {
       font-size: 1.8rem;
     }
@@ -151,6 +159,27 @@ const { data = [] } = Astro.props as Props;
     .faq-answer {
       padding: 0 15px 15px 15px;
       font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .section-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .faq-question {
+      font-size: 0.95rem;
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .faq-answer {
+      padding: 0 12px 12px 12px;
+      font-size: 0.9rem;
+    }
+
+    .faq-container {
+      gap: 12px;
     }
   }
 </style>

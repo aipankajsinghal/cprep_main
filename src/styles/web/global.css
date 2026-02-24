@@ -50,6 +50,12 @@ body {
   overflow-x: hidden;
 }
 
+@media (max-width: 768px) {
+  :root {
+    --header-height: 64px;
+  }
+}
+
 img {
   max-width: 100%;
   display: block;

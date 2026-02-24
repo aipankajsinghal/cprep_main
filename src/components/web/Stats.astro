@@ -51,7 +51,22 @@ const stats = [
     }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--size-2);
+    }
+
+    .stat-value {
+      font-size: var(--font-size-6);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-0);
+    }
+  }
+
+  @media (max-width: 360px) {
     .stats-grid {
       grid-template-columns: 1fr;
     }

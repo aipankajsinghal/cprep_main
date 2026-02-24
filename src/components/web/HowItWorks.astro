@@ -105,15 +105,26 @@ const steps = [
     .steps-container::before {
       display: none;
     }
-    
+
     .step-item {
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-    
+
     .step-number {
-      margin-block-end: var(--size-4);
+      width: 60px;
+      height: 60px;
+      font-size: var(--font-size-4);
+      margin-block-end: var(--size-3);
+    }
+
+    .step-content {
+      padding: var(--size-4);
+    }
+
+    .steps-container {
+      gap: var(--size-6);
     }
   }
 </style>

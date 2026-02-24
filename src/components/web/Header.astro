@@ -257,6 +257,16 @@ const APP_REGISTER = "https://app.championsprep.in/register";
     font-weight: 600;
   }
 
+  @media (max-width: 480px) {
+    .mobile-menu .nav-link {
+      font-size: var(--font-size-3);
+    }
+
+    .mobile-menu {
+      padding: var(--size-4);
+    }
+  }
+
   @media (max-width: 1024px) {
     .desktop-nav,
     .desktop-only {
@@ -265,12 +275,36 @@ const APP_REGISTER = "https://app.championsprep.in/register";
     .mobile-actions {
       display: flex;
     }
+
+    /* Ensure hamburger button meets 44px minimum touch target */
+    .mobile-actions .btn-ghost {
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    header {
+      height: 64px;
+    }
+
+    .logo img {
+      height: 38px;
+    }
   }
 
   @media (max-width: 480px) {
     .mobile-cta {
       font-size: var(--font-size-0);
       padding: var(--size-1) var(--size-3);
+    }
+
+    .logo img {
+      height: 34px;
+      max-width: 160px;
     }
   }
 </style>

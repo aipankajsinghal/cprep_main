@@ -348,6 +348,7 @@ const spotlightPosts = gridPosts.slice(0, 3);
     scrollbar-width: none;
     scroll-snap-type: x mandatory;
     padding-bottom: 0.2rem;
+    mask-image: linear-gradient(to right, transparent 0, black 0.5rem, black calc(100% - 2rem), transparent);
   }
 
   .blog-index__filter-row::-webkit-scrollbar {
@@ -363,9 +364,10 @@ const spotlightPosts = gridPosts.slice(0, 3);
     border-radius: 999px;
     background: var(--color-bg);
     color: var(--color-text-primary);
-    padding: 0.24rem 0.7rem;
+    padding: 0.5rem 0.85rem;
     font: inherit;
     font-size: 0.84rem;
+    min-height: 44px;
     cursor: pointer;
   }
 
