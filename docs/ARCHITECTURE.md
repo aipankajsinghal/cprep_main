@@ -81,3 +81,5 @@ test
 
 `api/inline-ai.ts` is a minimal stateless edge proxy for secure AI key usage.
 It is not used for content persistence, CMS behavior, or server-rendered page logic.
+
+Author changed
