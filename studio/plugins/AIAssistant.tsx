@@ -68,6 +68,13 @@ function AIAssistantTool() {
   const [loadingSeo, setLoadingSeo] = useState(false)
   const [loadingQuiz, setLoadingQuiz] = useState(false)
 
+  useEffect(() => {
+    console.log('[AI Assistant] Initialized with SITE_URL:', SITE_URL || '(empty)');
+    if (!SITE_URL) {
+      console.warn('[AI Assistant] SANITY_STUDIO_SITE_URL is not set. AI features will not work.');
+    }
+  }, []);
+
   // We need to resolve the document ID correctly for patching drafts
   const resolvedDocId = documentId?.replace('drafts.', '')
 

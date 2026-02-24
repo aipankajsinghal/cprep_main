@@ -20,6 +20,11 @@ export function getCORSHeaders(request: Request): Record<string, string> {
     };
   }
 
+  // Log rejected origins to help debugging
+  if (origin) {
+    console.warn(`[CORS] Request from unauthorized origin: ${origin}`);
+  }
+
   // Fallback to minimal CORS
   return {
     'Access-Control-Allow-Origin': 'https://www.championsprep.in',
