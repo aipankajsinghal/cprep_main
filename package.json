@@ -13,7 +13,7 @@
     "prebuild": "node $([ -f .env ] && echo --env-file=.env) scripts/generate-og.mjs && node $([ -f .env ] && echo --env-file=.env) scripts/generate-ig-briefs.mjs",
     "generate-brandkit": "node scripts/generate-brandkit.js",
     "build": "astro build",
-    "postbuild": "pagefind --site dist",
+    "postbuild": "pagefind --site .vercel/output/static",
     "preview": "astro preview",
     "astro": "astro",
     "studio": "cd studio && sanity dev",
