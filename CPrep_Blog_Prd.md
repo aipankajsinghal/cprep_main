@@ -640,3 +640,4 @@ The blog has migrated from local MDX content collections to Sanity CMS.
 - Build scripts (`generate-og.mjs`, `generate-ig-briefs.mjs`) were updated to fetch data directly from the Sanity Content Lake.
 - Legacy MDX files in `src/content/blog` are deprecated.
 
+changing author
