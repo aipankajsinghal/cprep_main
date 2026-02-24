@@ -21,7 +21,12 @@ export default defineConfig({
       previewUrl: {
         origin: process.env.SANITY_STUDIO_PREVIEW_URL ?? 'https://c-prep-blog.vercel.app',
         previewMode: {
-          enable: '/api/preview',
+          enable: {
+            url: '/api/preview',
+            // Pass the secret from environment variables
+            secret: process.env.SANITY_STUDIO_PREVIEW_SECRET 
+          },
+          disable: '/api/exit-preview'
         },
       },
     } as PresentationToolConfig),

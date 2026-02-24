@@ -26,18 +26,33 @@ function formatErrorMessage(error: unknown): string {
  * Handles API calls with error extraction
  */
 async function callAIEndpoint(endpoint: string, payload: any): Promise<any> {
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+  console.log(`[AI Assistant] Calling endpoint: ${endpoint}`);
+  
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || `API error: ${res.status}`)
+    if (!res.ok) {
+      const errorText = await res.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: errorText };
+      }
+      
+      console.error(`[AI Assistant] API Error (${res.status}):`, errorData);
+      throw new Error(errorData.error || `API error: ${res.status}`);
+    }
+
+    return await res.json()
+  } catch (fetchErr) {
+    console.error(`[AI Assistant] Fetch failed:`, fetchErr);
+    throw fetchErr;
   }
-
-  return await res.json()
 }
 
 function AIAssistantTool() {
