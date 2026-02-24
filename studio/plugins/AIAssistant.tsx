@@ -102,7 +102,7 @@ function AIAssistantTool() {
         return
       }
 
-      const data = await callAIEndpoint(`${SITE_URL}/api/ai/seo-description`, { title, body })
+      const data = await callAIEndpoint(`${SITE_URL}/api/ai/seo-description/`, { title, body })
 
       if (data.description && resolvedDocId) {
         // Patch the current document
@@ -142,7 +142,7 @@ function AIAssistantTool() {
         return
       }
 
-      const data = await callAIEndpoint(`${SITE_URL}/api/ai/generate-quiz`, { title, body })
+      const data = await callAIEndpoint(`${SITE_URL}/api/ai/generate-quiz/`, { title, body })
 
       if (data.questions && data.questions.length > 0 && resolvedDocId) {
         // Let's add Sanity keys to the questions format
