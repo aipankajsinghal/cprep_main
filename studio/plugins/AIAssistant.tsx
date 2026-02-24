@@ -9,7 +9,7 @@ import {
   Heading,
   Stack,
   Text,
-  useToast
+  useToast,
 } from '@sanity/ui'
 
 // Env var must be set in studio/.env as SANITY_STUDIO_SITE_URL=http://localhost:4321
@@ -154,7 +154,9 @@ function AIAssistantTool() {
     <Card padding={4} radius={2} shadow={1} tone="primary">
       <Stack space={4}>
         <Flex gap={2} align="center">
-          <Text size={2}><SparklesIcon /></Text>
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
+            <SparklesIcon />
+          </Box>
           <Heading size={1}>AI Content Assistant</Heading>
         </Flex>
         <Text size={1} muted>

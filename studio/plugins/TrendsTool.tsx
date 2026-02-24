@@ -113,7 +113,12 @@ function TrendsTool() {
     <Box padding={5}>
       <Stack space={5}>
         <Stack space={2}>
-          <Heading size={2}>Trends Desk</Heading>
+          <Flex gap={2} align="center">
+            <Box style={{ display: 'flex', alignItems: 'center' }}>
+              <SparklesIcon />
+            </Box>
+            <Heading size={2}>Trends Desk</Heading>
+          </Flex>
           <Text size={1} muted>
             Discover trending commerce topics and generate AI drafts saved directly into Sanity.
           </Text>
@@ -165,12 +170,14 @@ function TrendsTool() {
                   </Stack>
                 </Flex>
 
-                <Text size={1} muted>
-                  <strong>Why it matters:</strong> {trend.why_it_matters}
-                </Text>
-                <Text size={1} muted>
-                  <strong>Suggested angle:</strong> {trend.suggested_angle}
-                </Text>
+                <Stack space={1}>
+                  <Text size={1} weight="semibold">Why it matters:</Text>
+                  <Text size={1} muted>{trend.why_it_matters}</Text>
+                </Stack>
+                <Stack space={1}>
+                  <Text size={1} weight="semibold">Suggested angle:</Text>
+                  <Text size={1} muted>{trend.suggested_angle}</Text>
+                </Stack>
 
                 <Box>
                   <Button

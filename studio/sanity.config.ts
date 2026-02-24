@@ -1,8 +1,8 @@
-import { defineConfig } from 'sanity'
+import { defineConfig, PluginOptions } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
 import { markdownSchema } from 'sanity-plugin-markdown'
-import { presentationTool } from 'sanity/presentation'
+import { presentationTool, type PresentationToolConfig } from 'sanity/presentation'
 import { schemaTypes } from './schemaTypes'
 import { structure } from './structure'
 import { trendsPlugin } from './plugins/TrendsTool'
@@ -17,16 +17,16 @@ export default defineConfig({
 
   plugins: [
     structureTool({ structure }),
-    (presentationTool as any)({
+    presentationTool({
       previewUrl: {
-        origin: process.env.SANITY_STUDIO_PREVIEW_URL ?? 'http://localhost:4321',
+        origin: process.env.SANITY_STUDIO_PREVIEW_URL ?? 'https://c-prep-blog.vercel.app',
         previewMode: {
           enable: '/api/preview',
         },
       },
-    }),
+    } as PresentationToolConfig),
     visionTool(),
-    markdownSchema() as any,
+    markdownSchema() as unknown as PluginOptions,
     trendsPlugin(),
     aiAssistantPlugin(),
   ],
