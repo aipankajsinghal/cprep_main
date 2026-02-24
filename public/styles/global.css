@@ -1,0 +1,61 @@
+@import "open-props/open-props.min.css";
+@import "open-props/normalize.min.css";
+@import "open-props/buttons.min.css";
+@import "open-props/animations.min.css";
+@import "open-props/gradients.min.css";
+
+:root {
+  color-scheme: light;
+  /* Brand Colors */
+  --cp-lavender: #e6e6fa;
+  --cp-lavender-light: #f5f3ff;
+  --cp-cream: #eee9dd;
+  --cp-slate-dark: #4e5764;
+  --cp-slate-medium: #636c7a;
+  --cp-purple-deep: #6b5b95;
+  --cp-purple-hover: #5a4a84;
+  --cp-gold: #d4af37;
+  --cp-success: #4caf50;
+  --cp-white: #ffffff;
+
+  /* Layout */
+  --max-width: 1200px;
+  --header-height: 80px;
+
+  /* Overriding Open Props if needed */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--cp-lavender);
+  color: var(--cp-slate-dark);
+  font-family: var(--font-body);
+  line-height: var(--font-lineheight-3);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Rest of global overrides (trimmed for preview parity) */
+.cta-section { background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover)); color: var(--cp-white); }
+.card { background-color: var(--cp-white); padding: var(--size-6); border-radius: var(--radius-3); box-shadow: var(--shadow-2); }

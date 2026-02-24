@@ -1,0 +1,302 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ProblemSolution from '../components/ProblemSolution.astro';
+import Features from '../components/Features.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Subjects from '../components/Subjects.astro';
+import Testimonials from '../components/Testimonials.astro';
+// Stats component removed per request
+import PricingPreview from '../components/PricingPreview.astro';
+import FAQ from '../components/FAQ.astro';
+import CTASection from '../components/CTASection.astro';
+import SchemaMarkup from '../components/SchemaMarkup.astro';
+
+const orgSchema = {
+  name: "ChampionsPrep",
+  legalName: "PRePS AI Private Limited",
+  url: "https://championsprep.in",
+  logo: "https://championsprep.in/Logo.svg",
+  sameAs: [
+    "https://facebook.com/championsprep",
+    "https://twitter.com/championsprep",
+    "https://linkedin.com/company/championsprep"
+  ]
+};
+
+const faqData = {
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What exactly is the pay-per-chapter model?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unlike traditional subscriptions where you pay monthly for everything, ChampionsPrep lets you purchase access to individual chapters. If you only need help with 'Partnership Accounts' in Accountancy, you only pay for that chapter. Prices start from just ₹59 (GST Included)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the content aligned with the latest CBSE/ICSE syllabus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, our academic team constantly updates the content to ensure it perfectly aligns with the latest NCERT and ICSE guidelines for Class 11 and 12 Commerce."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI personalization work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our AI engine analyzes your performance during practice sessions. It identifies where you're struggling and provides targeted explanations and additional practice until you master the concept."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use ChampionsPrep on my mobile phone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely! Our platform is fully responsive and works beautifully on smartphones, tablets, and desktops. We also have a dedicated mobile app (coming soon) for a more seamless experience."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What subjects are covered?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We currently cover Accountancy, Economics, Business Studies and Mathematics for Class 11 and 12."
+      }
+    }
+  ]
+};
+
+
+const breadcrumbSchema = {
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://championsprep.in/"
+    }
+  ]
+};
+---
+
+<BaseLayout
+  title="AI-Powered Learning for Class 11-12 Commerce"
+  description="Master Class 11-12 Commerce with AI. Personalized learning, instant feedback, and affordable pay-per-chapter access for CBSE & ICSE."
+>
+  <SchemaMarkup type="Organization" data={orgSchema} />
+  <SchemaMarkup type="BreadcrumbList" data={breadcrumbSchema} />
+  <SchemaMarkup type="FAQPage" data={faqData} />
+
+  <!-- Tab Navigation (Mobile Only) -->
+  <div class="tab-container">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-overview">Overview</button>
+      <button class="tab-btn" data-tab="tab-process">How It Works</button>
+      <button class="tab-btn" data-tab="tab-courses">Courses</button>
+      <button class="tab-btn" data-tab="tab-stories">Stories</button>
+      <button class="tab-btn" data-tab="tab-pricing">Pricing</button>
+      <button class="tab-btn" data-tab="tab-faq">FAQ</button>
+    </div>
+
+    <!-- Desktop Layout (Always Visible) -->
+    <div class="desktop-layout">
+      <Hero />
+      <ProblemSolution />
+      <Features />
+      <HowItWorks />
+      <Subjects />
+      <Testimonials />
+      <PricingPreview />
+      <FAQ />
+      <CTASection />
+    </div>
+
+    <!-- Mobile Tab Content -->
+    <div class="mobile-tabs">
+      <!-- Tab 1: Overview -->
+      <div id="tab-overview" class="tab-content active">
+        <Hero />
+        <ProblemSolution />
+        <Features />
+      </div>
+
+      <!-- Tab 2: How It Works -->
+      <div id="tab-process" class="tab-content">
+        <HowItWorks />
+      </div>
+
+      <!-- Tab 3: Courses -->
+      <div id="tab-courses" class="tab-content">
+        <Subjects />
+      </div>
+
+      <!-- Tab 4: Success Stories -->
+      <div id="tab-stories" class="tab-content">
+        <Testimonials />
+      </div>
+
+      <!-- Tab 5: Pricing -->
+      <div id="tab-pricing" class="tab-content">
+        <PricingPreview />
+      </div>
+
+      <!-- Tab 6: FAQ -->
+      <div id="tab-faq" class="tab-content">
+        <FAQ />
+        <CTASection />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tab-container {
+    position: relative;
+  }
+
+  /* Desktop Layout - Always visible on desktop */
+  .desktop-layout {
+    display: block;
+  }
+
+  /* Mobile Tabs - Hidden on desktop */
+  .mobile-tabs {
+    display: none;
+  }
+
+  .tab-nav {
+    display: none;
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 640px) {
+    .desktop-layout {
+      display: none;
+    }
+
+    .mobile-tabs {
+      display: block;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: var(--size-2);
+      overflow-x: auto;
+      padding: var(--size-4);
+      background-color: var(--cp-lavender-light);
+      border-bottom: 2px solid var(--cp-lavender);
+      position: sticky;
+      top: var(--header-height);
+      z-index: 100;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      padding: var(--size-3) var(--size-4);
+      border: none;
+      background: transparent;
+      color: var(--cp-slate-medium);
+      font-weight: 600;
+      font-size: var(--font-size-1);
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      text-transform: capitalize;
+    }
+
+    .tab-btn:hover {
+      color: var(--cp-purple-deep);
+    }
+
+    .tab-btn.active {
+      color: var(--cp-purple-deep);
+      border-bottom-color: var(--cp-purple-deep);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  /* Tablet: Hybrid approach */
+  @media (max-width: 768px) and (min-width: 641px) {
+    .desktop-layout {
+      display: block;
+    }
+
+    .mobile-tabs {
+      display: none;
+    }
+
+    .tab-nav {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabId = button.getAttribute('data-tab');
+      if (!tabId) return; // guard: getAttribute can return null
+
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Add active class to clicked button and corresponding content
+      button.classList.add('active');
+      const activeTab = document.getElementById(tabId);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
+
+      // Scroll the tab button into view if needed
+      button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    });
+  });
+
+  // Re-initialize AOS for dynamically shown content
+  if (typeof window !== 'undefined') {
+    const _w = (window as unknown) as { AOS?: { refresh: () => void } };
+    if (_w.AOS) {
+      document.addEventListener('tab-changed', () => {
+        _w.AOS?.refresh();
+      });
+
+      // Trigger AOS refresh when tab is clicked
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          setTimeout(() => {
+            _w.AOS?.refresh();
+          }, 300);
+        });
+      });
+    }
+  }
+</script>

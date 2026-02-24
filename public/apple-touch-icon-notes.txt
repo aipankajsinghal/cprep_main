@@ -1,0 +1,9 @@
+Placeholder for apple-touch-icon.png
+
+This repo now references `/apple-touch-icon.png` (180x180) in the layout.
+
+Please replace this placeholder with a real 180x180 PNG. You can create one from `public/favicon.png` using ImageMagick:
+
+  magick public/favicon.png -resize 180x180 public/apple-touch-icon.png
+
+Or provide your own `apple-touch-icon.png` in `public/` and it will be picked up automatically.

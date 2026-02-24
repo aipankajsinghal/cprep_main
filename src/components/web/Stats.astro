@@ -1,0 +1,59 @@
+---
+const stats = [
+  { value: '500+', label: 'Chapters Available' },
+  { value: '5', label: 'Subjects Covered' },
+  { value: '₹59', label: 'Per Chapter' },
+  { value: '24/7', label: 'AI Support' }
+];
+---
+
+<section class="section-alt">
+  <div class="container">
+    <div class="grid grid-4 stats-grid">
+      {stats.map(stat => (
+        <div class="stat-item" data-aos="fade-up">
+          <div class="stat-value">{stat.value}</div>
+          <div class="stat-label">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: var(--size-4);
+  }
+
+  .stat-value {
+    font-size: var(--font-size-7);
+    font-weight: 800;
+    color: var(--cp-purple-deep);
+    font-family: var(--font-headings);
+    margin-block-end: var(--size-2);
+  }
+
+  .stat-label {
+    font-size: var(--font-size-2);
+    color: var(--cp-slate-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

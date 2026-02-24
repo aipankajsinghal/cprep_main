@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChampionsPrep Content Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+    <script>
+      (function () {
+        const cms = window.CMS || window.Decap || window.decap;
+        try {
+          if (cms && cms.registerPreviewTemplate) {
+            cms.registerPreviewTemplate('pages', function (entry) {
+              const data = entry.get('data').toJS ? entry.get('data').toJS() : entry.get('data') || {};
+              const title = data.metaTitle || data.title || '';
+              const description = data.description || '';
+              const slug = data.slug || (data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+              const body = data.body || '';
+              const noIndex = !!data.noIndex;
+              const renderedHtml = marked.parse(String(body || ''));
+              const safeHtml = window.DOMPurify
+                ? window.DOMPurify.sanitize(renderedHtml)
+                : renderedHtml;
+
+              // Build a simple HTML document for the iframe. Include site CSS for visual parity.
+              const cssLinks = [
+                '/styles/global.css',
+                '/styles/components.css'
+              ];
+
+              const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>${escapeHtml(title)}</title>
+    <meta name="description" content="${escapeHtml(description)}">
+    ${noIndex ? '<meta name="robots" content="noindex">' : ''}
+    ${cssLinks.map((l) => `<link rel="stylesheet" href="${l}">`).join('\n')}
+    <style>body{padding:28px;max-width:900px;margin:0 auto;background:#fff;color:#222}</style>
+  </head>
+  <body>
+    <article class="cms-preview">
+      <header style="margin-bottom:18px">
+        <h1>${escapeHtml(title)}</h1>
+        ${description ? `<p class="preview-description">${escapeHtml(description)}</p>` : ''}
+      </header>
+      <main>${safeHtml}</main>
+    </article>
+  </body>
+</html>`;
+
+              // Create container with iframe for live-like preview
+              const container = document.createElement('div');
+              container.style.padding = '8px';
+              container.style.display = 'flex';
+              container.style.flexDirection = 'column';
+              container.style.gap = '8px';
+
+              const iframe = document.createElement('iframe');
+              iframe.style.width = '100%';
+              iframe.style.height = '600px';
+              iframe.style.border = '1px solid #e5e7eb';
+              iframe.style.borderRadius = '8px';
+              iframe.setAttribute('sandbox', '');
+              iframe.srcdoc = html;
+
+              const metaBox = document.createElement('div');
+              metaBox.style.fontSize = '13px';
+              metaBox.style.color = '#444';
+              metaBox.style.padding = '8px 10px';
+              metaBox.style.border = '1px solid #eee';
+              metaBox.style.borderRadius = '8px';
+              metaBox.innerHTML = `<strong>Preview:</strong> /${escapeHtml(slug)} ${noIndex ? '• noindex' : ''}`;
+
+              container.appendChild(metaBox);
+              container.appendChild(iframe);
+
+              return container;
+            });
+          }
+        } catch (e) {
+          console.warn('Preview template registration failed', e);
+        }
+
+        function escapeHtml(s) {
+          if (!s) return '';
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+      })();
+    </script>
+  </body>
+</html>

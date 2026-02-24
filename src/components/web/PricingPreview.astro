@@ -1,0 +1,168 @@
+---
+import { getClient } from "../../lib/sanity";
+import { PRICING_PLANS_QUERY } from "../../lib/queries";
+import Button from "./Button.astro";
+
+const client = getClient();
+const pricingPlans = await client.fetch(PRICING_PLANS_QUERY);
+
+// For the preview, we typically show the most popular or featured plan
+const previewPlan =
+  pricingPlans?.find((p: any) => p.highlighted) || pricingPlans?.[0];
+
+const APP_REGISTER = "https://app.championsprep.in/register";
+---
+
+{
+  previewPlan && (
+    <section id="pricing-preview" class="section-cream">
+      <div class="container text-center">
+        <div class="mb-5" data-aos="fade-up">
+          <h2 class="mb-3 mx-auto" style="max-width: 800px;">
+            Transparent, Honest Pricing
+          </h2>
+          <p class="mx-auto" style="max-width: 600px;">
+            Stop paying for what you don't use. Our unique model scales with
+            you.
+          </p>
+        </div>
+
+        <div class="pricing-card card max-w-md mx-auto" data-aos="zoom-in-up">
+          <div class="pricing-header text-center mb-4">
+            <span class="badge mb-2">90% Cheaper Than Tuition</span>
+            <h3>{previewPlan.name}</h3>
+            <div class="price">
+              <span class="currency">₹</span>
+              <span class="amount">{previewPlan.price}</span>
+              <span class="gst"> (GST Included)</span>
+              <span class="period">/ chapter</span>
+            </div>
+            {previewPlan.description && (
+              <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem;">
+                {previewPlan.description}
+              </p>
+            )}
+          </div>
+
+          {previewPlan.features && (
+            <ul class="pricing-features mb-5">
+              {previewPlan.features.map((feature: string) => (
+                <li>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-success"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span set:html={feature} />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div class="text-center">
+            <Button
+              href={APP_REGISTER}
+              variant="primary"
+              class="w-full"
+              external
+            >
+              Start Mastering for ₹{previewPlan.price} (GST Included) →
+            </Button>
+          </div>
+
+          <div class="text-center mt-4">
+            <a href="/pricing" class="nav-link text-small">
+              See all pricing options
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .max-w-md {
+    max-width: 500px;
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .w-full {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .pricing-card {
+    padding: var(--size-8);
+    position: relative;
+    border: 2px solid var(--cp-purple-deep);
+    background-color: var(--cp-white);
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--cp-gold);
+    color: var(--cp-slate-dark);
+    padding: var(--size-1) var(--size-3);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-0);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .price {
+    margin-block: var(--size-4);
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--size-1);
+  }
+
+  .currency {
+    font-size: var(--font-size-4);
+    font-weight: 700;
+  }
+  .amount {
+    font-size: var(--font-size-8);
+    font-weight: 800;
+    color: var(--cp-purple-deep);
+  }
+  .period {
+    color: var(--cp-slate-medium);
+  }
+
+  .pricing-features {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-3);
+    text-align: left;
+    list-style: none;
+    padding: 0;
+  }
+
+  .pricing-features li {
+    display: flex;
+    gap: var(--size-3);
+    align-items: center;
+    font-size: var(--font-size-2);
+    color: var(--cp-slate-dark);
+  }
+
+  .text-success {
+    color: var(--cp-success);
+  }
+  .text-small {
+    font-size: var(--font-size-1);
+  }
+</style>

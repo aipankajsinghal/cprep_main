@@ -1,0 +1,66 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Breadcrumb from "../../components/web/Breadcrumb.astro";
+
+const {
+  title,
+  description,
+  keywords,
+  lastUpdated = "January 2026",
+} = Astro.props;
+
+const breadcrumbItems = [{ name: "Home", url: "/" }, { name: title }];
+---
+
+<BaseLayout title={title} description={description} keywords={keywords}>
+  <section class="legal-page py-10">
+    <div class="container max-w-3xl">
+      <Breadcrumb items={breadcrumbItems} />
+
+      <div class="legal-header mb-8" data-aos="fade-up">
+        <h1>{title}</h1>
+        <p class="text-small opacity-70">Last Updated: {lastUpdated}</p>
+      </div>
+
+      <div class="legal-content prose" data-aos="fade-up">
+        <slot />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    background-color: var(--cp-white);
+  }
+
+  .max-w-3xl {
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .prose :global(h2) {
+    margin-block-start: var(--size-7);
+    margin-block-end: var(--size-4);
+    font-size: var(--font-size-5);
+  }
+
+  .prose :global(p) {
+    margin-block-end: var(--size-4);
+    line-height: var(--font-lineheight-3);
+  }
+
+  .prose :global(ul) {
+    list-style: disc;
+    padding-left: var(--size-6);
+    margin-block-end: var(--size-4);
+  }
+
+  .prose :global(li) {
+    margin-block-end: var(--size-2);
+  }
+
+  .text-small {
+    font-size: var(--font-size-1);
+  }
+</style>

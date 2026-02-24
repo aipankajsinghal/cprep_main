@@ -1,0 +1,177 @@
+---
+import { getClient } from "../../lib/sanity";
+import { ALL_SUBJECTS_QUERY, SUBJECT_BY_SLUG_QUERY } from "../../lib/queries";
+import BaseLayout from "../../layouts/web/BaseLayout.astro";
+import Breadcrumb from "../../components/web/Breadcrumb.astro";
+import SchemaMarkup from "../../components/web/SchemaMarkup.astro";
+import type { Subject } from "../../types";
+import { PortableText } from "@portabletext/react"; // Assuming we might use this if body is PortableText, but currently it's markdown-like
+
+export const prerender = true;
+
+const client = getClient();
+
+export async function getStaticPaths() {
+  const { getClient } = await import("../../lib/sanity");
+  const { ALL_SUBJECTS_QUERY } = await import("../../lib/queries");
+  const client = getClient();
+  const items = await client.fetch(ALL_SUBJECTS_QUERY);
+  return items.map((i: any) => ({ params: { slug: i.slug } }));
+}
+
+const { slug } = Astro.params;
+const subject = (await client.fetch(SUBJECT_BY_SLUG_QUERY, {
+  slug,
+})) as Subject;
+
+if (!subject) throw new Error(`Subject with slug "${slug}" not found`);
+
+const pageTitle = subject.title;
+const pageDescription = subject.description || "";
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "Course",
+  name: pageTitle,
+  description: pageDescription,
+};
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <SchemaMarkup type="Course" data={schemaData} />
+  <div class="container" style="margin-top: 2rem;">
+    <Breadcrumb
+      items={[
+        { name: "Home", url: "/" },
+        { name: "Subjects", url: "/subjects" },
+        { name: pageTitle },
+      ]}
+    />
+  </div>
+
+  <section class="subject-hero">
+    <div class="container text-center">
+      <h1>{pageTitle}</h1>
+      <p class="subtitle">{pageDescription}</p>
+    </div>
+  </section>
+
+  <section class="snapshot-trust">
+    <div class="container">
+      <div class="grid grid-2 items-center gap-large">
+        <div>
+          <div class="snapshot-card">
+            <h4>Course Snapshot</h4>
+            {
+              subject.chapters && (
+                <ul>
+                  {subject.chapters.map((c) => (
+                    <li>
+                      <strong>{c.name}</strong>
+                      {c.price ? <span> — ₹{c.price}</span> : null}
+                      {c.description ? (
+                        <div class="muted">{c.description}</div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )
+            }
+          </div>
+        </div>
+
+        <div>
+          <div class="trust-strip">
+            <p class="trust-lead"><strong>Learn by doing</strong></p>
+            <p class="trust-text">
+              Chapter-wise drills, instant feedback, and real exam-style
+              practice.
+            </p>
+            <a
+              class="btn-primary"
+              href="https://app.championsprep.in/register"
+              target="_blank"
+              rel="noopener">Buy chapter</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="content-section">
+      {
+        /* If body is markdown, we might need a markdown renderer component. 
+          Assuming subject.body is available as string. */
+      }
+      {subject.body && <div set:html={subject.body} />}
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .subject-hero {
+    padding: 2.5rem 1rem;
+    text-align: center;
+  }
+  .subtitle {
+    color: var(--cp-slate-medium);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .content-section {
+    margin-top: 1rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-1);
+    color: var(--cp-slate-dark);
+  }
+
+  .snapshot-card {
+    background: var(--cp-white);
+    border: 1px solid var(--cp-lavender);
+    padding: 1.5rem;
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-1);
+  }
+
+  .snapshot-card ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .snapshot-card li {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--cp-lavender-light);
+  }
+
+  .snapshot-card li:last-child {
+    border-bottom: none;
+  }
+
+  .muted {
+    font-size: 0.9rem;
+    color: var(--cp-slate-medium);
+    margin-top: 0.25rem;
+  }
+
+  .trust-strip {
+    background: var(--cp-lavender-light);
+    border-left: 4px solid var(--cp-purple-deep);
+    padding: 2rem;
+    border-radius: var(--radius-2);
+  }
+
+  .trust-lead {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .trust-text {
+    margin-bottom: 1.5rem;
+    color: var(--cp-slate-medium);
+  }
+</style>

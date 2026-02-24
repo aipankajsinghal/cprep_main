@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+@theme {
+  /* Brand Colors from CPrep_Web */
+  --color-purple-deep: #6b5b95;
+  --color-purple-hover: #5a4a84;
+  --color-lavender: #e6e6fa;
+  --color-lavender-light: #f5f3ff;
+  --color-gold: #d4af37;
+  --color-slate-dark: #4e5764;
+  --color-slate-medium: #636c7a;
+  --color-cream: #eee9dd;
+  --color-success: #4caf50;
+  
+  /* Blog Layout Colors */
+  --color-bg-warm: #fcfaf7;
+  --color-text-primary: #1a1a1a;
+  --color-link: #6b5b95;
+  --color-link-hover: #5a4a84;
+  --color-border: #e6e6fa;
+
+  /* Typography */
+  --font-editorial: "Inter", sans-serif;
+  --font-headings: "Playfair Display", serif;
+  
+  /* Spacing & Shapes */
+  --space-md: 2rem;
+  --space-2xl: 4rem;
+  --shape-radius: 8px;
+}
+
+@layer base {
+  *, *::before, *::after { border-color: var(--color-border, #e5e7eb); }
+  
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-lavender);
+    color: var(--color-slate-dark);
+    font-family: var(--font-editorial);
+    line-height: 1.6;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headings);
+    color: var(--color-slate-dark);
+    line-height: 1.2;
+    font-weight: 800;
+  }
+}
+
+/* Common Web App Components Utility Classes */
+@layer components {
+  .section-lavender { background-color: var(--color-lavender); padding: 4rem 0; }
+  .section-cream { background-color: var(--color-cream); padding: 4rem 0; }
+  .section-white { background-color: white; padding: 4rem 0; }
+  
+  .container {
+    width: min(100% - 2rem, 1200px);
+    margin-inline: auto;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--color-gold);
+    color: black;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    color: var(--color-slate-medium);
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+}
+
+/* Animations (Shared with AOS) */
+[data-aos] {
+  pointer-events: none;
+}
+[data-aos].aos-animate {
+  pointer-events: auto;
+}

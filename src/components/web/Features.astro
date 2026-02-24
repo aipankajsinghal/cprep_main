@@ -1,0 +1,99 @@
+---
+interface Feature {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+interface Props {
+  data?: Feature[];
+}
+
+const { data = [] } = Astro.props as Props;
+const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
+---
+
+<section id="features" class="section-white text-center">
+  <div class="container">
+    <div class="mb-5" data-aos="fade-up">
+      <h2 class="mb-3 mx-auto" style="max-width: 800px;">Everything You Need to Succeed</h2>
+      <p class="mx-auto" style="max-width: 600px;">Modern tools designed for the modern commerce student.</p>
+    </div>
+
+    <div class="grid grid-3">
+      {data.map((feature, index) => (
+        <div class="card feature-card" data-aos="fade-up" data-aos-delay={index * 100}>
+          <div class="feature-icon-wrapper mb-4">
+            {
+              isEmojiIcon(feature.icon) ? (
+                <div class="feature-icon-emoji">{feature.icon}</div>
+              ) : (
+                <div class={`feature-icon ${feature.icon || ''}`}></div>
+              )
+            }
+          </div>
+          <h3>
+            {feature.title}
+          </h3>
+          <p>{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-card {
+    text-align: center;
+    border: 1px solid var(--cp-lavender);
+    height: 100%;
+    background-color: var(--cp-white);
+    color: var(--cp-slate-dark);
+  }
+
+  .feature-icon-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+    background-color: var(--cp-lavender-light);
+    border-radius: var(--radius-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: var(--cp-purple-deep);
+  }
+
+  .feature-icon-emoji {
+    width: 64px;
+    height: 64px;
+    background-color: var(--cp-lavender-light);
+    border-radius: var(--radius-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--cp-purple-deep);
+  }
+
+  /* SVG placeholders using background-image or CSS masks */
+  .feature-icon::before {
+    content: "";
+    width: 32px;
+    height: 32px;
+    background-color: var(--cp-purple-deep);
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .ai-personalization::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'%3E%3C/path%3E%3Cpath d='M12 8v4'%3E%3C/path%3E%3Cpath d='M12 16h.01'%3E%3C/path%3E%3C/svg%3E"); }
+  .pay-per-chapter::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'%3E%3C/rect%3E%3Cline x1='12' y1='8' x2='12' y2='16'%3E%3C/line%3E%3Cline x1='8' y1='12' x2='16' y2='12'%3E%3C/line%3E%3C/svg%3E"); }
+  .cbse-aligned::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10v6M2 10l10-5 10 5-10 5z'%3E%3C/path%3E%3Cpath d='M6 12v5c0 2 2 3 6 3s6-1 6-3v-5'%3E%3C/path%3E%3C/svg%3E"); }
+  .ai-feedback::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E"); }
+  .regional-language::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='2' y1='12' x2='22' y2='12'%3E%3C/line%3E%3Cpath d='M12 2C14.5 4.5 15.5 8 15.5 12S14.5 19.5 12 22 8.5 16 8.5 12 9.5 4.5 12 2z'%3E%3C/path%3E%3C/svg%3E"); }
+  .progress-tracking::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E"); }
+</style>

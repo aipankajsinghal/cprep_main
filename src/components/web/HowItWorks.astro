@@ -1,0 +1,119 @@
+---
+const steps = [
+  {
+    title: 'Choose Your Subject',
+    description: 'Select Accountancy, Economics, Business Studies, or Mathematics and pick the specific chapter you need help with.',
+    icon: '01'
+  },
+  {
+    title: 'Learn with AI',
+    description: 'Engage with AI-curated content, interactive explanations, and regional language support.',
+    icon: '02'
+  },
+  {
+    title: 'Practice & Feedback',
+    description: 'Solve problems and get instant AI feedback to master concepts quickly.',
+    icon: '03'
+  },
+  {
+    title: 'Track Success',
+    description: 'Monitor your progress, earn badges, and prepare to ace your board exams.',
+    icon: '04'
+  }
+];
+---
+
+<section id="how-it-works" class="section-cream">
+  <div class="container text-center">
+    <div class="mb-5" data-aos="fade-up">
+      <h2 class="mb-3 mx-auto" style="max-width: 800px;">How ChampionsPrep Works</h2>
+      <p class="mx-auto" style="max-width: 600px;">Simple, effective, and efficient learning in 4 easy steps.</p>
+    </div>
+
+    <div class="steps-container">
+      {steps.map((step, index) => (
+        <div class="step-item" data-aos={index % 2 === 0 ? "fade-right" : "fade-left"}>
+          <div class="step-number">{step.icon}</div>
+          <div class="step-content">
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="text-center mt-5" data-aos="fade-up">
+      <a href="https://app.championsprep.in/register" class="btn btn-primary" rel="noopener noreferrer" target="_blank">Ready to Start? Join Now →</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-8);
+    max-width: 800px;
+    margin-inline: auto;
+    position: relative;
+  }
+
+  .steps-container::before {
+    content: "";
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--cp-purple-deep);
+    opacity: 0.2;
+  }
+
+  .step-item {
+    display: flex;
+    gap: var(--size-6);
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-number {
+    width: 80px;
+    height: 80px;
+    background-color: var(--cp-purple-deep);
+    color: var(--cp-white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-5);
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-3);
+  }
+
+  .step-content {
+    background-color: var(--cp-white);
+    padding: var(--size-6);
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow-2);
+    flex-grow: 1;
+    color: var(--cp-slate-dark);
+  }
+
+  @media (max-width: 640px) {
+    .steps-container::before {
+      display: none;
+    }
+    
+    .step-item {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .step-number {
+      margin-block-end: var(--size-4);
+    }
+  }
+</style>

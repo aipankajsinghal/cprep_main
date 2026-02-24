@@ -1,0 +1,58 @@
+/* Google Fonts loaded via <link> in BaseLayout.astro for non-blocking rendering */
+
+:root {
+  --font-headings: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+  color: var(--cp-slate-dark);
+  line-height: var(--font-lineheight-1);
+  margin-block: var(--size-3);
+  text-align: inherit;
+}
+
+h1 { font-size: var(--font-size-8); }
+h2 { font-size: var(--font-size-6); }
+h3 { font-size: var(--font-size-5); }
+
+p {
+  font-size: var(--font-size-2);
+  margin-block-end: var(--size-3);
+}
+
+/* Ensure long-form prose is left-aligned for readability */
+.prose {
+  text-align: left;
+}
+
+/* Tablet: 768px and below */
+@media (max-width: 768px) {
+  h1 { font-size: var(--font-size-6); }
+  h2 { font-size: var(--font-size-5); }
+  h3 { font-size: var(--font-size-4); }
+}
+
+/* Mobile: 640px and below */
+@media (max-width: 640px) {
+  h1 { font-size: var(--font-size-5); }
+  h2 { font-size: var(--font-size-4); }
+  h3 { font-size: var(--font-size-3); }
+  p { font-size: var(--font-size-1); }
+}
+
+/* Small Mobile: 480px and below */
+@media (max-width: 480px) {
+  h1 { font-size: var(--font-size-4); }
+  h2 { font-size: var(--font-size-3); }
+  h3 { font-size: var(--font-size-2); }
+  p { font-size: var(--font-size-0); }
+}
+
+.text-gradient {
+  background: var(--gradient-8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

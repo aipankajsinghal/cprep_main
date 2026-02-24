@@ -1,0 +1,32 @@
+---
+const {
+  href,
+  variant = "primary",
+  class: className,
+  id,
+  external = false,
+  trackCta = false,
+  ctaLocation = "unknown",
+  ...rest
+} = Astro.props;
+
+const Element = href ? "a" : "button";
+const rel = external ? "noopener noreferrer" : undefined;
+const target = external ? "_blank" : undefined;
+const trackingAttrs = trackCta ? {
+  "data-track-cta": "true",
+  "data-cta-location": ctaLocation,
+} : {};
+---
+
+<Element
+  href={href}
+  id={id}
+  class:list={[`btn btn-${variant}`, className]}
+  rel={rel}
+  target={target}
+  {...trackingAttrs}
+  {...rest}
+>
+  <slot />
+</Element>

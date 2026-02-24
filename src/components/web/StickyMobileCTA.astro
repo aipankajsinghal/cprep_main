@@ -1,0 +1,157 @@
+---
+const APP_REGISTER = "https://app.championsprep.in/register";
+---
+
+<div id="sticky-mobile-cta" class="sticky-mobile-cta hidden" role="complementary" aria-label="Call to action">
+  <a
+    href={APP_REGISTER}
+    class="sticky-cta-button"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-track-cta="true"
+    data-cta-location="sticky-mobile-cta"
+  >
+    Start Free →
+  </a>
+  <button
+    id="close-sticky-cta"
+    class="sticky-cta-close"
+    aria-label="Close call to action"
+  >
+    ✕
+  </button>
+</div>
+
+<style>
+  .sticky-mobile-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover));
+    padding: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) 0.75rem  calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+    display: flex;
+    gap: var(--size-2);
+    align-items: center;
+    justify-content: space-between;
+    z-index: 999;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .sticky-mobile-cta.hidden {
+    display: none;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .sticky-cta-button {
+    flex: 1;
+    padding: 0.6rem 0.9rem;
+    background: var(--cp-white);
+    color: var(--cp-purple-deep);
+    text-decoration: none;
+    border-radius: var(--radius-2);
+    font-weight: 600;
+    font-size: var(--font-size-1);
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .sticky-cta-button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.2);
+  }
+
+  .sticky-cta-close {
+    background: transparent;
+    border: none;
+    color: var(--cp-white);
+    font-size: var(--font-size-3);
+    cursor: pointer;
+    padding: var(--size-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-2);
+    transition: background 0.2s ease;
+  }
+
+  .sticky-cta-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Only show on mobile */
+  @media (min-width: 768px) {
+    .sticky-mobile-cta {
+      display: none !important;
+    }
+  }
+
+  /* Tweak for very small narrow devices */
+  @media (max-width: 360px) {
+    .sticky-cta-button { font-size: var(--font-size-0); padding: 0.45rem 0.6rem; }
+    .sticky-mobile-cta { gap: 0.5rem; }
+    .sticky-cta-close { width: 32px; height: 32px; }
+  }
+</style>
+
+<script>
+  if (typeof document !== 'undefined') {
+    const stickyCTA = document.querySelector('#sticky-mobile-cta');
+    const closeBtn = document.querySelector('#close-sticky-cta');
+    const STORAGE_KEY = 'cprep_sticky_cta_dismissed';
+
+    // Show sticky CTA after 15 seconds of page load or 50% scroll
+    function showStickyCTA() {
+      if (stickyCTA && !localStorage.getItem(STORAGE_KEY)) {
+        stickyCTA.classList.remove('hidden');
+      }
+    }
+
+    const showTimer = setTimeout(showStickyCTA, 15000);
+
+    // Also show on scroll
+    window.addEventListener(
+      'scroll',
+      () => {
+        const scrollPercent = Math.round(
+          (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100
+        );
+        if (scrollPercent >= 50) {
+          clearTimeout(showTimer);
+          showStickyCTA();
+        }
+      },
+      { passive: true }
+    );
+
+    // Close button handler
+    closeBtn?.addEventListener('click', () => {
+      if (stickyCTA) {
+        stickyCTA.classList.add('hidden');
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
+      }
+    });
+
+    // Reset dismissal on new session (12 hours)
+    const lastDismissed = localStorage.getItem(STORAGE_KEY);
+    if (lastDismissed) {
+      const timeSinceDismissed = Date.now() - parseInt(lastDismissed);
+      if (timeSinceDismissed > 12 * 60 * 60 * 1000) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }
+</script>

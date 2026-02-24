@@ -1,0 +1,73 @@
+---
+import Button from './Button.astro';
+
+const APP_REGISTER = "https://app.championsprep.in/register";
+const APP_LOGIN = "https://app.championsprep.in/login";
+---
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card" data-aos="fade-up">
+      <h2 class="cta-title">Get Your First Chapter Free. Risk-Free for 7 Days.</h2>
+      <p class="cta-subtitle">Join 5,000+ students. See your score improve or get 100% refund.</p>
+      
+      <div class="cta-actions mt-4">
+        <Button href={APP_REGISTER} variant="primary" external trackCta={true} ctaLocation="footer-cta">Join Free Now →</Button>
+      </div>
+      
+      <p class="mt-4 text-small">
+        Already a member? <a href={APP_LOGIN} class="login-link" rel="noopener noreferrer" target="_blank">Login to your account</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-section {
+    padding-block: var(--size-10);
+    background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover));
+    text-align: center;
+    color: var(--cp-white);
+  }
+
+  .cta-card {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: var(--size-9);
+    border-radius: var(--radius-4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* ensure text remains readable on translucent card over purple gradient */
+    color: var(--cp-white);
+  }
+
+  .cta-title {
+    color: var(--cp-white);
+    font-size: var(--font-size-7);
+    margin-block-end: var(--size-3);
+  }
+
+  .cta-subtitle {
+    font-size: var(--font-size-4);
+    opacity: 0.9;
+    margin-block-end: var(--size-6);
+  }
+
+  .cta-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .login-link {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+
+  .login-link:hover {
+    opacity: 1;
+  }
+
+  .text-small {
+    font-size: var(--font-size-1);
+    opacity: 0.8;
+  }
+</style>

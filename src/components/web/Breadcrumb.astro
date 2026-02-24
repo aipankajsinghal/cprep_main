@@ -1,0 +1,99 @@
+---
+import SchemaMarkup from './SchemaMarkup.astro';
+
+
+interface BreadcrumbItem {
+  name: string;
+  url?: string;
+}
+
+export interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+
+// Build schema for structured data
+const schemaItems = items.map((item: BreadcrumbItem, index: number) => ({
+  "@type": "ListItem",
+  position: index + 1,
+  name: item.name,
+  ...(item.url && { item: item.url })
+}));
+
+const breadcrumbSchema = {
+  itemListElement: schemaItems
+};
+---
+
+<SchemaMarkup type="BreadcrumbList" data={breadcrumbSchema} />
+
+<nav aria-label="Breadcrumb" class={`breadcrumb ${className}`}>
+  <ol class="breadcrumb-list">
+    {items.map((item: BreadcrumbItem, index: number) => (
+      <li class="breadcrumb-item">
+        {item.url && index < items.length - 1 ? (
+          <a href={item.url}>{item.name}</a>
+        ) : (
+          <span aria-current={index === items.length - 1 ? "page" : undefined}>
+            {item.name}
+          </span>
+        )}
+        {index < items.length - 1 && (
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumb {
+    padding-block: var(--size-3);
+    font-size: var(--font-size-0);
+  }
+
+  .breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--size-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+  }
+
+  .breadcrumb-item a {
+    color: var(--cp-purple-deep);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: var(--cp-purple-vivid);
+    text-decoration: underline;
+  }
+
+  .breadcrumb-item span[aria-current="page"] {
+    color: var(--cp-slate-dark);
+    font-weight: 500;
+  }
+
+  .breadcrumb-separator {
+    color: var(--cp-slate);
+    user-select: none;
+  }
+
+  @media (max-width: 768px) {
+    .breadcrumb {
+      font-size: var(--font-size-00);
+    }
+  }
+</style>

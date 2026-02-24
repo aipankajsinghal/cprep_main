@@ -1,0 +1,206 @@
+---
+import { getClient } from "../../lib/sanity";
+import { ALL_SUBJECTS_QUERY } from "../../lib/queries";
+import { BookOpen, Calculator, Globe, PenTool, TrendingUp } from "lucide-react";
+
+// Lucide icon mapping
+const IconMap: Record<string, any> = {
+  "book-open": BookOpen,
+  calculator: Calculator,
+  globe: Globe,
+  "pen-tool": PenTool,
+  "trending-up": TrendingUp,
+};
+
+const client = getClient();
+const subjects = await client.fetch(ALL_SUBJECTS_QUERY);
+
+// Group subjects by class
+const subjectsByClass = subjects.reduce((acc: any, subject: any) => {
+  const cls = subject.class || "11";
+  if (!acc[cls]) acc[cls] = [];
+  acc[cls].push(subject);
+  return acc;
+}, {});
+
+const class11Subjects = subjectsByClass["11"] || [];
+const class12Subjects = subjectsByClass["12"] || [];
+
+interface Props {
+  showTitle?: boolean;
+}
+
+const { showTitle = true } = Astro.props;
+---
+
+<section id="subjects" class="section-lavender">
+  <div class="container">
+    {
+      showTitle && (
+        <div class="text-center mb-5" data-aos="fade-up">
+          <h2 class="mb-3">Master Your Commerce Subjects</h2>
+          <p class="subtitle mx-auto" style="max-width: 600px;">
+            Select your class and start learning with AI-personalized modules
+            designed for your success.
+          </p>
+        </div>
+      )
+    }
+
+    <div class="class-groups">
+      <!-- Class 12 Section -->
+      {
+        class12Subjects.length > 0 && (
+          <div class="class-group mb-5">
+            <div class="group-header mb-4" data-aos="fade-right">
+              <span class="badge mb-2">Most Popular</span>
+              <h3>Class 12 Modules</h3>
+            </div>
+            <div class="subjects-grid">
+              {class12Subjects.map((subject: any) => {
+                const IconComponent = IconMap[subject.icon] || BookOpen;
+                return (
+                  <a
+                    href={`/subjects/${subject.slug}`}
+                    class="subject-card card"
+                    data-aos="zoom-in"
+                  >
+                    <div class="subject-icon">
+                      <IconComponent size={32} />
+                    </div>
+                    <h4>{subject.title}</h4>
+                    <p>{subject.description}</p>
+                    <div class="subject-footer">
+                      <span class="chapter-count">
+                        {subject.chapters?.length || 0} Chapters
+                      </span>
+                      <span class="view-details">Learn More →</span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )
+      }
+
+      <!-- Class 11 Section -->
+      {
+        class11Subjects.length > 0 && (
+          <div class="class-group">
+            <div class="group-header mb-4" data-aos="fade-right">
+              <span class="badge badge-secondary mb-2">Foundation</span>
+              <h3>Class 11 Modules</h3>
+            </div>
+            <div class="subjects-grid">
+              {class11Subjects.map((subject: any) => {
+                const IconComponent = IconMap[subject.icon] || BookOpen;
+                return (
+                  <a
+                    href={`/subjects/${subject.slug}`}
+                    class="subject-card card"
+                    data-aos="zoom-in"
+                  >
+                    <div class="subject-icon">
+                      <IconComponent size={32} />
+                    </div>
+                    <h4>{subject.title}</h4>
+                    <p>{subject.description}</p>
+                    <div class="subject-footer">
+                      <span class="chapter-count">
+                        {subject.chapters?.length || 0} Chapters
+                      </span>
+                      <span class="view-details">Learn More →</span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--size-5);
+  }
+
+  .subject-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--size-6);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+    border: 1px solid var(--cp-lavender);
+  }
+
+  .subject-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-4);
+    border-color: var(--cp-purple-deep);
+  }
+
+  .subject-icon {
+    width: 64px;
+    height: 64px;
+    background-color: var(--cp-lavender-light);
+    color: var(--cp-purple-deep);
+    border-radius: var(--radius-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--size-4);
+  }
+
+  .subject-card h4 {
+    margin-bottom: var(--size-2);
+    color: var(--cp-slate-dark);
+  }
+
+  .subject-card p {
+    font-size: var(--font-size-1);
+    color: var(--cp-slate-medium);
+    margin-bottom: var(--size-5);
+    flex-grow: 1;
+  }
+
+  .subject-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--size-4);
+    border-top: 1px solid var(--cp-lavender-light);
+    font-size: var(--font-size-0);
+    font-weight: 600;
+  }
+
+  .chapter-count {
+    color: var(--cp-purple-deep);
+  }
+
+  .view-details {
+    color: var(--cp-slate-dark);
+    transition: color 0.2s ease;
+  }
+
+  .subject-card:hover .view-details {
+    color: var(--cp-purple-deep);
+  }
+
+  .badge-secondary {
+    background-color: var(--cp-lavender);
+    color: var(--cp-purple-deep);
+  }
+
+  @media (max-width: 640px) {
+    .subjects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

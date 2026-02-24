@@ -1,14 +1,112 @@
 ---
+import { getClient } from "../lib/sanity";
+import { FAQS_QUERY, TESTIMONIALS_QUERY, FEATURES_QUERY } from "../lib/queries";
+import BaseLayout from "../layouts/web/BaseLayout.astro";
+import Hero from "../components/web/Hero.astro";
+import ProblemSolution from "../components/web/ProblemSolution.astro";
+import Features from "../components/web/Features.astro";
+import HowItWorks from "../components/web/HowItWorks.astro";
+import Subjects from "../components/web/Subjects.astro";
+import EntranceExamsPromo from "../components/web/EntranceExamsPromo.astro";
+import Testimonials from "../components/web/Testimonials.astro";
+import PricingPreview from "../components/web/PricingPreview.astro";
+import FAQ from "../components/web/FAQ.astro";
+import CTASection from "../components/web/CTASection.astro";
+import SchemaMarkup from "../components/web/SchemaMarkup.astro";
+// import CookieConsent from "../components/web/CookieConsent.astro"; // Handled in BaseLayout usually
+
+// Sanity Data Fetching
+const client = getClient();
+const faqData = await client.fetch(FAQS_QUERY);
+const testimonialData = await client.fetch(TESTIMONIALS_QUERY);
+const featuresData = await client.fetch(FEATURES_QUERY);
+
+const orgSchema = {
+  name: "ChampionsPrep",
+  legalName: "PRePS AI Private Limited",
+  url: "https://championsprep.in",
+  logo: "https://championsprep.in/Logo.svg",
+  sameAs: [
+    "https://facebook.com/championsprep",
+    "https://twitter.com/championsprep",
+    "https://linkedin.com/company/championsprep",
+  ],
+};
+
+// Generate FAQ schema from dynamic data
+const faqSchema = {
+  mainEntity: (faqData || []).map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
+
+const breadcrumbSchema = {
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://championsprep.in/",
+    },
+  ],
+};
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=/blog/" />
-    <link rel="canonical" href="/blog/" />
-    <title>Redirecting…</title>
-  </head>
-  <body>
-    Redirecting to <a href="/blog/">/blog/</a>
-  </body>
-</html>
+
+<BaseLayout
+  title="AI-Powered Learning for Class 11-12 Commerce"
+  description="Master Class 11-12 Commerce with AI. Personalized learning, instant feedback, and affordable pay-per-chapter access for CBSE & ICSE."
+  keywords="Class 11 Commerce, Class 12 Commerce, CBSE Commerce, ICSE Commerce, AI learning, online commerce tuition, Accountancy, Economics, Business Studies, Mathematics, pay per chapter, affordable education, India"
+>
+  <SchemaMarkup type="Organization" data={orgSchema} />
+  <SchemaMarkup type="BreadcrumbList" data={breadcrumbSchema} />
+  <SchemaMarkup type="FAQPage" data={faqSchema} />
+
+  <section class="home-trust-surface">
+    <div class="container">
+      <div class="trust-strip">
+        <p>
+          <strong>ChampionsPrep:</strong> AI-personalized chapters • Pay-per-chapter
+          pricing • Instant feedback
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Hero />
+  <ProblemSolution />
+  <Features data={featuresData} />
+  <HowItWorks />
+  <Subjects />
+  <EntranceExamsPromo />
+  <Testimonials data={testimonialData} />
+  <PricingPreview />
+  <FAQ data={faqData} />
+  <CTASection />
+</BaseLayout>
+
+<style is:global>
+  .home-trust-surface {
+    background: var(--cp-lavender-light);
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+  .home-trust-surface .trust-strip {
+    background: var(--cp-white);
+    border: 1px solid var(--cp-lavender);
+    border-left: 4px solid var(--cp-purple-deep);
+    border-radius: var(--radius-2);
+    padding: 0.6rem 1rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .home-trust-surface p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--cp-slate-dark);
+  }
+</style>

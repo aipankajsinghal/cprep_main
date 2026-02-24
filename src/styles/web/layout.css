@@ -1,0 +1,79 @@
+.container {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--size-4);
+}
+
+/* Page header containers should center their direct content for consistent hero/header layouts */
+.page-header .container {
+  text-align: center;
+}
+
+section {
+  padding-block: var(--size-9);
+  color: var(--cp-slate-dark);
+}
+
+.section-alt {
+  background-color: var(--cp-lavender-light);
+}
+
+.section-cream {
+  background-color: var(--cp-cream);
+}
+
+.section-white {
+  background-color: var(--cp-white);
+}
+
+.grid {
+  display: grid;
+  gap: var(--size-6);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.flex {
+  display: flex;
+  gap: var(--size-4);
+  align-items: center;
+}
+
+.flex-center {
+  justify-content: center;
+}
+
+.flex-between {
+  justify-content: space-between;
+}

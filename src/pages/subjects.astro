@@ -1,0 +1,165 @@
+---
+import BaseLayout from "../layouts/web/BaseLayout.astro";
+import Breadcrumb from "../components/web/Breadcrumb.astro";
+import SubjectsComponent from "../components/web/Subjects.astro";
+import CTASection from "../components/web/CTASection.astro";
+
+const breadcrumbItems = [{ name: "Home", url: "/" }, { name: "Subjects" }];
+---
+
+<BaseLayout
+  title="Our Courses"
+  description="Explore our range of AI-powered commerce courses for Class 11 & 12. Accountancy, Economics, Business Studies, and more."
+  keywords="Commerce courses, Class 11 subjects, Class 12 subjects, CBSE syllabus, ICSE syllabus, online courses, Accountancy course, Economics course, Business Studies course, Mathematics course"
+>
+  <section class="page-header section-cream text-center">
+    <div class="container" data-aos="fade-up">
+      <Breadcrumb items={breadcrumbItems} />
+      <h1 class="mx-auto" style="max-width: 800px;">
+        Expert-Led, AI-Enhanced Courses
+      </h1>
+      <p class="subtitle mx-auto mt-3" style="max-width: 600px;">
+        Deep dive into every chapter. Understand concepts, practice with AI, and
+        master your syllabus.
+      </p>
+    </div>
+  </section>
+
+  <section class="subjects-intro-surface">
+    <div class="container">
+      <div class="trust-strip">
+        <p>
+          <strong>Course clarity:</strong> Each subject is broken into short chapters
+          with AI practice — preview a free chapter before purchase.
+        </p>
+      </div>
+
+      <div class="snapshot-grid">
+        <article class="snapshot-card">
+          <p class="snapshot-kicker">Free Preview</p>
+          <h3>Try a chapter</h3>
+          <p>Experience one free chapter before you commit.</p>
+        </article>
+        <article class="snapshot-card">
+          <p class="snapshot-kicker">AI Practice</p>
+          <h3>Instant Feedback</h3>
+          <p>Personalized practice questions after each chapter.</p>
+        </article>
+        <article class="snapshot-card">
+          <p class="snapshot-kicker">Affordable</p>
+          <h3>Pay per chapter</h3>
+          <p>Start from ₹59 — pay only for what you study.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <SubjectsComponent showTitle={false} />
+
+  <section class="course-details section-alt">
+    <div class="container">
+      <div class="text-center mb-5" data-aos="fade-up">
+        <h2>Designed for Success</h2>
+        <p class="subtitle mx-auto" style="max-width: 600px;">
+          Our modules are built to help you excel in board exams and competitive
+          entrances.
+        </p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card" data-aos="fade-right">
+          <h3>Board Exams (CBSE/ICSE)</h3>
+          <p class="subtitle">
+            Every chapter aligns perfectly with your latest board syllabus.
+            Master concepts with AI explanations and step-by-step walkthroughs.
+          </p>
+          <ul class="mt-4">
+            <li>NCERT/Board curriculum coverage</li>
+            <li>Previous year question practice</li>
+            <li>Instant AI feedback on answers</li>
+            <li>Chapter-wise mini mocks</li>
+          </ul>
+        </div>
+        <div class="card" data-aos="fade-left">
+          <h3>Entrance Exams</h3>
+          <p class="subtitle">
+            Get ahead of the curve for CUET, IPMAT, and other competitive exams
+            with advanced practice modules and full-length mocks.
+          </p>
+          <ul class="mt-4">
+            <li>CUET/IPMAT exam patterns</li>
+            <li>Time-bound practice modes</li>
+            <li>Performance analytics & insights</li>
+            <li>Strategic preparation notes</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding-block: var(--size-9);
+  }
+  .subtitle {
+    font-size: var(--font-size-4);
+    color: var(--cp-slate-medium);
+  }
+
+  ul {
+    list-style: disc;
+    padding-left: var(--size-6);
+    color: var(--cp-slate-medium);
+  }
+
+  li {
+    margin-block-end: var(--size-2);
+  }
+
+  /* Subjects snapshot/trust */
+  .subjects-intro-surface {
+    padding-top: 1.25rem;
+    background: var(--cp-lavender-light);
+  }
+  .subjects-intro-surface .trust-strip {
+    background: var(--cp-white);
+    border: 1px solid var(--cp-lavender);
+    border-left: 4px solid var(--cp-purple-deep);
+    border-radius: var(--radius-2);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .subjects-intro-surface .snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .subjects-intro-surface .snapshot-card {
+    background: var(--cp-white);
+    border: 1px solid var(--cp-lavender);
+    border-radius: var(--radius-2);
+    padding: 1rem;
+    box-shadow: var(--shadow-1);
+  }
+  .subjects-intro-surface .snapshot-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    color: var(--cp-slate-medium);
+  }
+
+  @media (max-width: 1024px) {
+    .subjects-intro-surface .snapshot-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .subjects-intro-surface .snapshot-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

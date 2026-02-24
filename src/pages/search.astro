@@ -1,0 +1,96 @@
+---
+import BaseLayout from "../layouts/web/BaseLayout.astro";
+import Breadcrumb from "../components/web/Breadcrumb.astro";
+
+const breadcrumbItems = [{ name: "Home", url: "/" }, { name: "Search" }];
+---
+
+<BaseLayout
+  title="Search Results"
+  description="Search for subjects, exams, and blog posts across ChampionsPrep."
+>
+  <section class="page-header section-cream">
+    <div class="container" data-aos="fade-up">
+      <Breadcrumb items={breadcrumbItems} />
+      <h1>Search ChampionsPrep</h1>
+      <p class="subtitle mt-2">
+        Find exactly what you're looking for across our entire platform.
+      </p>
+    </div>
+  </section>
+
+  <section class="search-section section-white">
+    <div class="container">
+      <div id="search" data-pagefind-root></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const init = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "/pagefind/pagefind-ui.js";
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.append(script);
+      });
+
+      if (typeof (window as any).PagefindUI !== "function")
+        throw new Error("PagefindUI not available");
+
+      new (window as any).PagefindUI({
+        element: "#search",
+        showSubResults: true,
+        showImages: false,
+        excerptLength: 30,
+        bundlePath: "/pagefind/",
+      });
+    } catch (e) {
+      const root = document.getElementById("search");
+      if (root) {
+        root.innerHTML = `<div class="p-4 border border-dashed border-gray-300 rounded text-center">
+          <p>Search indexing will be available after the production build.</p>
+        </div>`;
+      }
+    }
+  };
+
+  init();
+</script>
+
+<style is:global>
+  .search-section {
+    min-height: 60vh;
+    padding-bottom: 5rem;
+  }
+
+  /* Customizing Pagefind UI to match brand */
+  :root {
+    --pagefind-ui-primary: var(--cp-purple-deep);
+    --pagefind-ui-text: var(--cp-slate-dark);
+    --pagefind-ui-background: white;
+    --pagefind-ui-border: var(--cp-lavender);
+    --pagefind-ui-tag: var(--cp-lavender-light);
+  }
+
+  .pagefind-ui .pagefind-ui__search-input {
+    border-radius: 8px !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1.25rem !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result-link {
+    color: var(--cp-purple-deep) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result-excerpt {
+    color: var(--cp-slate-medium) !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+</style>

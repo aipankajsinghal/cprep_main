@@ -1,0 +1,55 @@
+---
+---
+
+<div id="cookie-consent-backdrop" class="cookie-consent-backdrop" aria-hidden="true"></div>
+
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-modal="true" aria-labelledby="cookie-title" aria-describedby="cookie-desc" hidden>
+  <div class="cookie-col">
+    <h3 id="cookie-title">We use cookies</h3>
+    <p id="cookie-desc">We use necessary cookies to make the site work. With your permission, we also use analytics and marketing cookies to improve and personalise your experience. You can change your choices anytime.</p>
+    <div id="cookie-preferences" class="cookie-preferences" aria-hidden="true">
+      <div class="cookie-row">
+        <div class="cookie-col">
+          <strong>Necessary</strong>
+          <div class="cookie-desc-small">Always active — required for basic site functionality</div>
+        </div>
+        <div class="cookie-switch"> <input type="checkbox" disabled checked aria-label="Necessary cookies"/></div>
+      </div>
+      <div class="cookie-row">
+        <div class="cookie-col">
+          <strong>Analytics</strong>
+          <div class="cookie-desc-small">Helps us understand site usage and improve the product</div>
+        </div>
+        <div class="cookie-switch"> <input id="consent-analytics" type="checkbox" aria-label="Analytics cookies"/></div>
+      </div>
+      <div class="cookie-row">
+        <div class="cookie-col">
+          <strong>Marketing</strong>
+          <div class="cookie-desc-small">Personalised ads and marketing communications</div>
+        </div>
+        <div class="cookie-switch"> <input id="consent-marketing" type="checkbox" aria-label="Marketing cookies"/></div>
+      </div>
+    </div>
+    <div class="cookie-note">By choosing your preferences you consent to storing a cookie for one year. Read our <a href="/privacy-policy">privacy policy</a> for details.</div>
+  </div>
+  <div class="cookie-actions" aria-hidden="false">
+    <button id="btn-manage" class="cookie-btn btn-ghost">Manage</button>
+    <button id="btn-reject" class="cookie-btn btn-ghost">Reject Non-Essential</button>
+    <button id="btn-accept" class="cookie-btn btn-primary">Accept All</button>
+  </div>
+</div>
+<script>
+  /* WCAG 2.1.1 Keyboard Support - Allow ESC to close dialog */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.code === 'Escape') {
+      const dialog = document.getElementById('cookie-consent');
+      if (dialog && !dialog.hidden && dialog.getAttribute('aria-hidden') !== 'true') {
+        // Close by clicking reject button (standard non-Essential rejection)
+        const rejectBtn = document.getElementById('btn-reject');
+        if (rejectBtn) {
+          rejectBtn.click();
+        }
+      }
+    }
+  });
+</script>

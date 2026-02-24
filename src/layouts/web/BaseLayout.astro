@@ -1,0 +1,172 @@
+---
+import Header from "../../components/web/Header.astro";
+import Footer from "../../components/web/Footer.astro";
+import StickyMobileCTA from "../../components/web/StickyMobileCTA.astro";
+import { ClientRouter } from "astro:transitions";
+import "../../styles/unified.css";
+import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+import CookieConsent from "../../components/web/CookieConsent.astro";
+
+import { getClient } from "../../lib/sanity";
+import { SITE_SETTINGS_QUERY } from "../../lib/queries";
+
+const {
+  title,
+  description,
+  keywords,
+  image = "/og-image.png",
+  canonicalURL = new URL(
+    Astro.url.pathname,
+    Astro.site || "https://championsprep.in",
+  ),
+  noIndex = false,
+} = Astro.props;
+
+const client = getClient();
+const siteSettings = await client.fetch(SITE_SETTINGS_QUERY);
+
+const siteName = siteSettings?.title || "ChampionsPrep";
+const defaultDescription =
+  siteSettings?.description ||
+  "Master Class 11-12 Commerce with AI. Personalized learning, instant feedback, and affordable pay-per-chapter access for CBSE & ICSE students.";
+const defaultKeywords =
+  "Class 11 Commerce, Class 12 Commerce, CBSE Commerce, ICSE Commerce, AI learning, Accountancy, Economics, Business Studies, Mathematics, pay per chapter";
+
+const displayTitle = title
+  ? title.includes(siteName)
+    ? title
+    : `${title} | ${siteName}`
+  : siteName;
+const displayDescription = description || defaultDescription;
+const displayKeywords = keywords || defaultKeywords;
+---
+
+<!doctype html>
+<html lang="en-IN" style="color-scheme: light;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta name="theme-color" content="#7C3AED" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="ChampionsPrep" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Primary Meta Tags -->
+    <title>{displayTitle}</title>
+    <meta name="title" content={displayTitle} />
+    <meta name="description" content={displayDescription} />
+    <meta name="keywords" content={displayKeywords} />
+    <meta name="author" content="PRePS AI Private Limited" />
+    <meta
+      name="robots"
+      content={noIndex ? "noindex, nofollow" : "index, follow"}
+    />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={displayTitle} />
+    <meta property="og:description" content={displayDescription} />
+    <meta property="og:image" content={new URL(image, Astro.url)} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={Astro.url} />
+    <meta name="twitter:title" content={displayTitle} />
+    <meta name="twitter:description" content={displayDescription} />
+    <meta name="twitter:image" content={new URL(image, Astro.url)} />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" as="image" href="/Logo.svg" type="image/svg+xml" />
+
+    <!-- Fonts (non-blocking via link tags) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+    />
+    <script>
+      // Expose GA Measurement ID from build-time env to the client for consent-guarded loading
+      window.__GA_MEASUREMENT_ID =
+        "" + (import.meta.env.GA_MEASUREMENT_ID || "");
+    </script>
+
+    <ClientRouter />
+
+    <script src="../../scripts/web/aos-init.js"></script>
+    <script src="/scripts/analytics.js" async></script>
+    <script type="module" src="/scripts/cookie-consent.js" defer></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <Header />
+    <main id="main-content" data-pagefind-body>
+      <slot />
+    </main>
+    <Footer />
+    <CookieConsent />
+    <StickyMobileCTA />
+    <Analytics />
+    <SpeedInsights />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light !important;
+  }
+
+  html,
+  body {
+    background-color: var(--cp-lavender);
+    color: var(--cp-slate-dark);
+  }
+
+  /* Ensure main content starts below the fixed header */
+  main {
+    padding-top: var(--header-height);
+    background-color: var(--cp-lavender);
+  }
+
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background-color: var(--cp-purple-deep);
+    color: var(--cp-white);
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 10000;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .skip-to-content:focus {
+    top: 0;
+  }
+</style>

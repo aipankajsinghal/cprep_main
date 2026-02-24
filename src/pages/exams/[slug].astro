@@ -1,0 +1,191 @@
+---
+import { getClient } from "../../lib/sanity";
+import { ALL_EXAMS_QUERY, EXAM_BY_SLUG_QUERY } from "../../lib/queries";
+import BaseLayout from "../../layouts/web/BaseLayout.astro";
+import Breadcrumb from "../../components/web/Breadcrumb.astro";
+import SchemaMarkup from "../../components/web/SchemaMarkup.astro";
+import type { Exam } from "../../types";
+
+export const prerender = true;
+
+const client = getClient();
+
+export async function getStaticPaths() {
+  const { getClient } = await import("../../lib/sanity");
+  const { ALL_EXAMS_QUERY } = await import("../../lib/queries");
+  const client = getClient();
+  const items = await client.fetch(ALL_EXAMS_QUERY);
+  return items.map((i: any) => ({ params: { slug: i.slug } }));
+}
+
+const { slug } = Astro.params;
+const exam = (await client.fetch(EXAM_BY_SLUG_QUERY, { slug })) as Exam;
+
+if (!exam) throw new Error(`Exam with slug "${slug}" not found`);
+
+const pageTitle = exam.title;
+const pageDescription = exam.description || "";
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: pageTitle,
+  description: pageDescription,
+};
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <SchemaMarkup type="Article" data={schemaData} />
+  <div class="container" style="margin-top: 2rem;">
+    <Breadcrumb
+      items={[
+        { name: "Home", url: "/" },
+        { name: "Entrance Exams", url: "/commerce-entrance-exams" },
+        { name: pageTitle },
+      ]}
+    />
+  </div>
+
+  <section class="exam-hero">
+    <div class="container">
+      <h1>{pageTitle}</h1>
+      <p class="subtitle">{pageDescription}</p>
+    </div>
+  </section>
+
+  <section class="snapshot-trust">
+    <div class="container">
+      <div class="grid grid-2 items-center gap-large">
+        <div>
+          <div class="snapshot-card">
+            <h4>Quick Snapshot</h4>
+            <dl>
+              {
+                exam.examDate && (
+                  <>
+                    <dt>Date</dt>
+                    <dd>{exam.examDate}</dd>
+                  </>
+                )
+              }
+              {
+                exam.eligibility && (
+                  <>
+                    <dt>Eligibility</dt>
+                    <dd>{exam.eligibility}</dd>
+                  </>
+                )
+              }
+              {
+                exam.chapters && exam.chapters.length > 0 && (
+                  <>
+                    <dt>Key Topics</dt>
+                    <dd>
+                      <ul>
+                        {exam.chapters.map((c) => (
+                          <li>{c}</li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </>
+                )
+              }
+            </dl>
+          </div>
+        </div>
+
+        <div>
+          <div class="trust-strip">
+            <p class="trust-lead"><strong>Exam-ready practice</strong></p>
+            <p class="trust-text">
+              Timed mocks, chapter drills, and analytics tuned to this exam's
+              pattern.
+            </p>
+            <a
+              class="btn-primary"
+              href="https://app.championsprep.in/register"
+              target="_blank"
+              rel="noopener">Start practicing</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container content-grid">
+    <div class="page-main">
+      <article class="content-section">
+        {exam.body && <div set:html={exam.body} />}
+      </article>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .exam-hero {
+    background: linear-gradient(
+      to right,
+      var(--cp-purple-deep),
+      var(--cp-purple-hover)
+    );
+    color: white;
+    padding: 3rem 1rem;
+    text-align: center;
+  }
+  .subtitle {
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .content-grid {
+    padding: 2rem 1rem;
+  }
+  .content-section {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-1);
+    color: var(--cp-slate-dark);
+  }
+
+  .snapshot-card {
+    background: var(--cp-white);
+    border: 1px solid var(--cp-lavender);
+    padding: 1.5rem;
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-1);
+  }
+
+  dt {
+    font-weight: 700;
+    color: var(--cp-purple-deep);
+    margin-top: 1rem;
+  }
+
+  dd {
+    margin-left: 0;
+    color: var(--cp-slate-medium);
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .trust-strip {
+    background: var(--cp-lavender-light);
+    border-left: 4px solid var(--cp-purple-deep);
+    padding: 2rem;
+    border-radius: var(--radius-2);
+  }
+
+  .trust-lead {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .trust-text {
+    margin-bottom: 1.5rem;
+    color: var(--cp-slate-medium);
+  }
+</style>

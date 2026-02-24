@@ -1,0 +1,180 @@
+---
+import Button from './Button.astro';
+
+const APP_REGISTER = "https://app.championsprep.in/register";
+---
+
+<section class="hero-section">
+  <div class="container hero-grid">
+    <div class="hero-content" data-aos="fade-up">
+      <h1 class="hero-title">Score 95+ in Commerce.  <br /><span class="text-gradient">₹59/Chapter. No Subscriptions.</span></h1>
+      <p class="hero-subtitle">
+        Join 5,000+ students who improved 15+ points in 2 months.
+        AI-personalized learning, instant feedback, and a guaranteed
+        7-day refund if you don't see results.
+      </p>
+      
+      <div class="hero-actions">
+        <Button href={APP_REGISTER} variant="primary" external trackCta={true} ctaLocation="hero-primary">Get First Chapter Free →</Button>
+        <Button href={APP_REGISTER} variant="secondary" external trackCta={true} ctaLocation="hero-secondary">Try Risk-Free for 7 Days</Button>
+      </div>
+
+      
+    </div>
+
+    <div class="hero-image" data-aos="fade-in" data-aos-delay="200">
+      <picture>
+        <source
+          srcset="/images/hero-illustration.avif?w=800 800w, /images/hero-illustration.avif?w=1200 1200w"
+          type="image/avif"
+        />
+        <source
+          srcset="/images/hero-illustration.webp?w=800 800w, /images/hero-illustration.webp?w=1200 1200w"
+          type="image/webp"
+        />
+        <img 
+          src="/images/hero-illustration.png"
+          alt="Commerce student mastering Accountancy, Economics and Business Studies with AI-powered ChampionsPrep platform" 
+          width="600" 
+          height="500"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 600px"
+        />
+      </picture>
+      <div class="floating-badge badge-1">AI-Powered</div>
+      <div class="floating-badge badge-2">Pay-Per-Chapter</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    position: relative;
+    padding-block: var(--size-10);
+    overflow: hidden;
+    background: radial-gradient(circle at top right, var(--cp-lavender-light), transparent);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--size-8);
+    align-items: center;
+  }
+
+  .hero-title {
+    margin-block-end: var(--size-4);
+    line-height: var(--font-lineheight-0);
+  }
+
+  .hero-subtitle {
+    font-size: var(--font-size-4);
+    color: var(--cp-slate-medium);
+    margin-block-end: var(--size-6);
+    max-width: 50ch;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--size-4);
+  }
+
+  .hero-trust {
+    display: flex;
+    gap: var(--size-6);
+  }
+
+  .trust-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .trust-number {
+    font-family: var(--font-headings);
+    font-size: var(--font-size-5);
+    color: var(--cp-purple-deep);
+    font-weight: 800;
+  }
+
+  .trust-label {
+    font-size: var(--font-size-0);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cp-slate-medium);
+  }
+
+  .hero-image {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(var(--shadow-5));
+    visibility: visible;
+    background: transparent;
+  }
+
+  .floating-badge {
+    position: absolute;
+    background-color: var(--cp-white);
+    padding: var(--size-2) var(--size-4);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-3);
+    font-weight: 600;
+    font-size: var(--font-size-1);
+    color: var(--cp-purple-deep);
+    animation: floating 3s ease-in-out infinite;
+    z-index: 3;
+  }
+
+  .badge-1 { top: 10%; right: 5%; }
+  .badge-2 { bottom: 15%; left: 0; animation-delay: 1.5s; }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-badge {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .hero-section { padding-block: var(--size-8); }
+
+    .hero-subtitle {
+      margin-inline: auto;
+    }
+
+    .hero-actions {
+      justify-content: center;
+    }
+
+    .hero-trust {
+      justify-content: center;
+    }
+
+    .hero-image {
+      max-width: 600px;
+      margin-inline: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-actions {
+      flex-direction: column;
+    }
+    .hero-section { padding-block: var(--size-6); }
+  }
+</style>

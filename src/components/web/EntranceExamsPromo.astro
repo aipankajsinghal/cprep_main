@@ -1,0 +1,62 @@
+---
+import Button from './Button.astro';
+---
+
+<section class="entrance-exams-promo">
+  <div class="container">
+    <div class="promo-content">
+      <span class="badge">New Guide</span>
+      <h2>Commerce Entrance Exams 2026</h2>
+      <p>Planning for life after Class 12? Check our comprehensive guide for detailed schedules, syllabus, and application deadlines for CUET, IPMAT, CA, CS, and more.</p>
+      <div class="actions">
+        <Button href="/commerce-entrance-exams" variant="primary">View 2026 Exam Calendar →</Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .entrance-exams-promo {
+    padding-block: var(--size-9);
+    background-color: var(--cp-lavender-light);
+    /* ensure content text is readable on pale lavender background */
+    color: var(--cp-slate-dark);
+  }
+  
+  .promo-content {
+    max-width: var(--size-content-3);
+    margin-inline: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--size-3);
+  }
+  
+  .badge {
+    background-color: var(--cp-lavender);
+    color: var(--cp-purple-deep);
+    padding: var(--size-1) var(--size-3);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-6);
+    text-transform: uppercase;
+    letter-spacing: var(--font-letterspacing-1);
+  }
+
+  h2 {
+    font-size: var(--font-size-6);
+    color: var(--cp-slate-dark);
+    margin: 0;
+  }
+  
+  p {
+    font-size: var(--font-size-3);
+    color: var(--cp-slate-medium);
+    max-width: 60ch;
+  }
+  
+  .actions {
+    margin-top: var(--size-2);
+  }
+</style>

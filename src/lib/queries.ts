@@ -42,3 +42,65 @@ export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug &&
 
 /** Site settings singleton */
 export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]`
+
+/** Subjects queries */
+export const ALL_SUBJECTS_QUERY = `*[_type == "subject"] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  icon,
+  keyTopics,
+  chapters,
+  class
+}`
+
+export const SUBJECT_BY_SLUG_QUERY = `*[_type == "subject" && slug.current == $slug][0] {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  icon,
+  keyTopics,
+  chapters,
+  class,
+  body
+}`
+
+/** Exams queries */
+export const ALL_EXAMS_QUERY = `*[_type == "exam"] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  examDate,
+  eligibility
+}`
+
+export const EXAM_BY_SLUG_QUERY = `*[_type == "exam" && slug.current == $slug][0] {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  examDate,
+  eligibility,
+  chapters,
+  body
+}`
+
+/** Generic Pages query */
+export const PAGE_BY_SLUG_QUERY = `*[_type == "page" && slug.current == $slug][0] {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  metaTitle,
+  noIndex,
+  body
+}`
+
+/** Site Data queries */
+export const FAQS_QUERY = `*[_type == "faq"] | order(order asc)`
+export const TESTIMONIALS_QUERY = `*[_type == "testimonial"] | order(_createdAt desc)`
+export const FEATURES_QUERY = `*[_type == "feature"]`
+export const PRICING_PLANS_QUERY = `*[_type == "pricingPlan"] | order(order asc)`

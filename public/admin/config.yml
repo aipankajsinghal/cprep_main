@@ -1,0 +1,253 @@
+backend:
+  name: github
+  repo: aipankajsinghal/cprep_web
+  branch: main
+  base_url: /api
+  auth_endpoint: auth
+
+publish_mode: editorial_workflow
+
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: site_data
+    label: Site Data
+    files:
+      - label: FAQs
+        name: faqs
+        file: src/content/faqs/index.json
+        fields:
+          - label: Questions
+            name: questions
+            widget: list
+            collapsed: false
+            summary: "{{fields.name}}"
+            fields:
+              - label: Question
+                name: name
+                widget: string
+              - label: Answer
+                name: answer
+                widget: text
+
+      - label: Testimonials
+        name: testimonials
+        file: src/content/testimonials/index.json
+        fields:
+          - label: Testimonials
+            name: testimonials
+            widget: list
+            collapsed: false
+            summary: "{{fields.author}}"
+            fields:
+              - label: Author
+                name: author
+                widget: string
+              - label: Role
+                name: role
+                widget: string
+              - label: Content
+                name: content
+                widget: text
+              - label: Rating
+                name: rating
+                widget: number
+                min: 1
+                max: 5
+                step: 1
+              - label: Image
+                name: image
+                widget: image
+                required: false
+
+      - label: Features
+        name: features
+        file: src/content/features/index.json
+        fields:
+          - label: Features
+            name: features
+            widget: list
+            collapsed: false
+            summary: "{{fields.title}}"
+            fields:
+              - label: Title
+                name: title
+                widget: string
+              - label: Description
+                name: description
+                widget: text
+              - label: Icon
+                name: icon
+                widget: string
+                required: false
+
+      - label: Pricing Plans
+        name: pricing
+        file: src/content/pricing/plans.json
+        fields:
+          - label: Plans
+            name: plans
+            widget: list
+            collapsed: false
+            summary: "{{fields.name}}"
+            fields:
+              - label: Name
+                name: name
+                widget: string
+              - label: Price
+                name: price
+                widget: number
+              - label: Description
+                name: description
+                widget: string
+              - label: Features
+                name: features
+                widget: list
+                field:
+                  label: Feature
+                  name: feature
+                  widget: string
+              - label: Highlighted
+                name: highlighted
+                widget: boolean
+                default: false
+
+  - name: exams
+    label: Entrance Exams
+    folder: src/content/exams
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        required: true
+      - label: Description
+        name: description
+        widget: text
+        required: true
+      - label: Exam Date
+        name: examDate
+        widget: string
+        required: false
+      - label: Chapters
+        name: chapters
+        widget: list
+        required: false
+        field:
+          label: Chapter
+          name: chapter
+          widget: string
+      - label: Body
+        name: body
+        widget: markdown
+        required: true
+
+  - name: subjects
+    label: Subjects
+    folder: src/content/subjects
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Slug
+        name: slug
+        widget: string
+      - label: Description
+        name: description
+        widget: text
+      - label: Icon
+        name: icon
+        widget: string
+        required: false
+      - label: Key Topics
+        name: keyTopics
+        widget: list
+        field:
+          label: Topic
+          name: topic
+          widget: string
+      - label: Chapters
+        name: chapters
+        widget: list
+        summary: "{{fields.name}} - ₹{{fields.price}}"
+        fields:
+          - label: Name
+            name: name
+            widget: string
+          - label: Price
+            name: price
+            widget: number
+          - label: Description
+            name: description
+            widget: string
+            required: false
+      - label: Body
+        name: body
+        widget: markdown
+        required: false
+
+  - name: pages
+    label: Pages
+    folder: src/content/pages
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        required: true
+      - label: Slug
+        name: slug
+        widget: string
+        required: true
+      - label: Description
+        name: description
+        widget: text
+      - label: Keywords
+        name: keywords
+        widget: string
+      - label: SEO Title
+        name: metaTitle
+        widget: string
+      - label: SEO Image
+        name: image
+        widget: image
+      - label: Canonical URL
+        name: canonicalURL
+        widget: string
+      - label: No Index
+        name: noIndex
+        widget: boolean
+        default: false
+      - label: Published
+        name: published
+        widget: boolean
+        default: true
+      - label: Publish Date
+        name: publishDate
+        widget: datetime
+        required: false
+      - label: Tags
+        name: tags
+        widget: list
+        field:
+          label: Tag
+          name: tag
+          widget: string
+      - label: Body
+        name: body
+        widget: markdown
+        required: true

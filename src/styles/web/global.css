@@ -1,0 +1,170 @@
+/* Self-hosted Open Props from node_modules (eliminates render-blocking external CSS fetch)
+   Version: 1.7.23 (pinned in package.json)
+   See CWV-002 in IMPLEMENTATION_SUMMARY for performance rationale. */
+@import "../../node_modules/open-props/open-props.min.css";
+@import "../../node_modules/open-props/normalize.min.css";
+@import "../../node_modules/open-props/buttons.min.css";
+@import "../../node_modules/open-props/animations.min.css";
+@import "../../node_modules/open-props/gradients.min.css";
+
+:root {
+  color-scheme: light;
+  /* Brand Colors */
+  --cp-lavender: #e6e6fa;
+  --cp-lavender-light: #f5f3ff;
+  --cp-cream: #eee9dd;
+  --cp-slate-dark: #4e5764;
+  --cp-slate-medium: #636c7a;
+  --cp-purple-deep: #6b5b95;
+  --cp-purple-hover: #5a4a84;
+  --cp-gold: #d4af37;
+  --cp-success: #4caf50;
+  --cp-white: #ffffff;
+
+  /* Additional palette and utility tokens (missing variables referenced in layout review) */
+  --cp-gray-200: #e5e7eb;
+  --cp-gray-400: #9ca3af;
+  --cp-gray-600: #4b5563;
+  --cp-bg-light: #f9fafb;
+  --cp-purple-light: #8f7fd0;
+
+  /* Layout */
+  --max-width: 1200px;
+  --header-height: 80px;
+
+  /* Overriding Open Props if needed */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--cp-lavender);
+  color: var(--cp-slate-dark);
+  font-family: var(--font-body);
+  line-height: var(--font-lineheight-3);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Accessibility & global design overrides
+   - Consolidate common color fixes to improve contrast site-wide
+   - Keep rules conservative and scoped to known patterns */
+.subtitle,
+p.subtitle {
+  color: var(--cp-slate-dark) !important;
+}
+
+.badge {
+  /* ensure badge text contrasts with gold background */
+  color: var(--cp-slate-dark) !important;
+}
+
+/* CTA: ensure translucent card over gradient keeps readable white text */
+.cta-section {
+  background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover));
+  color: var(--cp-white);
+}
+.cta-section .cta-card {
+  background-color: rgba(0,0,0,0.12) !important;
+  border-color: rgba(255,255,255,0.14) !important;
+  color: var(--cp-white) !important;
+}
+.cta-section .cta-title,
+.cta-section .cta-subtitle,
+.cta-section .cta-actions,
+.cta-section .login-link {
+  color: var(--cp-white) !important;
+}
+
+/* FAQ: prefer darker text on light FAQ backgrounds */
+.faq-section .faq-question,
+.faq-section .faq-question span {
+  color: var(--cp-slate-dark) !important;
+}
+
+/* Stronger global fixes for remaining audited failures */
+.badge {
+  color: #0b0b0b !important;
+}
+
+/* Force exam hero gradient where component styles may not apply */
+.exam-hero,
+.exam-hero .container {
+  background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover)) !important;
+  color: var(--cp-white) !important;
+}
+
+/* Ensure CTA sections render the intended purple gradient consistently */
+.cta-section,
+.cta-section .container {
+  background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover)) !important;
+}
+
+/* When FAQ appears on dark surfaces, ensure the question text is light */
+.section-purple summary.faq-question,
+.header-dark summary.faq-question,
+.dark-surface summary.faq-question,
+footer summary.faq-question {
+  color: var(--cp-white) !important;
+}
+
+/* Centralized hero/exam-hero styling to guarantee readable overlays on purple backgrounds */
+.hero-section,
+.exam-hero,
+.cta-section {
+  color: var(--cp-white) !important;
+}
+
+.hero-section h1,
+.exam-hero h1,
+.hero-section .hero-title,
+.hero-section .hero-subtitle,
+.exam-hero p.subtitle,
+.exam-hero .subtitle {
+  color: var(--cp-white) !important;
+}
+
+/* Ensure secondary buttons are readable on purple surfaces */
+.hero-section .btn-secondary,
+.exam-hero .btn-secondary,
+.cta-section .btn-secondary {
+  color: var(--cp-white) !important;
+  border-color: rgba(255,255,255,0.22) !important;
+  background: transparent !important;
+}
+.hero-section .btn-secondary:hover,
+.exam-hero .btn-secondary:hover,
+.cta-section .btn-secondary:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+/* FAQ: ensure questions are visible on darker surfaces that may be used in footers or headers */
+.hero-section summary.faq-question,
+.exam-hero summary.faq-question,
+.footer summary.faq-question,
+.header-dark summary.faq-question,
+.dark-surface summary.faq-question {
+  color: var(--cp-white) !important;
+}
+
+

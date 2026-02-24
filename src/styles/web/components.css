@@ -1,0 +1,279 @@
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--size-3) var(--size-5);
+  border-radius: var(--radius-2);
+  font-weight: 600;
+  transition: transform 0.2s var(--ease-out-3), box-shadow 0.2s var(--ease-out-3), background-color 0.2s var(--ease-out-3);
+  cursor: pointer;
+  border: none;
+}
+
+/* WCAG 2.4.7 Focus Visible - Required for keyboard accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--cp-purple-deep);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--cp-white);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--cp-white);
+  box-shadow: 0 0 0 4px var(--cp-purple-deep);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--cp-purple-deep);
+  outline-offset: 2px;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--cp-purple-deep);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.btn-primary {
+  background-color: var(--cp-purple-deep);
+  color: var(--cp-white) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--cp-purple-hover);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-3);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--cp-purple-deep);
+  color: var(--cp-purple-deep);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(107, 91, 149, 0.1);
+  transform: scale(1.02);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--cp-slate-dark);
+}
+
+.btn-ghost:hover {
+  color: var(--cp-purple-deep);
+}
+
+/* Cards */
+.card {
+  background-color: var(--cp-white);
+  padding: var(--size-6);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-2);
+  transition: transform 0.3s var(--ease-out-3), box-shadow 0.3s var(--ease-out-3);
+  color: var(--cp-slate-dark) !important;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-4);
+}
+
+/* Chapter cards used on subject pages should have left-aligned text for readability */
+.chapter-card {
+  text-align: left;
+}
+
+/* Nav */
+.nav-link {
+  font-weight: 500;
+  transition: color 0.2s var(--ease-in-out-2);
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--cp-purple-deep);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--cp-purple-deep);
+  transition: width 0.3s var(--ease-out-3);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Forms */
+.form-group {
+  margin-block-end: var(--size-4);
+}
+
+.label {
+  display: block;
+  margin-block-end: var(--size-1);
+  font-weight: 500;
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: var(--size-2) var(--size-3);
+  border: 1px solid var(--cp-slate-medium);
+  border-radius: var(--radius-2);
+  font-family: inherit;
+}
+
+.input:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--cp-purple-deep);
+  box-shadow: 0 0 0 2px rgba(107, 91, 149, 0.2);
+}
+
+/* Cookie consent banner */
+.cookie-consent-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.35);display:none}
+.cookie-consent{position:fixed;left:1rem;right:1rem;bottom:1.25rem;z-index:9999;max-width:980px;margin:0 auto;background:#fff;border-radius:8px;padding:1rem 1.25rem;box-shadow:0 6px 24px rgba(16,24,40,0.15);display:flex;gap:1rem;align-items:flex-start}
+.cookie-consent h3{margin:0 0 .25rem;font-size:1.05rem}
+.cookie-consent p{margin:0 0 .5rem;color:#334155}
+.cookie-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+.cookie-btn{padding:.5rem .75rem;border-radius:6px;border:1px solid transparent;cursor:pointer}
+.cookie-btn.btn-ghost{background:transparent;border-color:#e2e8f0}
+.cookie-btn.btn-primary{background:var(--cp-purple-deep);color:#fff}
+.cookie-preferences{display:none;flex-direction:column;gap:.5rem;margin-top:.5rem;border-top:1px solid #e6edf3;padding-top:.5rem}
+.cookie-row{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.cookie-col{flex:1}
+.cookie-switch{display:flex;align-items:center;gap:.5rem}
+.cookie-desc-small{font-size:0.9rem;color:#475569}
+.cookie-note{margin-top:.6rem;font-size:0.85rem;color:#475569}
+
+/* Respect the native `hidden` attribute and ARIA on the consent UI.
+  Some build-time CSS previously forced `display:flex` which prevented
+  the `hidden` attribute from hiding the element. Make hiding explicit
+  and scoped so scripts can toggle visibility reliably. */
+.cookie-consent[hidden] { display: none !important; }
+.cookie-consent-backdrop[aria-hidden="true"] { display: none !important; }
+.cookie-consent-backdrop[aria-hidden="false"] { display: block !important; }
+
+/* Ensure header and cookie consent overlay above transformed/animated content.
+   Some animation libraries add transforms which create stacking contexts that
+   can visually overlap fixed elements. Use a very high z-index and
+   !important to keep these UI elements on top. */
+#main-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100000 !important;
+}
+
+#cookie-consent {
+  z-index: 100002 !important;
+}
+
+#cookie-consent-backdrop {
+  z-index: 99999 !important; /* Below header but still blocks background */
+}
+
+/* Ensure the cookie dialog and its controls always receive pointer events
+   even when other stacking contexts or transforms are present. This guards
+   against accidental overlays from animated elements that can intercept
+   clicks. */
+#cookie-consent {
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#cookie-consent * {
+  pointer-events: auto !important;
+}
+
+#cookie-consent-backdrop {
+  pointer-events: auto !important;
+}
+
+/* Accessibility overrides (targeted): ensure readable foreground on audited surfaces */
+/* These are narrow, conservative rules applied to selectors flagged by the audit. */
+.cta-card { color: var(--cp-white) !important; }
+.entrance-exams-promo, .entrance-exams-promo h2, .entrance-exams-promo p { color: var(--cp-slate-dark) !important; }
+.entrance-exams-promo .badge { color: var(--cp-purple-deep) !important; background-color: var(--cp-lavender) !important; }
+.faq-section, .faq-section p { color: var(--cp-slate-dark); }
+.faq-question:hover { color: var(--cp-slate-dark); }
+.feature-card, .feature-card h3, .feature-card p { color: var(--cp-slate-dark) !important; }
+.feature-icon, .feature-icon-emoji { color: var(--cp-purple-deep) !important; }
+.footer, .footer * { color: var(--cp-white) !important; }
+header, header .nav-link, header.scrolled, .mobile-menu { color: var(--cp-slate-dark) !important; }
+.floating-badge { color: var(--cp-purple-deep) !important; }
+.step-number { color: var(--cp-white) !important; }
+.step-content { color: var(--cp-slate-dark) !important; }
+.pricing-preview .badge, .pricing .badge { color: var(--cp-white) !important; }
+.problem-card, .solution-card { color: var(--cp-slate-dark) !important; }
+.subject-card, .subject-card h3, .subject-card p { color: var(--cp-slate-dark) !important; }
+.subject-icon-box { color: var(--cp-purple-deep) !important; }
+.testimonial-avatar, .avatar { color: var(--cp-purple-deep) !important; }
+html, body { color: var(--cp-slate-dark) !important; }
+.skip-to-content { color: var(--cp-white) !important; }
+.legal-page { color: var(--cp-slate-dark) !important; }
+.tab-nav { color: var(--cp-slate-dark) !important; }
+
+/* Ensure readable text on deep purple surfaces used across components. */
+/* Keep selectors narrow to avoid unintended overrides. */
+.step-number,
+.exam-hero,
+.header-dark,
+.section-purple,
+.purple-surface,
+.btn-primary,
+.cookie-btn.btn-primary {
+  color: var(--cp-white) !important;
+}
+
+/* Global exam hero and CTA defaults (moved from page/component styles to central stylesheet)
+   Ensures gradient backgrounds are applied consistently and occupy space so overlays work. */
+.exam-hero {
+  background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover)) !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+  min-height: 220px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: var(--cp-white) !important;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, var(--cp-purple-deep), var(--cp-purple-hover)) !important;
+  background-size: cover !important;
+  min-height: 240px !important;
+  color: var(--cp-white) !important;
+}
+
+/* Ensure FAQ items always render on an explicit white card background so
+   question text (dark) remains readable regardless of surrounding surfaces. */
+.faq-section .faq-item {
+  background: var(--cp-white) !important;
+  color: var(--cp-slate-dark) !important;
+}
+
+/* Ensure the summary element itself does not get a darker background from
+   external normalize/third-party styles — make it transparent so the
+   white faq-item card shows through for proper contrast. */
+.faq-section summary.faq-question {
+  background-color: transparent !important;
+}
+.faq-section summary.faq-question span {
+  color: var(--cp-slate-dark) !important;
+}
+

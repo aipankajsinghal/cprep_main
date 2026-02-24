@@ -1,0 +1,370 @@
+---
+import Button from "./Button.astro";
+
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Courses", href: "/subjects" },
+  { label: "Entrance Exams", href: "/commerce-entrance-exams" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Blog", href: "/blog" },
+  { label: "Search", href: "/search" },
+  { label: "About", href: "/about" },
+];
+
+const APP_LOGIN = "https://app.championsprep.in/login";
+const APP_REGISTER = "https://app.championsprep.in/register";
+---
+
+<header id="main-header" data-pagefind-ignore>
+  <div class="container header-content">
+    <a href="/" class="logo" aria-label="ChampionsPrep Home">
+      <img
+        src="/Logo.svg"
+        alt="ChampionsPrep Logo"
+        width="180"
+        height="50"
+        decoding="async"
+      />
+    </a>
+
+    <nav class="desktop-nav">
+      <ul>
+        {
+          navLinks.map((link) => (
+            <li>
+              <a href={link.href} class="nav-link">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header-actions desktop-only">
+      <Button href={APP_LOGIN} variant="ghost" external>Login</Button>
+      <Button href={APP_REGISTER} variant="primary" external>Join Free →</Button
+      >
+    </div>
+
+    <div class="mobile-actions">
+      <Button href={APP_REGISTER} variant="primary" class="mobile-cta" external
+        >Join Free</Button
+      >
+      <button
+        id="menu-toggle"
+        class="btn btn-ghost"
+        aria-label="Toggle Menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><line x1="3" y1="12" x2="21" y2="12"></line><line
+            x1="3"
+            y1="6"
+            x2="21"
+            y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg
+        >
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Backdrop -->
+  <div id="mobile-menu-backdrop" class="mobile-menu-backdrop"></div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="mobile-menu"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Navigation Menu"
+  >
+    <div class="mobile-menu-header">
+      <button id="menu-close" class="btn btn-ghost" aria-label="Close Menu">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><line x1="18" y1="6" x2="6" y2="18"></line><line
+            x1="6"
+            y1="6"
+            x2="18"
+            y2="18"></line></svg
+        >
+      </button>
+    </div>
+    <nav>
+      <ul>
+        {
+          navLinks.map((link) => (
+            <li>
+              <a href={link.href} class="nav-link">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a
+            href={APP_LOGIN}
+            class="nav-link"
+            rel="noopener noreferrer"
+            target="_blank">Login</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    background-color: var(--cp-white);
+    border-bottom: 1px solid var(--cp-lavender);
+    transition: all 0.3s var(--ease-out-3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+  }
+
+  header.scrolled {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-2);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .logo img {
+    height: 48px;
+    width: auto;
+    background-color: transparent !important;
+    mix-blend-mode: normal;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+  }
+
+  .desktop-nav ul {
+    display: flex;
+    gap: var(--size-6);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--size-3);
+  }
+
+  .mobile-actions {
+    display: none;
+    gap: var(--size-2);
+    align-items: center;
+  }
+
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s var(--ease-out-3),
+      visibility 0.3s;
+  }
+
+  .mobile-menu-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: min(
+      90%,
+      100vw - 20px
+    ); /* WCAG 1.4.10 Reflow - adapts to ultra-small screens */
+    height: 100vh;
+    background-color: var(--cp-white);
+    z-index: 1001;
+    transition: right 0.3s var(--ease-out-3);
+    padding: var(--size-6);
+    box-shadow: var(--shadow-5);
+  }
+
+  @media (max-width: 360px) {
+    .mobile-menu {
+      width: calc(
+        100vw - 10px
+      ); /* Full width with minimal margin on very small screens */
+    }
+  }
+
+  .mobile-menu.active {
+    right: 0;
+  }
+
+  .mobile-menu-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-block-end: var(--size-6);
+  }
+
+  .mobile-menu ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4);
+  }
+
+  .nav-link {
+    color: var(--cp-slate-dark);
+  }
+
+  .nav-link:hover {
+    color: var(--cp-purple-deep);
+  }
+
+  .mobile-menu .nav-link {
+    color: var(--cp-purple-deep);
+    font-size: var(--font-size-4);
+    font-weight: 600;
+  }
+
+  @media (max-width: 1024px) {
+    .desktop-nav,
+    .desktop-only {
+      display: none;
+    }
+    .mobile-actions {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .mobile-cta {
+      font-size: var(--font-size-0);
+      padding: var(--size-1) var(--size-3);
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector("#main-header");
+  const menuToggle = document.querySelector("#menu-toggle") as HTMLElement;
+  const menuClose = document.querySelector("#menu-close") as HTMLElement;
+  const mobileMenu = document.querySelector("#mobile-menu");
+  const menuBackdrop = document.querySelector("#mobile-menu-backdrop");
+
+  // Helper function to toggle menu with accessibility support
+  const toggleMenu = (isOpen: boolean) => {
+    if (isOpen) {
+      mobileMenu?.classList.add("active");
+      menuBackdrop?.classList.add("active");
+      mobileMenu?.setAttribute("aria-hidden", "false");
+      menuToggle?.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = "hidden";
+      // Focus first focusable element in menu
+      setTimeout(() => menuClose?.focus(), 100);
+    } else {
+      mobileMenu?.classList.remove("active");
+      menuBackdrop?.classList.remove("active");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      menuToggle?.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+      // Return focus to toggle button
+      menuToggle?.focus();
+    }
+  };
+
+  // Close menu when backdrop is clicked
+  menuBackdrop?.addEventListener("click", () => {
+    toggleMenu(false);
+  });
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) {
+      header?.classList.add("scrolled");
+    } else {
+      header?.classList.remove("scrolled");
+    }
+  });
+
+  menuToggle?.addEventListener("click", () => {
+    const isOpen = mobileMenu?.classList.contains("active");
+    toggleMenu(!isOpen);
+  });
+
+  menuClose?.addEventListener("click", () => {
+    toggleMenu(false);
+  });
+
+  // Close menu on link click
+  mobileMenu?.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      toggleMenu(false);
+    });
+  });
+
+  // Close menu on Escape key
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Escape" && mobileMenu?.classList.contains("active")) {
+      toggleMenu(false);
+    }
+  });
+
+  // Trap focus within mobile menu when open
+  mobileMenu?.addEventListener("keydown", (e: Event) => {
+    const kbEvent = e as KeyboardEvent;
+    if (kbEvent.key !== "Tab") return;
+
+    const focusableElements = mobileMenu?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+
+    if (!focusableElements || focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
+
+    if (kbEvent.shiftKey) {
+      if (document.activeElement === firstElement) {
+        kbEvent.preventDefault();
+        lastElement?.focus();
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        kbEvent.preventDefault();
+        firstElement?.focus();
+      }
+    }
+  });
+</script>

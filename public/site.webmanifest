@@ -1,0 +1,21 @@
+{
+  "name": "ChampionsPrep",
+  "short_name": "CPrep",
+  "description": "Master Class 11-12 Commerce with AI. Personalized learning, pay-per-chapter.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F3F0FF",
+  "theme_color": "#7C3AED",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
