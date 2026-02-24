@@ -90,8 +90,7 @@ export const postType = defineType({
       type: 'array',
       title: 'Tags',
       group: 'meta',
-      of: [{ type: 'string' }],
-      options: { layout: 'tags' },
+      of: [{ type: 'reference', to: [{ type: 'tag' }] }],
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
@@ -199,6 +198,13 @@ export const postType = defineType({
                 }),
                 defineField({ name: 'explanation', type: 'text', title: 'Explanation', rows: 2 }),
               ],
+              validation: (Rule) => Rule.custom((value: any) => {
+                if (!value?.options || value?.correctIndex === undefined) return true;
+                if (value.correctIndex >= value.options.length) {
+                  return `Correct option index (${value.correctIndex}) must be less than the number of options (${value.options.length})`;
+                }
+                return true;
+              }),
               preview: {
                 select: { title: 'question' },
               },

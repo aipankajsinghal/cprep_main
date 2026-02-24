@@ -11,7 +11,7 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 import Analytics from '@vercel/analytics/astro';
 import { slugifyTag } from "../utils/content";
 import { getClient } from "../lib/sanity";
-import { ALL_POSTS_QUERY } from "../lib/queries";
+import { TAGS_QUERY } from "../lib/queries";
 
 type JsonLdValue = Record<string, unknown>;
 
@@ -61,18 +61,27 @@ const canonicalUrl = normalizeCanonical(canonical ?? new URL(Astro.url.pathname,
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site ?? Astro.url).toString() : undefined;
 const jsonLdBlocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-const isPreview = Astro.cookies.has('sanity-preview');
+// In static/prerender mode, cookies/request headers are not available.
+let isPreview = false;
+try {
+  isPreview = Astro.cookies.has('sanity-preview');
+} catch (e) {
+  // Fallback to false during static build or if request context is missing
+}
 const client = getClient(isPreview);
-const navTags = await client.fetch(ALL_POSTS_QUERY).then((posts: any[]) => {
+const navTags = await client.fetch(TAGS_QUERY).then((posts: any[]) => {
   const counter = new Map<string, { slug: string; label: string; count: number }>();
   for (const post of posts) {
-    for (const tag of post.tags ?? []) {
-      const slug = slugifyTag(tag);
+    if (!post.tags) continue;
+    for (const tagObj of post.tags) {
+      if (!tagObj || !tagObj.slug) continue;
+      const slug = tagObj.slug;
+      const label = tagObj.title;
       const existing = counter.get(slug);
       if (existing) {
         existing.count += 1;
       } else {
-        counter.set(slug, { slug, label: tag, count: 1 });
+        counter.set(slug, { slug, label, count: 1 });
       }
     }
   }

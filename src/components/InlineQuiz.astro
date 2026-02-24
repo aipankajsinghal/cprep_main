@@ -19,98 +19,162 @@ if (!questions || questions.length === 0) {
 const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-<div class="inline-quiz" data-quiz-id={quizId} data-mode={mode} data-time-limit={timeLimit}>
+<div
+  class="inline-quiz"
+  data-quiz-id={quizId}
+  data-mode={mode}
+  data-time-limit={timeLimit}
+>
   <form class="quiz-form" novalidate>
     <div class="quiz-header">
       {quiz.title && <h2 class="quiz-title">{quiz.title}</h2>}
       <div class="quiz-instructions" role="status" aria-live="polite">
-        {mode === "practice" ? (
-          <p class="instruction-text">
-            💡 Select each answer to get instant feedback and learn as you go.
-          </p>
-        ) : (
-          <p class="instruction-text">
-            📝 Choose your answers carefully. You'll see results and explanations after you submit.
-          </p>
-        )}
+        {
+          mode === "practice" ? (
+            <p class="instruction-text">
+              💡 Select each answer to get instant feedback and learn as you go.
+            </p>
+          ) : (
+            <p class="instruction-text">
+              📝 Choose your answers carefully. You'll see results and
+              explanations after you submit.
+            </p>
+          )
+        }
       </div>
     </div>
 
-    {timeLimit && (
-      <div class="quiz-timer" role="timer" aria-live="polite" aria-label="Time remaining" title="You have this much time to complete the quiz. The timer starts when you select your first answer.">
-        <span class="timer-label">⏱ Time left:</span>
-        <span class="timer-display" data-timer-display>--:--</span>
-      </div>
-    )}
+    {
+      timeLimit && (
+        <div
+          class="quiz-timer"
+          role="timer"
+          aria-live="polite"
+          aria-label="Time remaining"
+          title="You have this much time to complete the quiz. The timer starts when you select your first answer."
+        >
+          <span class="timer-label">⏱ Time left:</span>
+          <span class="timer-display" data-timer-display>
+            --:--
+          </span>
+        </div>
+      )
+    }
 
     <div class="quiz-content">
-      {questions.map((q, idx) => (
-        <fieldset class="quiz-question" data-question-index={idx} data-correct-index={q.correctIndex}>
-          <legend class="question-text">{q.question}</legend>
-          <div class="options-group">
-            {q.options.map((option, optIdx) => (
-              <div class="option-container">
-                <input
-                  type="radio"
-                  name={`question-${idx}`}
-                  id={`q${idx}-opt${optIdx}`}
-                  value={optIdx.toString()}
-                  class="option-input"
-                  data-option-index={optIdx}
-                  title="Click to select this answer"
-                />
-                <label for={`q${idx}-opt${optIdx}`} class="option-label">
-                  {option}
-                </label>
-                <div class="option-feedback" aria-live="polite" aria-atomic="true"></div>
-              </div>
-            ))}
-          </div>
-          {q.explanation && (
-            <details class="explanation-toggle" data-explanation-for={idx} title={mode === "practice" ? "Click to see why this answer is correct" : "Click to read the explanation"}>
-              <summary>
-                <span class="explanation-icon">📖</span> Explanation
-              </summary>
-              <p class="explanation-text">{q.explanation}</p>
-            </details>
-          )}
-        </fieldset>
-      ))}
+      {
+        questions.map((q, idx) => (
+          <fieldset
+            class="quiz-question"
+            data-question-index={idx}
+            data-correct-index={q.correctIndex}
+          >
+            <legend class="question-text">{q.question}</legend>
+            <div class="options-group">
+              {q.options.map((option, optIdx) => (
+                <div class="option-container">
+                  <input
+                    type="radio"
+                    name={`question-${idx}`}
+                    id={`q${idx}-opt${optIdx}`}
+                    value={optIdx.toString()}
+                    class="option-input"
+                    data-option-index={optIdx}
+                    title="Click to select this answer"
+                  />
+                  <label for={`q${idx}-opt${optIdx}`} class="option-label">
+                    {option}
+                  </label>
+                  <div
+                    class="option-feedback"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  />
+                </div>
+              ))}
+            </div>
+            {q.explanation && (
+              <details
+                class="explanation-toggle"
+                data-explanation-for={idx}
+                title={
+                  mode === "practice"
+                    ? "Click to see why this answer is correct"
+                    : "Click to read the explanation"
+                }
+              >
+                <summary>
+                  <span class="explanation-icon">📖</span> Explanation
+                </summary>
+                <p class="explanation-text">{q.explanation}</p>
+              </details>
+            )}
+          </fieldset>
+        ))
+      }
     </div>
 
     {/* No-JS Fallback: Show all answers */}
-    <details class="answers-reveal-no-js" hidden title="View the correct answers without JavaScript">
+    <details
+      class="answers-reveal-no-js"
+      hidden
+      title="View the correct answers without JavaScript"
+    >
       <summary>🔑 Answer Key (No JavaScript)</summary>
       <div class="answer-key-content">
-        {questions.map((q, idx) => (
-          <div class="answer-item">
-            <strong>Q{idx + 1}:</strong> {q.question}
-            <br />
-            <span class="answer-indicator">➜ Answer: {q.options[q.correctIndex]}</span>
-            {q.explanation && (
-              <>
-                <br />
-                <em>Why:</em> {q.explanation}
-              </>
-            )}
-          </div>
-        ))}
+        {
+          questions.map((q, idx) => (
+            <div class="answer-item">
+              <strong>Q{idx + 1}:</strong> {q.question}
+              <br />
+              <span class="answer-indicator">
+                ➜ Answer: {q.options[q.correctIndex]}
+              </span>
+              {q.explanation && (
+                <>
+                  <br />
+                  <em>Why:</em> {q.explanation}
+                </>
+              )}
+            </div>
+          ))
+        }
       </div>
     </details>
 
     <div class="quiz-actions">
-      {mode === "exam" ? (
-        <button type="button" class="btn-submit" data-action="submit" disabled title="Select all answers first, then click to see your results">
-          Submit Answers
-        </button>
-      ) : (
-        <div class="quiz-score" aria-live="polite" aria-atomic="true" title={`Your current score: select answers above to see how you're doing`}>
-          Your Score: <span class="score-value">0</span> / <span class="score-total">{questions.length}</span>
-        </div>
-      )}
+      {
+        mode === "exam" ? (
+          <button
+            type="button"
+            class="btn-submit"
+            data-action="submit"
+            disabled
+            title="Select all answers first, then click to see your results"
+          >
+            Submit Answers
+          </button>
+        ) : (
+          <div
+            class="quiz-score"
+            aria-live="polite"
+            aria-atomic="true"
+            title={`Your current score: select answers above to see how you're doing`}
+          >
+            Your Score: <span class="score-value">0</span> /{" "}
+            <span class="score-total">{questions.length}</span>
+          </div>
+        )
+      }
     </div>
 
-    <div class="quiz-feedback" aria-live="polite" aria-atomic="true" role="status"></div>
+    <div
+      class="quiz-feedback"
+      aria-live="polite"
+      aria-atomic="true"
+      role="status"
+    >
+    </div>
   </form>
 </div>
 
@@ -435,11 +499,21 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
     const quizId = quizDiv.dataset.quizId;
 
     // DOM references
-    const timerDisplay = formElement.querySelector("[data-timer-display]") as HTMLElement | null;
-    const submitBtn = formElement.querySelector("[data-action='submit']") as HTMLButtonElement | null;
-    const scoreValue = formElement.querySelector(".score-value") as HTMLElement | null;
-    const scoreFeedback = formElement.querySelector(".quiz-feedback") as HTMLElement | null;
-    const answerKeyNoJs = formElement.closest(".inline-quiz")?.querySelector(".answers-reveal-no-js") as HTMLDetailsElement | null;
+    const timerDisplay = formElement.querySelector(
+      "[data-timer-display]",
+    ) as HTMLElement | null;
+    const submitBtn = formElement.querySelector(
+      "[data-action='submit']",
+    ) as HTMLButtonElement | null;
+    const scoreValue = formElement.querySelector(
+      ".score-value",
+    ) as HTMLElement | null;
+    const scoreFeedback = formElement.querySelector(
+      ".quiz-feedback",
+    ) as HTMLElement | null;
+    const answerKeyNoJs = formElement
+      .closest(".inline-quiz")
+      ?.querySelector(".answers-reveal-no-js") as HTMLDetailsElement | null;
 
     // State
     let timeRemaining = timeLimit;
@@ -447,7 +521,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
     let submitted = false;
     let userSelections: (number | null)[] = [];
 
-    const questions = Array.from(formElement.querySelectorAll(".quiz-question")) as HTMLElement[];
+    const questions = Array.from(
+      formElement.querySelectorAll(".quiz-question"),
+    ) as HTMLElement[];
     userSelections = new Array(questions.length).fill(null);
 
     // Hide no-JS fallback once JS initializes
@@ -520,7 +596,7 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
             startTimer();
           }
         },
-        { once: false }
+        { once: false },
       );
     };
 
@@ -535,11 +611,15 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
       const isCorrect = selectedIndex === correctIndex;
 
       // Get the selected option's feedback element
-      const selectedInput = fieldset.querySelector(`input[value="${selectedIndex}"]`) as HTMLInputElement | null;
+      const selectedInput = fieldset.querySelector(
+        `input[value="${selectedIndex}"]`,
+      ) as HTMLInputElement | null;
       if (!selectedInput) return;
 
       const container = selectedInput.parentElement;
-      const feedback = container?.querySelector(".option-feedback") as HTMLElement | null;
+      const feedback = container?.querySelector(
+        ".option-feedback",
+      ) as HTMLElement | null;
 
       if (feedback) {
         feedback.classList.add("show");
@@ -550,7 +630,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
 
       // Auto-open explanation if correct (practice mode)
       if (isCorrect) {
-        const explanation = fieldset.querySelector(".explanation-toggle") as HTMLDetailsElement | null;
+        const explanation = fieldset.querySelector(
+          ".explanation-toggle",
+        ) as HTMLDetailsElement | null;
         if (explanation) {
           explanation.open = true;
         }
@@ -565,7 +647,10 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
 
       let score = 0;
       questions.forEach((fieldset, idx) => {
-        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+        const correctIndex = parseInt(
+          fieldset.dataset.correctIndex || "-1",
+          10,
+        );
         if (userSelections[idx] === correctIndex) {
           score++;
         }
@@ -593,7 +678,10 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
       // Calculate score and show results for all questions
       let score = 0;
       questions.forEach((fieldset, idx) => {
-        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
+        const correctIndex = parseInt(
+          fieldset.dataset.correctIndex || "-1",
+          10,
+        );
         const selectedIndex = userSelections[idx];
         const isCorrect = selectedIndex === correctIndex;
 
@@ -605,7 +693,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
         fieldset.querySelectorAll("input").forEach((input) => {
           const optIndex = parseInt(input.value, 10);
           const container = input.parentElement;
-          const feedback = container?.querySelector(".option-feedback") as HTMLElement | null;
+          const feedback = container?.querySelector(
+            ".option-feedback",
+          ) as HTMLElement | null;
 
           if (feedback) {
             feedback.classList.add("show");
@@ -613,7 +703,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
             if (optIndex === correctIndex) {
               feedback.classList.add("correct");
               feedback.textContent = "✓ Correct answer";
-              const label = container?.querySelector("label") as HTMLElement | null;
+              const label = container?.querySelector(
+                "label",
+              ) as HTMLElement | null;
               if (label) {
                 label.style.fontWeight = "600";
               }
@@ -625,7 +717,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
         });
 
         // Open all explanations
-        const explanation = fieldset.querySelector(".explanation-toggle") as HTMLDetailsElement | null;
+        const explanation = fieldset.querySelector(
+          ".explanation-toggle",
+        ) as HTMLDetailsElement | null;
         if (explanation) {
           explanation.open = true;
         }
@@ -635,8 +729,22 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
       if (scoreFeedback) {
         scoreFeedback.classList.add("show");
         const percentage = Math.round((score / questions.length) * 100);
+
         const resultDiv = document.createElement("div");
-        resultDiv.innerHTML = `<strong>Quiz Complete!</strong><br>You scored <strong>${score} out of ${questions.length}</strong> (${percentage}%)`;
+        const titleLine = document.createElement("strong");
+        titleLine.textContent = "Quiz Complete!";
+        resultDiv.appendChild(titleLine);
+        resultDiv.appendChild(document.createElement("br"));
+
+        const scoreText = document.createTextNode("You scored ");
+        const scoreBold = document.createElement("strong");
+        scoreBold.textContent = `${score} out of ${questions.length}`;
+        const percentageText = document.createTextNode(` (${percentage}%)`);
+
+        resultDiv.appendChild(scoreText);
+        resultDiv.appendChild(scoreBold);
+        resultDiv.appendChild(percentageText);
+
         scoreFeedback.replaceChildren(resultDiv);
       }
 
@@ -663,8 +771,16 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
         // Defensive: validate indices are in bounds
         if (questionIndex < 0 || questionIndex >= questions.length) return;
         const fieldset = questions[questionIndex];
-        const correctIndex = parseInt(fieldset.dataset.correctIndex || "-1", 10);
-        if (selectedIndex < 0 || selectedIndex >= (fieldset.querySelector(".options-group")?.children.length || 0)) return;
+        const correctIndex = parseInt(
+          fieldset.dataset.correctIndex || "-1",
+          10,
+        );
+        if (
+          selectedIndex < 0 ||
+          selectedIndex >=
+            (fieldset.querySelector(".options-group")?.children.length || 0)
+        )
+          return;
 
         userSelections[questionIndex] = selectedIndex;
 

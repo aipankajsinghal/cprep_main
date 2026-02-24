@@ -13,7 +13,7 @@ const POST_LIST_FIELDS = `
   publishDate,
   updatedDate,
   author,
-  tags,
+  "tags": tags[]->{title, "slug": slug.current},
   cluster,
   draft,
   minutesRead,
@@ -25,6 +25,9 @@ const POST_LIST_FIELDS = `
 /** Shared filter: published, non-draft, not future-dated */
 const PUBLISHED_FILTER = `_type == "post" && draft != true && (!defined(publishDate) || publishDate <= now())`
 
+/** All tags for navigation (resolved from references) */
+export const TAGS_QUERY = `*[${PUBLISHED_FILTER}] { "tags": tags[]->{title, "slug": slug.current} }`
+
 /** All published posts sorted newest-first (no body) */
 export const ALL_POSTS_QUERY = `*[${PUBLISHED_FILTER}] | order(date desc) {${POST_LIST_FIELDS}}`
 
@@ -32,7 +35,7 @@ export const ALL_POSTS_QUERY = `*[${PUBLISHED_FILTER}] | order(date desc) {${POS
 export const ALL_SLUGS_QUERY = `*[${PUBLISHED_FILTER}] { "slug": slug.current }`
 
 /** Single post by slug including body */
-export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug && draft != true][0] {
+export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug && draft != true && (!defined(publishDate) || publishDate <= now())][0] {
   ${POST_LIST_FIELDS},
   body
 }`

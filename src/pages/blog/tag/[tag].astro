@@ -13,17 +13,18 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const now = new Date();
   const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
+  const now = new Date();
   const posts = rawPosts.filter(
     (p: any) => !p.publishDate || new Date(p.publishDate) <= now,
   );
 
   const tagMap = new Map<string, string>();
   for (const post of posts) {
-    for (const tag of post.tags as string[]) {
-      const slug = slugifyTag(tag);
-      if (!tagMap.has(slug)) tagMap.set(slug, tag);
+    if (!post.tags) continue;
+    for (const tagObj of post.tags) {
+      if (!tagObj?.slug) continue;
+      if (!tagMap.has(tagObj.slug)) tagMap.set(tagObj.slug, tagObj.title);
     }
   }
 
@@ -43,7 +44,9 @@ const rawPosts = sanityClient ? await sanityClient.fetch(ALL_POSTS_QUERY) : [];
 const posts = rawPosts
   .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
   .filter((p: any) =>
-    (p.tags as string[]).some((tag) => slugifyTag(tag) === tagSlug),
+    ((p.tags as Array<{ title: string; slug: string }>) ?? []).some(
+      (tag) => tag.slug === tagSlug,
+    ),
   )
   .sort(
     (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime(),

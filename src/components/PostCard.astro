@@ -9,7 +9,7 @@ interface Props {
   date: Date;
   minutesRead: number;
   cluster: string;
-  tags: string[];
+  tags: Array<{ title: string; slug: string }>;
   featured?: boolean;
 }
 
@@ -21,16 +21,20 @@ const {
   minutesRead,
   cluster,
   tags,
-  featured = false
+  featured = false,
 } = Astro.props as Props;
 
 const dateLabel = date.toLocaleDateString("en-IN", {
   year: "numeric",
   month: "short",
-  day: "numeric"
+  day: "numeric",
 });
 ---
-<article class:list={["post-card", featured && "post-card--featured"]} data-cluster={cluster}>
+
+<article
+  class:list={["post-card", featured && "post-card--featured"]}
+  data-cluster={cluster}
+>
   <p class="post-card__meta">
     <time datetime={date.toISOString()}>{dateLabel}</time>
     <span aria-hidden="true">•</span>
@@ -45,15 +49,17 @@ const dateLabel = date.toLocaleDateString("en-IN", {
 
   <p class="post-card__description">{description}</p>
 
-  {tags.length > 0 && (
-    <div class="post-card__tags" aria-label="Post tags">
-      {tags.slice(0, 4).map((tag) => (
-        <a href={`/blog/tag/${slugifyTag(tag)}/`} class="post-card__tag">
-          {tag}
-        </a>
-      ))}
-    </div>
-  )}
+  {
+    tags.length > 0 && (
+      <div class="post-card__tags" aria-label="Post tags">
+        {tags.slice(0, 4).map((tag) => (
+          <a href={`/blog/tag/${tag.slug}/`} class="post-card__tag">
+            {tag.title}
+          </a>
+        ))}
+      </div>
+    )
+  }
 
   <div class="post-card__reading-bar" aria-hidden="true"></div>
 
@@ -76,14 +82,19 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     height: 100%;
     display: grid;
     align-content: start;
-    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease,
+      background 180ms ease;
   }
 
   .post-card:hover {
     transform: var(--transform-lift);
     border-color: color-mix(in srgb, var(--cluster-color), transparent 35%);
     background: var(--color-bg-warm);
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--cluster-color), transparent 88%);
+    box-shadow: 0 12px 28px
+      color-mix(in srgb, var(--cluster-color), transparent 88%);
   }
 
   .post-card--featured {
@@ -94,7 +105,8 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     background: linear-gradient(
       160deg,
       var(--color-bg-warm) 0%,
-      color-mix(in srgb, var(--color-lavender-light), var(--color-bg-warm) 55%) 100%
+      color-mix(in srgb, var(--color-lavender-light), var(--color-bg-warm) 55%)
+        100%
     );
     border-top: 4px solid var(--cluster-color);
     padding: clamp(1.5rem, 3vw, 2.4rem);

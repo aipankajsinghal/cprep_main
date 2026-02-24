@@ -21,7 +21,7 @@ import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
 import { slugifyTag } from "../../utils/content";
 import { clusterLabel } from "../../utils/clusters";
 
-export const prerender = false;
+export const prerender = true;
 
 export async function getStaticPaths() {
   try {
@@ -36,7 +36,12 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params as { slug: string };
-const isPreview = Astro.cookies.has("sanity-preview");
+let isPreview = false;
+try {
+  isPreview = Astro.cookies.has("sanity-preview");
+} catch (e) {
+  // Prerender mode
+}
 const client = getClient(isPreview);
 
 let post: Post | null = null;
@@ -178,7 +183,9 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   author={post.author ?? "ChampionsPrep"}
   publishedDate={postDate.toISOString()}
   updatedDate={updatedDate.toISOString()}
-  articleTags={(post.tags as string[]) ?? []}
+  articleTags={(post.tags as Array<{ title: string; slug: string }>)?.map(
+    (t) => t.title,
+  ) ?? []}
   articleSection={post.cluster ?? ""}
 >
   <ReadingProgress />
@@ -200,8 +207,8 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
         {
           (post.tags ?? []).length > 0 && (
             <div class="post-head__tags" aria-label="Post tags">
-              {(post.tags ?? []).map((tag: string) => (
-                <a href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
+              {(post.tags as any[]).map((tag) => (
+                <a href={`/blog/tag/${tag.slug}/`}>{tag.title}</a>
               ))}
             </div>
           )
@@ -236,7 +243,7 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
       <RelatedPosts
         currentSlug={slug}
         cluster={post.cluster ?? ""}
-        tags={(post.tags as string[]) ?? []}
+        tags={(post.tags as any[]) ?? []}
       />
       <SmartCTA postSlug={slug} cluster={post.cluster ?? ""} />
       <AuthorCard name={post.author ?? ""} />

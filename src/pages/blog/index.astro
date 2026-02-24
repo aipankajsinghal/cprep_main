@@ -1,5 +1,5 @@
 ---
-import BlogLayout from '../../layouts/BlogLayout.astro';
+import BlogLayout from "../../layouts/BlogLayout.astro";
 import SearchWidget from "../../components/SearchWidget.astro";
 import PostCard from "../../components/PostCard.astro";
 import { sanityClient } from "../../lib/sanity";
@@ -22,14 +22,14 @@ const posts = rawPosts
     date: new Date(post.date),
     publishDate: post.publishDate ? new Date(post.publishDate) : undefined,
     updatedDate: post.updatedDate ? new Date(post.updatedDate) : undefined,
-    minutesRead: post.minutesRead ?? calculateMinutesRead(post.body ?? ''),
+    minutesRead: post.minutesRead ?? calculateMinutesRead(post.body ?? ""),
   }));
 
 const featuredPost = posts[0];
 const gridPosts = featuredPost ? posts.slice(1) : posts;
-const availableClusters = Array.from(new Set(posts.map((post: any) => post.cluster))).sort((a: any, b: any) =>
-  clusterLabel(a).localeCompare(clusterLabel(b))
-);
+const availableClusters = Array.from(
+  new Set(posts.map((post: any) => post.cluster)),
+).sort((a: any, b: any) => clusterLabel(a).localeCompare(clusterLabel(b)));
 
 const pageTitle = "ChampionsPrep Blog";
 const pageDescription =
@@ -41,7 +41,7 @@ const jsonLd = [
     "@type": "Blog",
     name: "ChampionsPrep Blog",
     description: pageDescription,
-    url: canonical
+    url: canonical,
   },
   {
     "@context": "https://schema.org",
@@ -51,8 +51,8 @@ const jsonLd = [
     logo: "https://www.championsprep.in/icons/icon-512.svg",
     sameAs: [
       "https://www.instagram.com/champions.prep/",
-      "https://x.com/championsprep"
-    ]
+      "https://x.com/championsprep",
+    ],
   },
   {
     "@context": "https://schema.org",
@@ -62,14 +62,21 @@ const jsonLd = [
     potentialAction: {
       "@type": "SearchAction",
       target: `${canonical}?search={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
-  }
+      "query-input": "required name=search_term_string",
+    },
+  },
 ];
 
 const spotlightPosts = gridPosts.slice(0, 3);
 ---
-<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd} pagefindStyles={true}>
+
+<BlogLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  pagefindStyles={true}
+>
   <header class="blog-index__hero">
     <div class="blog-index__masthead-rule" aria-hidden="true"></div>
     <p class="blog-index__eyebrow">
@@ -77,86 +84,115 @@ const spotlightPosts = gridPosts.slice(0, 3);
       <span aria-hidden="true">·</span>
       <span>{posts.length} articles · {availableClusters.length} topics</span>
     </p>
-    <h1 class="blog-index__headline">ChampionsPrep<br class="blog-index__br" />Commerce Blog</h1>
+    <h1 class="blog-index__headline">
+      ChampionsPrep<br class="blog-index__br" />Commerce Blog
+    </h1>
     <p class="blog-index__dek">{pageDescription}</p>
-    <div class="blog-index__masthead-rule blog-index__masthead-rule--bottom" aria-hidden="true"></div>
+    <div
+      class="blog-index__masthead-rule blog-index__masthead-rule--bottom"
+      aria-hidden="true"
+    >
+    </div>
   </header>
 
   <SearchWidget />
 
-  {spotlightPosts.length > 0 && (
-    <section class="blog-index__spotlight" aria-labelledby="spotlight-title">
-      <h2 id="spotlight-title">Start with these reads</h2>
-      <div class="blog-index__spotlight-grid">
-        {spotlightPosts.map((post: any) => (
-          <a href={`/blog/${post.slug}/`} class="blog-index__spotlight-link">
-            <span class="blog-index__spotlight-cluster">{clusterLabel(post.cluster)}</span>
-            <span class="blog-index__spotlight-title">{post.title}</span>
-            <span class="blog-index__spotlight-meta">{post.minutesRead} min read</span>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
+  {
+    spotlightPosts.length > 0 && (
+      <section class="blog-index__spotlight" aria-labelledby="spotlight-title">
+        <h2 id="spotlight-title">Start with these reads</h2>
+        <div class="blog-index__spotlight-grid">
+          {spotlightPosts.map((post: any) => (
+            <a href={`/blog/${post.slug}/`} class="blog-index__spotlight-link">
+              <span class="blog-index__spotlight-cluster">
+                {clusterLabel(post.cluster)}
+              </span>
+              <span class="blog-index__spotlight-title">{post.title}</span>
+              <span class="blog-index__spotlight-meta">
+                {post.minutesRead} min read
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
-  {featuredPost && (
-    <section class="blog-index__featured" aria-labelledby="featured-post-title">
-      <div class="blog-index__section-heading">
-        <p class="blog-index__eyebrow">Latest Article</p>
-        <h2 id="featured-post-title">Featured Post</h2>
-      </div>
-      <PostCard
-        href={`/blog/${featuredPost.slug}/`}
-        title={featuredPost.title}
-        description={featuredPost.description}
-        date={featuredPost.date}
-        minutesRead={featuredPost.minutesRead}
-        cluster={featuredPost.cluster}
-        tags={featuredPost.tags}
-        featured={true}
-      />
-    </section>
-  )}
+  {
+    featuredPost && (
+      <section
+        class="blog-index__featured"
+        aria-labelledby="featured-post-title"
+      >
+        <div class="blog-index__section-heading">
+          <p class="blog-index__eyebrow">Latest Article</p>
+          <h2 id="featured-post-title">Featured Post</h2>
+        </div>
+        <PostCard
+          href={`/blog/${featuredPost.slug}/`}
+          title={featuredPost.title}
+          description={featuredPost.description}
+          date={featuredPost.date}
+          minutesRead={featuredPost.minutesRead}
+          cluster={featuredPost.cluster}
+          tags={featuredPost.tags}
+          featured={true}
+        />
+      </section>
+    )
+  }
 
-  {availableClusters.length > 0 && (
-    <section class="blog-index__filters" aria-label="Filter posts by cluster">
-      <div class="blog-index__section-heading">
-        <p class="blog-index__eyebrow">Browse by Topic</p>
-        <h2>Clusters</h2>
-      </div>
-      <div class="blog-index__filter-row">
-        <button type="button" data-cluster-filter="all" class="is-active">All</button>
-        {availableClusters.map((cluster: any) => (
-          <button type="button" data-cluster-filter={cluster}>
-            {clusterLabel(cluster)}
+  {
+    availableClusters.length > 0 && (
+      <section class="blog-index__filters" aria-label="Filter posts by cluster">
+        <div class="blog-index__section-heading">
+          <p class="blog-index__eyebrow">Browse by Topic</p>
+          <h2>Clusters</h2>
+        </div>
+        <div class="blog-index__filter-row">
+          <button type="button" data-cluster-filter="all" class="is-active">
+            All
           </button>
-        ))}
-      </div>
-    </section>
-  )}
+          {availableClusters.map((cluster: any) => (
+            <button type="button" data-cluster-filter={cluster}>
+              {clusterLabel(cluster)}
+            </button>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   <section class="blog-index__grid" data-cluster-grid>
-    {gridPosts.map((post: any) => (
-      <div data-cluster-card={post.cluster}>
-        <PostCard
-          href={`/blog/${post.slug}/`}
-          title={post.title}
-          description={post.description}
-          date={post.date}
-          minutesRead={post.minutesRead}
-          cluster={post.cluster}
-          tags={post.tags}
-          featured={false}
-        />
-      </div>
-    ))}
+    {
+      gridPosts.map((post: any) => (
+        <div data-cluster-card={post.cluster}>
+          <PostCard
+            href={`/blog/${post.slug}/`}
+            title={post.title}
+            description={post.description}
+            date={post.date}
+            minutesRead={post.minutesRead}
+            cluster={post.cluster}
+            tags={post.tags}
+            featured={false}
+          />
+        </div>
+      ))
+    }
   </section>
 
-  {posts.length === 0 && <p class="blog-index__empty">No posts published yet.</p>}
+  {
+    posts.length === 0 && (
+      <p class="blog-index__empty">No posts published yet.</p>
+    )
+  }
 </BlogLayout>
 
 <script>
-  const filterButtons = Array.from(document.querySelectorAll("[data-cluster-filter]"));
+  const filterButtons = Array.from(
+    document.querySelectorAll("[data-cluster-filter]"),
+  );
   const cards = Array.from(document.querySelectorAll("[data-cluster-card]"));
 
   if (filterButtons.length > 0 && cards.length > 0) {
@@ -174,7 +210,10 @@ const spotlightPosts = gridPosts.slice(0, 3);
     const setFilter = (cluster: string) => {
       for (const button of filterButtons) {
         if (!(button instanceof HTMLButtonElement)) continue;
-        button.classList.toggle("is-active", button.dataset.clusterFilter === cluster);
+        button.classList.toggle(
+          "is-active",
+          button.dataset.clusterFilter === cluster,
+        );
       }
 
       for (const card of cards) {
@@ -332,7 +371,11 @@ const spotlightPosts = gridPosts.slice(0, 3);
 
   .blog-index__filter-row button.is-active {
     border-color: var(--color-border-accent);
-    background: color-mix(in srgb, var(--color-lavender-light), transparent 35%);
+    background: color-mix(
+      in srgb,
+      var(--color-lavender-light),
+      transparent 35%
+    );
     color: var(--color-purple-deep);
   }
 
