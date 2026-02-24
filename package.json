@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node $([ -f .env ] && echo --env-file=.env) scripts/generate-og.mjs && node $([ -f .env ] && echo --env-file=.env) scripts/generate-ig-briefs.mjs",
+    "prebuild": "node scripts/generate-og.mjs && node scripts/generate-ig-briefs.mjs",
     "generate-brandkit": "node scripts/generate-brandkit.js",
     "build": "astro build",
     "postbuild": "pagefind --site .vercel/output/static",

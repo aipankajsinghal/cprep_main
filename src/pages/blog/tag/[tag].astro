@@ -1,12 +1,12 @@
 ---
-import BlogLayout from '../../../layouts/BlogLayout.astro';
+import BlogLayout from "../../../layouts/BlogLayout.astro";
 import PostCard from "../../../components/PostCard.astro";
 import { sanityClient } from "../../../lib/sanity";
 import { ALL_POSTS_QUERY } from "../../../lib/queries";
 import { calculateMinutesRead } from "../../../lib/markdown";
 import { slugifyTag } from "../../../utils/content";
 
-export const prerender = false;
+export const prerender = true;
 
 export async function getStaticPaths() {
   if (!sanityClient) {
@@ -15,11 +15,13 @@ export async function getStaticPaths() {
 
   const now = new Date();
   const rawPosts = await sanityClient.fetch(ALL_POSTS_QUERY);
-  const posts = rawPosts.filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now);
+  const posts = rawPosts.filter(
+    (p: any) => !p.publishDate || new Date(p.publishDate) <= now,
+  );
 
   const tagMap = new Map<string, string>();
   for (const post of posts) {
-    for (const tag of (post.tags as string[])) {
+    for (const tag of post.tags as string[]) {
       const slug = slugifyTag(tag);
       if (!tagMap.has(slug)) tagMap.set(slug, tag);
     }
@@ -27,29 +29,44 @@ export async function getStaticPaths() {
 
   return Array.from(tagMap.entries()).map(([slug, label]) => ({
     params: { tag: slug },
-    props: { tagSlug: slug, tagLabel: label }
+    props: { tagSlug: slug, tagLabel: label },
   }));
 }
 
-const { tagSlug, tagLabel } = Astro.props as { tagSlug: string; tagLabel: string };
+const { tagSlug, tagLabel } = Astro.props as {
+  tagSlug: string;
+  tagLabel: string;
+};
 const now = new Date();
 const rawPosts = sanityClient ? await sanityClient.fetch(ALL_POSTS_QUERY) : [];
 
 const posts = rawPosts
   .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
-  .filter((p: any) => (p.tags as string[]).some((tag) => slugifyTag(tag) === tagSlug))
-  .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .filter((p: any) =>
+    (p.tags as string[]).some((tag) => slugifyTag(tag) === tagSlug),
+  )
+  .sort(
+    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
   .map((p: any) => ({
     ...p,
     date: new Date(p.date),
-    minutesRead: p.minutesRead ?? calculateMinutesRead(p.body ?? ''),
+    minutesRead: p.minutesRead ?? calculateMinutesRead(p.body ?? ""),
   }));
 
 const pageTitle = `Tag: ${tagLabel}`;
 const pageDescription = `Posts tagged with ${tagLabel}.`;
-const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toString();
+const canonical = new URL(
+  `/blog/tag/${tagSlug}/`,
+  Astro.site ?? Astro.url,
+).toString();
 ---
-<BlogLayout title={pageTitle} description={pageDescription} canonical={canonical}>
+
+<BlogLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
   <header class="tag-page__head">
     <h1>{pageTitle}</h1>
     <p>{pageDescription}</p>
@@ -58,23 +75,25 @@ const canonical = new URL(`/blog/tag/${tagSlug}/`, Astro.site ?? Astro.url).toSt
     </p>
   </header>
 
-  {posts.length === 0 ? (
-    <p class="tag-page__empty">No posts found for this tag.</p>
-  ) : (
-    <section class="tag-page__grid">
-      {posts.map((post: any) => (
-        <PostCard
-          href={`/blog/${post.slug}/`}
-          title={post.title}
-          description={post.description}
-          date={post.date}
-          minutesRead={post.minutesRead}
-          cluster={post.cluster}
-          tags={post.tags}
-        />
-      ))}
-    </section>
-  )}
+  {
+    posts.length === 0 ? (
+      <p class="tag-page__empty">No posts found for this tag.</p>
+    ) : (
+      <section class="tag-page__grid">
+        {posts.map((post: any) => (
+          <PostCard
+            href={`/blog/${post.slug}/`}
+            title={post.title}
+            description={post.description}
+            date={post.date}
+            minutesRead={post.minutesRead}
+            cluster={post.cluster}
+            tags={post.tags}
+          />
+        ))}
+      </section>
+    )
+  }
 </BlogLayout>
 
 <style>
