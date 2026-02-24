@@ -1,6 +1,7 @@
 {
   "name": "cprep-studio",
   "private": true,
+  "author": "aipankajsinghal",
   "version": "1.0.0",
   "scripts": {
     "dev": "sanity dev",

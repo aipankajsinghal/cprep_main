@@ -2,6 +2,11 @@
   "name": "cprep-blog",
   "version": "0.0.1",
   "private": true,
+  "author": "aipankajsinghal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aipankajsinghal/CPrep_Blog.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "astro dev",
