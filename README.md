@@ -138,3 +138,5 @@ Also generated:
 - `docs/ARCHITECTURE.md` - architecture constraints and runtime model
 - `docs/COMPONENTS.md` - component responsibilities and behavior
 - `docs/OPERATIONS.md` - env vars, build/deploy, troubleshooting
+
+Changing authors
