@@ -40,16 +40,28 @@
 </div>
 <script>
   /* WCAG 2.1.1 Keyboard Support - Allow ESC to close dialog */
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' || e.code === 'Escape') {
-      const dialog = document.getElementById('cookie-consent');
-      if (dialog && !dialog.hidden && dialog.getAttribute('aria-hidden') !== 'true') {
-        // Close by clicking reject button (standard non-Essential rejection)
-        const rejectBtn = document.getElementById('btn-reject');
-        if (rejectBtn) {
-          rejectBtn.click();
+  function initCookieConsent() {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.code === 'Escape') {
+        const dialog = document.getElementById('cookie-consent');
+        if (dialog && !dialog.hidden && dialog.getAttribute('aria-hidden') !== 'true') {
+          const rejectBtn = document.getElementById('btn-reject');
+          if (rejectBtn) {
+            rejectBtn.click();
+          }
         }
       }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // Cleanup before SPA navigation
+    function cleanup() {
+      document.removeEventListener('keydown', handleEscapeKey);
     }
-  });
+
+    document.addEventListener('astro:before-swap', cleanup);
+  }
+
+  initCookieConsent();
 </script>
