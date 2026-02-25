@@ -3,15 +3,20 @@
  */
 export function getCORSHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get('Origin');
-  // Allow localhost (dev) and your production domains
+  const projectId = import.meta.env.SANITY_PROJECT_ID;
+
+  // Allow specific domains and only the specific Sanity Studio for this project
   const allowedOrigins = [
-    'http://localhost:4321', // Astro dev
-    'http://localhost:3333', // Sanity Studio local
+    ...(import.meta.env.DEV ? [
+      'http://localhost:4321', // Astro dev
+      'http://localhost:3333', // Sanity Studio local
+    ] : []),
     'https://c-prep-blog.vercel.app',
-    'https://www.championsprep.in'
+    'https://www.championsprep.in',
+    ...(projectId ? [`https://${projectId}.sanity.studio`] : []),
   ];
 
-  if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.sanity.studio'))) {
+  if (origin && allowedOrigins.includes(origin)) {
     return {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',

@@ -203,8 +203,7 @@ export const GET: APIRoute = async ({ request }) => {
     siteOrigin,
     callbackOrigin || '',
     ...envAllowlist,
-    'http://localhost:4321',
-    'http://127.0.0.1:4321',
+    ...(import.meta.env.DEV ? ['http://localhost:4321', 'http://127.0.0.1:4321'] : []),
     'https://*.vercel.app',
   ].filter(Boolean)));
 
