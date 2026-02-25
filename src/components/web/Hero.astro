@@ -7,7 +7,7 @@ const APP_REGISTER = "https://app.championsprep.in/register";
 <section class="hero-section">
   <div class="container hero-grid">
     <div class="hero-content" data-aos="fade-up">
-      <h1 class="hero-title">Score 95+ in Commerce.  <br /><span class="text-gradient">₹59/Chapter. No Subscriptions.</span></h1>
+      <h1 class="hero-title">Score 95+ in Commerce. <br class="hero-br" /><span class="text-gradient">₹59/Chapter. No Subscriptions.</span></h1>
       <p class="hero-subtitle">
         Join 5,000+ students who improved 15+ points in 2 months.
         AI-personalized learning, instant feedback, and a guaranteed
@@ -67,13 +67,15 @@ const APP_REGISTER = "https://app.championsprep.in/register";
   .hero-title {
     margin-block-end: var(--size-4);
     line-height: var(--font-lineheight-0);
+    text-wrap: balance;
   }
 
   .hero-subtitle {
     font-size: var(--font-size-4);
     color: var(--cp-slate-medium);
     margin-block-end: var(--size-6);
-    max-width: 50ch;
+    max-width: 60ch;
+    text-wrap: pretty;
   }
 
   .hero-actions {
@@ -168,6 +170,21 @@ const APP_REGISTER = "https://app.championsprep.in/register";
     .hero-image {
       max-width: 600px;
       margin-inline: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-br {
+      display: none;
+    }
+
+    .hero-subtitle {
+      font-size: var(--font-size-3);
+    }
+
+    .floating-badge {
+      font-size: var(--font-size-0);
+      padding: var(--size-1) var(--size-3);
     }
   }
 

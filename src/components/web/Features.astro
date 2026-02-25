@@ -16,8 +16,8 @@ const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
 <section id="features" class="section-white text-center">
   <div class="container">
     <div class="mb-5" data-aos="fade-up">
-      <h2 class="mb-3 mx-auto" style="max-width: 800px;">Everything You Need to Succeed</h2>
-      <p class="mx-auto" style="max-width: 600px;">Modern tools designed for the modern commerce student.</p>
+      <h2 class="section-heading mb-3 mx-auto">Everything You Need to Succeed</h2>
+      <p class="section-subtitle mx-auto">Modern tools designed for the modern commerce student.</p>
     </div>
 
     <div class="grid grid-3">
@@ -43,6 +43,15 @@ const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
 </section>
 
 <style>
+  .section-heading {
+    text-wrap: balance;
+  }
+
+  .section-subtitle {
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+
   .feature-card {
     text-align: center;
     border: 1px solid var(--cp-lavender);
@@ -96,4 +105,21 @@ const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
   .ai-feedback::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E"); }
   .regional-language::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='2' y1='12' x2='22' y2='12'%3E%3C/line%3E%3Cpath d='M12 2C14.5 4.5 15.5 8 15.5 12S14.5 19.5 12 22 8.5 16 8.5 12 9.5 4.5 12 2z'%3E%3C/path%3E%3C/svg%3E"); }
   .progress-tracking::before { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'%3E%3C/line%3E%3Cline x1='12' y1='20' x2='12' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='14'%3E%3C/line%3E%3C/svg%3E"); }
+
+  @media (max-width: 640px) {
+    .feature-icon,
+    .feature-icon-emoji {
+      width: 52px;
+      height: 52px;
+    }
+
+    .feature-icon-emoji {
+      font-size: 24px;
+    }
+
+    .feature-icon::before {
+      width: 26px;
+      height: 26px;
+    }
+  }
 </style>

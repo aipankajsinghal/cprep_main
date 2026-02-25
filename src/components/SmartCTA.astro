@@ -126,18 +126,20 @@ const {
     font-style: italic;
     font-size: clamp(1.05rem, 1.6vw, 1.22rem);
     color: var(--color-text-heading);
-    line-height: 1.5;
-    max-width: 52ch;
+    line-height: 1.55;
+    max-width: 64ch;
     margin: 0 auto 0.9rem;
+    text-wrap: balance;
   }
 
   .smart-cta__headline {
     font-family: var(--font-display);
     font-size: clamp(1.05rem, 1.8vw, 1.3rem);
     color: var(--color-text-heading);
-    line-height: 1.45;
-    max-width: 56ch;
+    line-height: 1.5;
+    max-width: 64ch;
     margin: 0 auto 1rem;
+    text-wrap: balance;
   }
 
   .smart-cta__link {
@@ -177,5 +179,21 @@ const {
 
   html.dark .smart-cta--end .smart-cta__inner {
     background: color-mix(in srgb, var(--color-lavender-light), transparent 50%);
+  }
+
+  @media (max-width: 640px) {
+    .smart-cta__text,
+    .smart-cta__headline {
+      max-width: 100%;
+    }
+
+    .smart-cta--end .smart-cta__inner {
+      padding: 1.2rem 1rem;
+    }
+
+    .smart-cta__link--end {
+      padding: 0.55rem 1.2rem;
+      font-size: 0.88rem;
+    }
   }
 </style>

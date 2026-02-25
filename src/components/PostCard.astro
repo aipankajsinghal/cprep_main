@@ -115,8 +115,9 @@ const dateLabel = date.toLocaleDateString("en-IN", {
   .post-card--featured .post-card__title {
     font-family: var(--font-display);
     font-size: clamp(1.65rem, 3vw, 2.3rem);
-    line-height: 1.12;
+    line-height: 1.25;
     letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   .post-card--featured .post-card__description {
@@ -146,6 +147,9 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     color: var(--color-text-heading);
     font-family: var(--font-display);
     letter-spacing: -0.015em;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-wrap: balance;
   }
 
   .post-card__title a {
@@ -159,6 +163,8 @@ const dateLabel = date.toLocaleDateString("en-IN", {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .post-card__tags {
@@ -252,6 +258,14 @@ const dateLabel = date.toLocaleDateString("en-IN", {
   }
 
   @media (max-width: 640px) {
+    .post-card--featured {
+      min-height: auto;
+    }
+
+    .post-card--featured .post-card__description {
+      max-width: 100%;
+    }
+
     .post-card__tags {
       gap: 0.35rem;
     }

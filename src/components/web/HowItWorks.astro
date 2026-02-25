@@ -26,8 +26,8 @@ const steps = [
 <section id="how-it-works" class="section-cream">
   <div class="container text-center">
     <div class="mb-5" data-aos="fade-up">
-      <h2 class="mb-3 mx-auto" style="max-width: 800px;">How ChampionsPrep Works</h2>
-      <p class="mx-auto" style="max-width: 600px;">Simple, effective, and efficient learning in 4 easy steps.</p>
+      <h2 class="section-heading mb-3 mx-auto">How ChampionsPrep Works</h2>
+      <p class="section-subtitle mx-auto">Simple, effective, and efficient learning in 4 easy steps.</p>
     </div>
 
     <div class="steps-container">
@@ -49,6 +49,15 @@ const steps = [
 </section>
 
 <style>
+  .section-heading {
+    text-wrap: balance;
+  }
+
+  .section-subtitle {
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+
   .steps-container {
     display: flex;
     flex-direction: column;
@@ -99,21 +108,33 @@ const steps = [
     box-shadow: var(--shadow-2);
     flex-grow: 1;
     color: var(--cp-slate-dark);
+    text-align: left;
   }
 
   @media (max-width: 640px) {
     .steps-container::before {
       display: none;
     }
-    
+
     .step-item {
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-    
+
     .step-number {
-      margin-block-end: var(--size-4);
+      width: 60px;
+      height: 60px;
+      font-size: var(--font-size-4);
+      margin-block-end: var(--size-3);
+    }
+
+    .step-content {
+      padding: var(--size-4);
+    }
+
+    .steps-container {
+      gap: var(--size-6);
     }
   }
 </style>

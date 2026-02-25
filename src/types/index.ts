@@ -45,3 +45,37 @@ export interface Quiz {
   timeLimit?: number; // seconds
   questions: QuizQuestion[];
 }
+
+/** Sanity document types */
+export interface Page {
+  _id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  metaTitle?: string;
+  noIndex?: boolean;
+  body?: any;
+}
+
+export interface Subject {
+  _id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  keyTopics?: string[];
+  chapters?: Chapter[];
+  class?: string;
+  body?: any;
+}
+
+export interface Exam {
+  _id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  examDate?: string;
+  eligibility?: string;
+  chapters?: Chapter[];
+  body?: any;
+}

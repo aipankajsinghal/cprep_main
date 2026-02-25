@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { formatErrorMessage, createErrorResponse, extractGeminiText, getCORSHeaders, logError } from './utils';
+import { formatErrorMessage, createErrorResponse, extractGeminiText, getCORSHeaders, logError, validateAuth } from './utils';
 
 export const OPTIONS: APIRoute = async ({ request }) => {
   return new Response(null, {
@@ -12,6 +12,12 @@ export const OPTIONS: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   const corsHeaders = getCORSHeaders(request);
+
+  // Validate authentication
+  const auth = validateAuth(request);
+  if (!auth.valid) {
+    return createErrorResponse(auth.error || 'Unauthorized', 401, corsHeaders);
+  }
 
   try {
     const { title, body } = await request.json();

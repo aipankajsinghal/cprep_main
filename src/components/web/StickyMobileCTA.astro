@@ -82,8 +82,8 @@ const APP_REGISTER = "https://app.championsprep.in/register";
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-2);
     transition: background 0.2s ease;
   }
@@ -103,29 +103,28 @@ const APP_REGISTER = "https://app.championsprep.in/register";
   @media (max-width: 360px) {
     .sticky-cta-button { font-size: var(--font-size-0); padding: 0.45rem 0.6rem; }
     .sticky-mobile-cta { gap: 0.5rem; }
-    .sticky-cta-close { width: 32px; height: 32px; }
+    .sticky-cta-close { width: 44px; height: 44px; }
   }
 </style>
 
 <script>
   if (typeof document !== 'undefined') {
-    const stickyCTA = document.querySelector('#sticky-mobile-cta');
-    const closeBtn = document.querySelector('#close-sticky-cta');
-    const STORAGE_KEY = 'cprep_sticky_cta_dismissed';
+    function initStickyMobileCTA() {
+      const stickyCTA = document.querySelector('#sticky-mobile-cta');
+      const closeBtn = document.querySelector('#close-sticky-cta');
+      const STORAGE_KEY = 'cprep_sticky_cta_dismissed';
 
-    // Show sticky CTA after 15 seconds of page load or 50% scroll
-    function showStickyCTA() {
-      if (stickyCTA && !localStorage.getItem(STORAGE_KEY)) {
-        stickyCTA.classList.remove('hidden');
+      // Show sticky CTA after 15 seconds of page load or 50% scroll
+      function showStickyCTA() {
+        if (stickyCTA && !localStorage.getItem(STORAGE_KEY)) {
+          stickyCTA.classList.remove('hidden');
+        }
       }
-    }
 
-    const showTimer = setTimeout(showStickyCTA, 15000);
+      let showTimer = setTimeout(showStickyCTA, 15000);
 
-    // Also show on scroll
-    window.addEventListener(
-      'scroll',
-      () => {
+      // Scroll handler
+      const handleScroll = () => {
         const scrollPercent = Math.round(
           (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100
         );
@@ -133,25 +132,40 @@ const APP_REGISTER = "https://app.championsprep.in/register";
           clearTimeout(showTimer);
           showStickyCTA();
         }
-      },
-      { passive: true }
-    );
+      };
 
-    // Close button handler
-    closeBtn?.addEventListener('click', () => {
-      if (stickyCTA) {
-        stickyCTA.classList.add('hidden');
-        localStorage.setItem(STORAGE_KEY, Date.now().toString());
-      }
-    });
+      // Also show on scroll
+      window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Reset dismissal on new session (12 hours)
-    const lastDismissed = localStorage.getItem(STORAGE_KEY);
-    if (lastDismissed) {
-      const timeSinceDismissed = Date.now() - parseInt(lastDismissed);
-      if (timeSinceDismissed > 12 * 60 * 60 * 1000) {
-        localStorage.removeItem(STORAGE_KEY);
+      // Close button handler
+      const handleCloseClick = () => {
+        if (stickyCTA) {
+          stickyCTA.classList.add('hidden');
+          localStorage.setItem(STORAGE_KEY, Date.now().toString());
+        }
+      };
+
+      closeBtn?.addEventListener('click', handleCloseClick);
+
+      // Reset dismissal on new session (12 hours)
+      const lastDismissed = localStorage.getItem(STORAGE_KEY);
+      if (lastDismissed) {
+        const timeSinceDismissed = Date.now() - parseInt(lastDismissed);
+        if (timeSinceDismissed > 12 * 60 * 60 * 1000) {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
+
+      // Cleanup function
+      function cleanup() {
+        clearTimeout(showTimer);
+        window.removeEventListener('scroll', handleScroll);
+        closeBtn?.removeEventListener('click', handleCloseClick);
+      }
+
+      document.addEventListener('astro:before-swap', cleanup);
     }
+
+    initStickyMobileCTA();
   }
 </script>

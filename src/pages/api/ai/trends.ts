@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { formatErrorMessage, createErrorResponse, extractGeminiText, getCORSHeaders, logError } from './utils';
+import { formatErrorMessage, createErrorResponse, extractGeminiText, getCORSHeaders, logError, validateAuth } from './utils';
 import { CLUSTERS, isCluster } from '../../../utils/clusters';
 
 export const OPTIONS: APIRoute = async ({ request }) => {
@@ -38,6 +38,12 @@ function parseTitlesFromRss(xml: string): string[] {
 
 export const GET: APIRoute = async ({ request }) => {
   const corsHeaders = getCORSHeaders(request);
+
+  // Validate authentication
+  const auth = validateAuth(request);
+  if (!auth.valid) {
+    return createErrorResponse(auth.error || 'Unauthorized', 401, corsHeaders);
+  }
 
   try {
     const trendsResponse = await fetch(

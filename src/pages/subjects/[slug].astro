@@ -1,11 +1,11 @@
 ---
 import { getClient } from "../../lib/sanity";
 import { ALL_SUBJECTS_QUERY, SUBJECT_BY_SLUG_QUERY } from "../../lib/queries";
+import { sanitizeHtml } from "../../lib/sanitize";
 import BaseLayout from "../../layouts/web/BaseLayout.astro";
 import Breadcrumb from "../../components/web/Breadcrumb.astro";
 import SchemaMarkup from "../../components/web/SchemaMarkup.astro";
 import type { Subject } from "../../types";
-import { PortableText } from "@portabletext/react"; // Assuming we might use this if body is PortableText, but currently it's markdown-like
 
 export const prerender = true;
 
@@ -25,6 +25,9 @@ const subject = (await client.fetch(SUBJECT_BY_SLUG_QUERY, {
 })) as Subject;
 
 if (!subject) throw new Error(`Subject with slug "${slug}" not found`);
+
+// Sanitize body content to prevent XSS
+const sanitizedBody = subject.body ? await sanitizeHtml(subject.body) : null;
 
 const pageTitle = subject.title;
 const pageDescription = subject.description || "";
@@ -90,7 +93,7 @@ const schemaData = {
               class="btn-primary"
               href="https://app.championsprep.in/register"
               target="_blank"
-              rel="noopener">Buy chapter</a
+              rel="noopener noreferrer">Buy chapter</a
             >
           </div>
         </div>
@@ -100,11 +103,7 @@ const schemaData = {
 
   <div class="container">
     <article class="content-section">
-      {
-        /* If body is markdown, we might need a markdown renderer component. 
-          Assuming subject.body is available as string. */
-      }
-      {subject.body && <div set:html={subject.body} />}
+      {sanitizedBody && <div set:html={sanitizedBody} />}
     </article>
   </div>
 </BaseLayout>
