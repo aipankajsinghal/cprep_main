@@ -12,9 +12,9 @@ import MicroFeedback from "../../components/MicroFeedback.astro";
 import SmartCTA from "../../components/SmartCTA.astro";
 import { getClient } from "../../lib/sanity";
 import {
-  ALL_POSTS_QUERY,
   ALL_SLUGS_QUERY,
   POST_BY_SLUG_QUERY,
+  CLUSTER_POSTS_QUERY,
 } from "../../lib/queries";
 import type { Post } from "../../../studio/sanity.types";
 import { markdownToHtml, calculateMinutesRead } from "../../lib/markdown";
@@ -79,16 +79,11 @@ const updatedLabel = updatedDate.toLocaleDateString("en-IN", {
   day: "numeric",
 });
 
-// Related / prev-next navigation from full post list
-const now = new Date();
-const allPosts = (await client.fetch<Post[]>(ALL_POSTS_QUERY))
-  .filter((p: any) => !p.publishDate || new Date(p.publishDate) <= now)
+// Related / prev-next navigation from cluster posts (optimized - no N+1)
+const clusterPosts = (await client.fetch<Post[]>(CLUSTER_POSTS_QUERY, { cluster: post.cluster ?? "" }))
   .map((p: any) => ({ ...p, date: new Date(p.date ?? "") }))
   .sort((a: any, b: any) => b.date.getTime() - a.date.getTime());
 
-const clusterPosts = allPosts.filter(
-  (p: any) => p.cluster === (post.cluster ?? ""),
-);
 const currentIndex = clusterPosts.findIndex((p: any) => p.slug === slug);
 const previousPost =
   currentIndex > 0 ? clusterPosts[currentIndex - 1] : undefined;

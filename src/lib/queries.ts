@@ -40,6 +40,9 @@ export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug &&
   body
 }`
 
+/** Posts in same cluster for prev/next navigation (optimized - avoids N+1) */
+export const CLUSTER_POSTS_QUERY = `*[${PUBLISHED_FILTER} && cluster == $cluster] | order(date desc) {${POST_LIST_FIELDS}}`
+
 /** Site settings singleton */
 export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]`
 
