@@ -80,7 +80,11 @@ const updatedLabel = updatedDate.toLocaleDateString("en-IN", {
 });
 
 // Related / prev-next navigation from cluster posts (optimized - no N+1)
-const clusterPosts = (await client.fetch<Post[]>(CLUSTER_POSTS_QUERY, { cluster: post.cluster ?? "" }))
+const clusterPosts = (
+  await client.fetch<Post[]>(CLUSTER_POSTS_QUERY, {
+    cluster: post.cluster ?? "",
+  })
+)
   .map((p: any) => ({ ...p, date: new Date(p.date ?? "") }))
   .sort((a: any, b: any) => b.date.getTime() - a.date.getTime());
 
@@ -178,9 +182,7 @@ const jsonLd = faqJsonLd ? [...baseJsonLd, faqJsonLd] : baseJsonLd;
   author={post.author ?? "ChampionsPrep"}
   publishedDate={postDate.toISOString()}
   updatedDate={updatedDate.toISOString()}
-  articleTags={(post.tags as Array<{ title: string; slug: string }>)?.map(
-    (t) => t.title,
-  ) ?? []}
+  articleTags={(post.tags as any[])?.map((t: any) => t.title) ?? []}
   articleSection={post.cluster ?? ""}
 >
   <ReadingProgress />

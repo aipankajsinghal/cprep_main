@@ -6,19 +6,13 @@
 
 ## Static Validation
 
-Nothing in this PRD requires a backend. All features are static or client-side-minimal:
+Nothing in this PRD requires a traditional backend database. All features are static-first or client-side-minimal, with server-side rendering used for API routes and preview functionality:
 
-|Feature|Implementation|Backend?|
-|-|-|-|
-|Pagefind search|Static index built at deploy|❌ No|
+|Feature|Implementation|SSR?|
+|Original search|Static index built at deploy|❌ No|
 |OG images|Build-time generation via satori|❌ No|
-|Micro feedback|GA4 custom events only|❌ No|
-|Share buttons|Static URL templates|❌ No|
-|Reading time|Word count at build|❌ No|
-|Dark mode|CSS + localStorage|❌ No|
-|Related posts|Build-time scoring|❌ No|
-|Tag pages|Static generation per tag|❌ No|
-|Table of Contents|Build-time heading extraction|❌ No|
+|API routes|Astro server endpoints|✅ Yes|
+|Draft previews|Sanity Preview Mode|✅ Yes|
 
 ---
 
@@ -35,7 +29,7 @@ This blog:
 
 * lives at `/blog` on main domain
 * is a separate repo/project
-* contains ZERO backend logic
+* contains minimal backend logic (stateless API routes)
 * is optimized for SEO + reading experience.
 
 ---
@@ -44,12 +38,12 @@ This blog:
 
 DO NOT implement:
 
-* backend APIs
+* complex backend APIs (minimal proxies allowed)
 * databases
-* CMS dashboards
-* authentication
-* runtime rendering
-* SSR unless explicitly needed.
+* CMS dashboards (uses Sanity)
+* authentication (handled via proxy/Sanity)
+* runtime rendering for end-users (prerendering preferred)
+* SSR unless explicitly needed for API/Previews.
 
 Publishing workflow:
 
@@ -444,16 +438,16 @@ Students print articles — this costs nothing and helps them.
 
 # 18\. Performance Rules
 
-## Static Rendering Mode (EXPLICIT)
+## Server Rendering Mode (Hybrid/Server)
 
 ```
 // astro.config.mjs
 export default defineConfig({
-  output: 'static'
+  output: 'server'
 });
 ```
 
-All pages are pre-rendered at build time. No SSR. No server runtime. If a feature cannot work with `output: 'static'`, it is rejected.
+The app uses server output mode to support API routes and Sanity preview mode. However, most pages are still optimized for static-first delivery and high performance.
 
 ## Rules
 
@@ -639,5 +633,3 @@ The blog has migrated from local MDX content collections to Sanity CMS.
 ### 22.3 Build Pipeline Updates
 - Build scripts (`generate-og.mjs`, `generate-ig-briefs.mjs`) were updated to fetch data directly from the Sanity Content Lake.
 - Legacy MDX files in `src/content/blog` are deprecated.
-
-changing author

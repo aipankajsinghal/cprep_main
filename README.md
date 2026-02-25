@@ -25,29 +25,21 @@ Static-first editorial blog for ChampionsPrep, built with Astro + MDX.
 
 ## Project Structure
 
-```text
-api/
-  inline-ai.ts
-public/
-  blog/og/
-  data/assistant-responses.json
-  icons/
-  manifest.webmanifest
-  sw.js
 src/
   components/
   content/
-    blog/ (Astro Content Collections - legacy/templates)
-    config.ts
+    blog/ (Legacy MDX templates)
+  data/
   layouts/
+  lib/
   pages/
+    api/
     blog/
   styles/
+  types/
   utils/
-scripts/
-  generate-og.mjs
+scripts/ (Maintenance and migration scripts)
 studio/ (Sanity Studio project)
-```
 
 ## Local Development (PowerShell)
 

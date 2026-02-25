@@ -107,7 +107,7 @@ const displayKeywords = keywords || defaultKeywords;
     />
     <script>
       // Expose GA Measurement ID from build-time env to the client for consent-guarded loading
-      window.__GA_MEASUREMENT_ID =
+      (window as any).__GA_MEASUREMENT_ID =
         "" + (import.meta.env.GA_MEASUREMENT_ID || "");
     </script>
 

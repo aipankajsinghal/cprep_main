@@ -1,5 +1,5 @@
 ---
-import { sanityClient } from "../lib/sanity";
+import { getClient } from "../lib/sanity";
 import { ALL_POSTS_QUERY } from "../lib/queries";
 import { clusterLabel } from "../utils/clusters";
 
@@ -14,7 +14,8 @@ const { currentSlug, cluster, tags, limit = 3 } = Astro.props as Props;
 const tagSlugs = new Set(tags.map((t) => t.slug));
 
 const now = new Date();
-const allPosts = (await sanityClient.fetch(ALL_POSTS_QUERY)).filter(
+const client = getClient();
+const allPosts = (await client.fetch(ALL_POSTS_QUERY)).filter(
   (p: any) => !p.publishDate || new Date(p.publishDate) <= now,
 );
 
@@ -75,7 +76,7 @@ const relatedItems = selected.map(({ post }: any) => ({
       <p class="related-posts__empty">No related posts yet.</p>
     ) : (
       <div class="related-posts__grid">
-        {relatedItems.map((item) => (
+        {relatedItems.map((item: any) => (
           <a
             href={`/blog/${item.slug}/`}
             class="related-posts__card"

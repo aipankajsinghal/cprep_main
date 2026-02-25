@@ -16,9 +16,9 @@
 
 ## Runtime Model
 
-- Astro output mode is static.
-- Content is fetched from Sanity CMS and compiled at build time.
-- Dynamic behavior is limited to lightweight client-side enhancement.
+- Astro output mode is `server` (to support API routes and Sanity Preview).
+- Most content is fetched from Sanity CMS and can be pre-rendered using `export const prerender = true`.
+- Previews use the dynamic server mode to fetch draft content securely.
 
 ## Build Pipeline
 
@@ -77,9 +77,5 @@ Smart context extraction sends nearest learning section context only.
 
 ## Exception Route
 
-test
-
 `api/inline-ai.ts` is a minimal stateless edge proxy for secure AI key usage.
 It is not used for content persistence, CMS behavior, or server-rendered page logic.
-
-Author changed

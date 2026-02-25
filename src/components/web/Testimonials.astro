@@ -11,7 +11,7 @@ interface Props {
   data?: Testimonial[];
 }
 
-const defaultTestimonials = [
+const defaultTestimonials: Testimonial[] = [
   {
     author: "Priya S.",
     role: "Was scoring 62 → Final exam: 94 (Accounts)",
@@ -90,9 +90,7 @@ const getInitials = (name: string) =>
                   loading="lazy"
                 />
               )}
-              {!t.image && (
-                <div class="avatar">{getInitials(t.author)}</div>
-              )}
+              {!t.image && <div class="avatar">{getInitials(t.author)}</div>}
               <div class="author-info">
                 <div class="author-name">{t.author}</div>
                 <div class="author-location">{t.role}</div>
