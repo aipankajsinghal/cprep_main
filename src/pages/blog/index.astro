@@ -7,7 +7,7 @@ import { ALL_POSTS_QUERY } from "../../lib/queries";
 import { calculateMinutesRead } from "../../lib/markdown";
 import { clusterLabel } from "../../utils/clusters";
 
-export const prerender = false;
+export const prerender = true;
 
 const now = new Date();
 const rawPosts = sanityClient ? await sanityClient.fetch(ALL_POSTS_QUERY) : [];

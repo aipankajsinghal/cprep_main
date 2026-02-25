@@ -74,3 +74,32 @@ export function createErrorResponse(message: string, status: number = 500, heade
 export function extractGeminiText(data: any): string | null {
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
 }
+
+/**
+ * Validates API request authorization
+ * Checks for Bearer token in Authorization header if AI_API_TOKENS is configured
+ */
+export function validateAuth(request: Request): { valid: boolean; error?: string } {
+  const validTokens = (import.meta.env.AI_API_TOKENS || '').split(',').filter(Boolean);
+
+  // If no tokens are configured, skip auth (for backward compatibility)
+  if (validTokens.length === 0) {
+    return { valid: true };
+  }
+
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader) {
+    return { valid: false, error: 'Missing Authorization header' };
+  }
+
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!bearerToken) {
+    return { valid: false, error: 'Invalid Authorization header format' };
+  }
+
+  if (!validTokens.includes(bearerToken)) {
+    return { valid: false, error: 'Invalid API token' };
+  }
+
+  return { valid: true };
+}

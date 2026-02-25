@@ -50,8 +50,7 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0",
-    "vercel": "^28.18.5"
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@astrojs/vercel": "^8.0.4",
