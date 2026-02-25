@@ -15,11 +15,20 @@ import CTASection from "../components/web/CTASection.astro";
 import SchemaMarkup from "../components/web/SchemaMarkup.astro";
 // import CookieConsent from "../components/web/CookieConsent.astro"; // Handled in BaseLayout usually
 
-// Sanity Data Fetching
-const client = getClient();
-const faqData = await client.fetch(FAQS_QUERY);
-const testimonialData = await client.fetch(TESTIMONIALS_QUERY);
-const featuresData = await client.fetch(FEATURES_QUERY);
+// Sanity Data Fetching with error handling
+let faqData: any[] = [];
+let testimonialData: any[] = [];
+let featuresData: any[] = [];
+
+try {
+  const client = getClient();
+  faqData = await client.fetch(FAQS_QUERY);
+  testimonialData = await client.fetch(TESTIMONIALS_QUERY);
+  featuresData = await client.fetch(FEATURES_QUERY);
+} catch (error) {
+  console.error("Failed to fetch homepage data from Sanity:", error);
+  // Continue with empty arrays - components handle missing data gracefully
+}
 
 const orgSchema = {
   name: "ChampionsPrep",
