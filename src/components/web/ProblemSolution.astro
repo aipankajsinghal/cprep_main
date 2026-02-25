@@ -4,8 +4,8 @@
 <section class="section-alt text-center">
   <div class="container pb-5">
     <div class="mb-5" data-aos="fade-up">
-      <h2 class="mb-3 mx-auto" style="max-width: 800px;">Why Do 95% of our students score 15+ points higher? <br />Because AI adapts to <em>you</em>.</h2>
-      <p class="mx-auto" style="max-width: 600px;">No generic videos. No waiting for teacher replies. Get instant explanations when you're confused.</p>
+      <h2 class="section-heading mb-3 mx-auto">Why Do 95% of our students score 15+ points higher? <br />Because AI adapts to <em>you</em>.</h2>
+      <p class="section-subtitle mx-auto">No generic videos. No waiting for teacher replies. Get instant explanations when you're confused.</p>
     </div>
 
     <div class="grid grid-2 pt-4">
@@ -39,16 +39,27 @@
 </section>
 
 <style>
+  .section-heading {
+    text-wrap: balance;
+  }
+
+  .section-subtitle {
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+
   .comparison-list {
     display: flex;
     flex-direction: column;
     gap: var(--size-3);
+    text-align: left;
   }
 
   .comparison-list li {
     position: relative;
     padding-left: var(--size-6);
     font-size: var(--font-size-2);
+    text-align: left;
   }
 
   .comparison-list li::before {

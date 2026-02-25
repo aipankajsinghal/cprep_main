@@ -16,8 +16,8 @@ const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
 <section id="features" class="section-white text-center">
   <div class="container">
     <div class="mb-5" data-aos="fade-up">
-      <h2 class="mb-3 mx-auto" style="max-width: 800px;">Everything You Need to Succeed</h2>
-      <p class="mx-auto" style="max-width: 600px;">Modern tools designed for the modern commerce student.</p>
+      <h2 class="section-heading mb-3 mx-auto">Everything You Need to Succeed</h2>
+      <p class="section-subtitle mx-auto">Modern tools designed for the modern commerce student.</p>
     </div>
 
     <div class="grid grid-3">
@@ -43,6 +43,15 @@ const isEmojiIcon = (icon?: string) => !!icon && Array.from(icon).length <= 2;
 </section>
 
 <style>
+  .section-heading {
+    text-wrap: balance;
+  }
+
+  .section-subtitle {
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+
   .feature-card {
     text-align: center;
     border: 1px solid var(--cp-lavender);

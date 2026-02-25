@@ -24,7 +24,7 @@ import Button from './Button.astro';
   }
   
   .promo-content {
-    max-width: var(--size-content-3);
+    max-width: 720px;
     margin-inline: auto;
     text-align: center;
     display: flex;
@@ -48,12 +48,14 @@ import Button from './Button.astro';
     font-size: var(--font-size-6);
     color: var(--cp-slate-dark);
     margin: 0;
+    text-wrap: balance;
   }
-  
+
   p {
     font-size: var(--font-size-3);
     color: var(--cp-slate-medium);
-    max-width: 60ch;
+    max-width: 64ch;
+    text-wrap: pretty;
   }
   
   .actions {
