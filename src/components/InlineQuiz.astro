@@ -281,6 +281,8 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
     cursor: pointer;
     padding: 0.25rem;
     color: var(--color-text-primary, #333);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .option-feedback {
@@ -288,6 +290,7 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
     margin-left: 1.5rem;
     font-size: 0.875rem;
     font-weight: 500;
+    overflow-wrap: break-word;
   }
 
   .option-feedback.show {
@@ -454,7 +457,9 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
     color: #fff;
     border-radius: calc(var(--shape-radius, 8px) / 2);
     font-size: 0.8rem;
-    white-space: nowrap;
+    white-space: normal;
+    max-width: min(90vw, 280px);
+    text-align: center;
     z-index: 100;
     pointer-events: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -479,6 +484,31 @@ const quizId = `quiz-${Math.random().toString(36).slice(2, 9)}`;
 
     .btn-submit {
       width: 100%;
+    }
+
+    .option-feedback {
+      margin-left: 0;
+      margin-top: 0.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .inline-quiz {
+      padding: 0.75rem;
+      margin: 1.5rem 0;
+    }
+
+    .quiz-question {
+      padding: 0.5rem;
+    }
+
+    .quiz-instructions {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.88rem;
+    }
+
+    .question-text {
+      font-size: 0.95rem;
     }
   }
 </style>

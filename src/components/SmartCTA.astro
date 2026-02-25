@@ -178,4 +178,20 @@ const {
   html.dark .smart-cta--end .smart-cta__inner {
     background: color-mix(in srgb, var(--color-lavender-light), transparent 50%);
   }
+
+  @media (max-width: 640px) {
+    .smart-cta__text,
+    .smart-cta__headline {
+      max-width: 100%;
+    }
+
+    .smart-cta--end .smart-cta__inner {
+      padding: 1.2rem 1rem;
+    }
+
+    .smart-cta__link--end {
+      padding: 0.55rem 1.2rem;
+      font-size: 0.88rem;
+    }
+  }
 </style>
